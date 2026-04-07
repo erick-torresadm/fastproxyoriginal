@@ -40,43 +40,43 @@
     <style>
 /* Updated CSS - Dark Theme */
 :root {
-            --bg-primary: #030803;
-            --bg-secondary: rgba(5, 20, 5, 0.6);
-            --bg-card: rgba(10, 30, 10, 0.95);
-            --text-primary: #e8f5e8;
-            --text-secondary: rgba(200, 230, 200, 0.75);
-            --text-muted: rgba(180, 220, 180, 0.5);
-            --text-zinc: #86efac;
-            --border-color: rgba(50, 125, 38, 0.15);
-            --border-hover: rgba(50, 125, 38, 0.3);
-            --nav-bg: rgba(3, 8, 3, 0.85);
-            --orb-1: rgba(50, 125, 38, 0.5);
-            --orb-2: rgba(34, 197, 94, 0.3);
-            --orb-3: rgba(22, 163, 74, 0.25);
-            --card-glow: rgba(50, 125, 38, 0.4);
-            --grain-opacity: 0.025;
-            --section-bg: rgba(5, 15, 5, 0.4);
-            --scrollbar-bg: #030803;
+            --bg-primary: #0a0f0a;
+            --bg-secondary: rgba(15, 25, 15, 0.7);
+            --bg-card: rgba(20, 30, 20, 0.95);
+            --text-primary: #d4e8d4;
+            --text-secondary: rgba(180, 210, 180, 0.75);
+            --text-muted: rgba(150, 190, 150, 0.5);
+            --text-zinc: #7cb87c;
+            --border-color: rgba(50, 90, 40, 0.15);
+            --border-hover: rgba(50, 90, 40, 0.3);
+            --nav-bg: rgba(10, 15, 10, 0.9);
+            --orb-1: rgba(40, 80, 30, 0.4);
+            --orb-2: rgba(30, 70, 25, 0.3);
+            --orb-3: rgba(25, 60, 20, 0.25);
+            --card-glow: rgba(40, 80, 30, 0.3);
+            --grain-opacity: 0.02;
+            --section-bg: rgba(15, 25, 15, 0.4);
+            --scrollbar-bg: #0a0f0a;
         }
 
         html.light {
-            --bg-primary: #f0fdf4;
-            --bg-secondary: rgba(220, 252, 231, 0.6);
+            --bg-primary: #f4f9f4;
+            --bg-secondary: rgba(230, 245, 230, 0.7);
             --bg-card: rgba(255, 255, 255, 0.95);
-            --text-primary: #052e16;
-            --text-secondary: rgba(0, 60, 0, 0.7);
-            --text-muted: rgba(0, 80, 0, 0.5);
-            --text-zinc: #14532d;
-            --border-color: rgba(34, 197, 94, 0.15);
-            --border-hover: rgba(34, 197, 94, 0.25);
-            --nav-bg: rgba(240, 253, 244, 0.9);
-            --orb-1: rgba(34, 197, 94, 0.3);
-            --orb-2: rgba(22, 163, 74, 0.25);
-            --orb-3: rgba(34, 197, 94, 0.2);
-            --card-glow: rgba(34, 197, 94, 0.3);
-            --grain-opacity: 0.015;
-            --section-bg: rgba(220, 252, 231, 0.1);
-            --scrollbar-bg: #f0fdf4;
+            --text-primary: #1a2e1a;
+            --text-secondary: rgba(30, 50, 30, 0.8);
+            --text-muted: rgba(30, 60, 30, 0.6);
+            --text-zinc: #2d4a2d;
+            --border-color: rgba(40, 80, 40, 0.12);
+            --border-hover: rgba(40, 80, 40, 0.22);
+            --nav-bg: rgba(244, 249, 244, 0.95);
+            --orb-1: rgba(50, 100, 50, 0.2);
+            --orb-2: rgba(40, 80, 40, 0.15);
+            --orb-3: rgba(30, 60, 30, 0.12);
+            --card-glow: rgba(40, 80, 40, 0.2);
+            --grain-opacity: 0.01;
+            --section-bg: rgba(230, 245, 230, 0.15);
+            --scrollbar-bg: #f4f9f4;
         }
 
         * {
@@ -133,26 +133,6 @@
                 linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
         }
 
-        html.light {
-            --bg-primary: #f5fff5;
-            --bg-secondary: rgba(220, 255, 220, 0.5);
-            --bg-card: rgba(255, 255, 255, 0.95);
-            --text-primary: #0a1f0a;
-            --text-secondary: rgba(0, 40, 0, 0.7);
-            --text-muted: rgba(0, 50, 0, 0.5);
-            --text-zinc: #14532d;
-            --border-color: rgba(34, 197, 94, 0.15);
-            --border-hover: rgba(34, 197, 94, 0.25);
-            --nav-bg: rgba(245, 255, 245, 0.9);
-            --orb-1: rgba(34, 197, 94, 0.25);
-            --orb-2: rgba(22, 163, 74, 0.2);
-            --orb-3: rgba(34, 197, 94, 0.1);
-            --card-glow: rgba(34, 197, 94, 0.2);
-            --grain-opacity: 0.015;
-            --section-bg: rgba(240, 255, 240, 0.03);
-            --scrollbar-bg: #f5fff5;
-        }
-
         .color1 { color: #327d26; }
         .color2 { color: #266c1c; }
         .color3 { color: #195c13; }
@@ -180,9 +160,33 @@
         }
 
         /* Dark mode toggle */
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 28px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .site-logo {
+            filter: brightness(0) invert(1);
+        }
+        
+        html.light .site-logo {
+            filter: none;
+        }
+
         .theme-toggle::before {
             content: '☀️';
+            font-size: 16px;
         }
+
         html.light .theme-toggle::before {
             content: '🌙';
         }
@@ -194,26 +198,6 @@
         .feature-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 20px 40px rgba(50, 125, 38, 0.15);
-        }
-
-        html.light {
-            --bg-primary: #fafafa;
-            --bg-secondary: rgba(255, 255, 255, 0.5);
-            --bg-card: rgba(255, 255, 255, 0.95);
-            --text-primary: #18181b;
-            --text-secondary: rgba(0, 0, 0, 0.6);
-            --text-muted: rgba(0, 0, 0, 0.5);
-            --text-zinc: #52525b;
-            --border-color: rgba(0, 0, 0, 0.08);
-            --border-hover: rgba(0, 0, 0, 0.15);
-            --nav-bg: rgba(255, 255, 255, 0.8);
-            --orb-1: rgba(124, 58, 237, 0.3);
-            --orb-2: rgba(79, 70, 229, 0.2);
-            --orb-3: rgba(37, 99, 235, 0.15);
-            --card-glow: rgba(124, 58, 237, 0.2);
-            --grain-opacity: 0.02;
-            --section-bg: rgba(0, 0, 0, 0.02);
-            --scrollbar-bg: #fafafa;
         }
 
         * {
@@ -733,7 +717,7 @@
         <div class="flex items-center justify-between">
             <!-- Logo -->
             <a href="#" class="flex items-center gap-3">
-                <img src="https://i.ibb.co/SwQ6ksRy/LOGO-FAST-PROXY.png" alt="FastProxy" class="h-10">
+                <img src="https://i.ibb.co/SwQ6ksRy/LOGO-FAST-PROXY.png" alt="FastProxy" class="h-10 site-logo">
             </a>
             
             <!-- Desktop Navigation -->
