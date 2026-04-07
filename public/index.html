@@ -1816,6 +1816,8 @@
             const email = document.getElementById('customer-email').value;
             const whatsapp = document.getElementById('customer-whatsapp').value;
             
+            alert('Iniciando checkout... quantidade: ' + quantity + ', email: ' + email);
+            
             if (!email) {
                 alert('Por favor, insira seu email');
                 return;
@@ -1825,6 +1827,7 @@
             btn.textContent = 'Processando...';
             
             try {
+                alert('Enviando requisição...');
                 const response = await fetch('/api/cakto/create-checkout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1836,11 +1839,14 @@
                     })
                 });
                 
+                alert('Resposta recebida: ' + response.status);
                 const data = await response.json();
+                alert('Dados: ' + JSON.stringify(data));
                 console.log('Checkout response:', data);
                 
                 if (data.success && data.checkoutUrl) {
                     console.log('Redirecting to:', data.checkoutUrl);
+                    alert('Redirecionando para: ' + data.checkoutUrl);
                     window.location.href = data.checkoutUrl;
                 } else {
                     alert('Erro: ' + (data.error || data.details || 'Falha ao criar checkout'));
