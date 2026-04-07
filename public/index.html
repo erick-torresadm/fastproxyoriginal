@@ -1,87 +1,30 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="scroll-smooth dark" id="html-root">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FastProxy - Proxies HTTP Premium</title>
-    <meta name="description" content="FastProxy: Proxies HTTP dedicados para suas campanhas. Alta velocidade, estabilidade e suporte 24/7.">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>FastProxy - Proxies HTTP Premium Brasil</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            200: '#bbf7d0',
-                            300: '#86efac',
-                            400: '#4ade80',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            800: '#166534',
-                            900: '#14532d',
-                            950: '#052e16',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Outfit', 'system-ui', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    }
-                }
-            }
-        }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
     <style>
-/* Updated CSS - Dark Theme */
-:root {
-            --bg-primary: #0a0f0a;
-            --bg-secondary: rgba(15, 25, 15, 0.7);
-            --bg-card: rgba(20, 30, 20, 0.95);
-            --text-primary: #d4e8d4;
-            --text-secondary: rgba(180, 210, 180, 0.75);
-            --text-muted: rgba(150, 190, 150, 0.5);
-            --text-zinc: #7cb87c;
-            --border-color: rgba(50, 90, 40, 0.15);
-            --border-hover: rgba(50, 90, 40, 0.3);
-            --nav-bg: rgba(10, 15, 10, 0.9);
-            --orb-1: rgba(40, 80, 30, 0.4);
-            --orb-2: rgba(30, 70, 25, 0.3);
-            --orb-3: rgba(25, 60, 20, 0.25);
-            --card-glow: rgba(40, 80, 30, 0.3);
-            --grain-opacity: 0.02;
-            --section-bg: rgba(15, 25, 15, 0.4);
-            --scrollbar-bg: #0a0f0a;
-        }
-
-        html.light {
-            --bg-primary: #f4f9f4;
-            --bg-secondary: rgba(230, 245, 230, 0.7);
-            --bg-card: rgba(255, 255, 255, 0.95);
-            --text-primary: #1a2e1a;
-            --text-secondary: rgba(30, 50, 30, 0.8);
-            --text-muted: rgba(30, 60, 30, 0.6);
-            --text-zinc: #2d4a2d;
-            --border-color: rgba(40, 80, 40, 0.12);
-            --border-hover: rgba(40, 80, 40, 0.22);
-            --nav-bg: rgba(244, 249, 244, 0.95);
-            --orb-1: rgba(50, 100, 50, 0.2);
-            --orb-2: rgba(40, 80, 40, 0.15);
-            --orb-3: rgba(30, 60, 30, 0.12);
-            --card-glow: rgba(40, 80, 40, 0.2);
-            --grain-opacity: 0.01;
-            --section-bg: rgba(230, 245, 230, 0.15);
-            --scrollbar-bg: #f4f9f4;
+        :root {
+            --bg-primary: #020617;
+            --bg-secondary: #0f172a;
+            --bg-card: rgba(15, 23, 42, 0.8);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent: #10b981;
+            --accent-light: #34d399;
+            --accent-dark: #059669;
+            --border: rgba(148, 163, 184, 0.1);
+            --glow: rgba(16, 185, 129, 0.15);
         }
 
         * {
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -92,1789 +35,912 @@
         }
 
         body {
+            font-family: 'Sora', sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
-            font-family: 'Outfit', system-ui, sans-serif;
-            transition: background 0.3s ease, color 0.3s ease;
+            line-height: 1.6;
+            overflow-x: hidden;
         }
 
-        /* Gradient Text */
-        .gradient-text {
-            background: linear-gradient(135deg, #22c55e 0%, #4ade80 50%, #16a34a 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        html.light .gradient-text {
-            background: linear-gradient(135deg, #15803d 0%, #22c55e 50%, #4ade80 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero-bg {
-            background: 
-                radial-gradient(ellipse 80% 50% at 50% -20%, var(--orb-1), transparent),
-                radial-gradient(ellipse 60% 40% at 80% 60%, var(--orb-2), transparent),
-                radial-gradient(ellipse 50% 30% at 20% 80%, var(--orb-3), transparent);
-        }
-
-        .grid-pattern {
-            background-image: 
-                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-            background-size: 60px 60px;
-        }
-
-        html.light .grid-pattern {
-            background-image: 
-                linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
-        }
-
-        .color1 { color: #327d26; }
-        .color2 { color: #266c1c; }
-        .color3 { color: #195c13; }
-        .color4 { color: #0d4b09; }
-        .color5 { color: #003b00; }
-        
-        /* Modern background */
-        body { 
-            background: radial-gradient(ellipse at 20% 0%, var(--orb-1) 0%, transparent 50%),
-                        radial-gradient(ellipse at 80% 100%, var(--orb-2) 0%, transparent 50%),
-                        var(--bg-primary);
-            transition: background 0.3s ease;
-        }
-
-        html.light body { 
-            background: radial-gradient(ellipse at 20% 0%, var(--orb-1) 0%, transparent 50%),
-                        radial-gradient(ellipse at 80% 100%, var(--orb-2) 0%, transparent 50%),
-                        var(--bg-primary);
-        }
-        
-        /* Animated background */
-        @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
-        }
-
-        /* Dark mode toggle */
-        .theme-toggle {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 44px;
-            height: 28px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .site-logo {
-            filter: brightness(0) invert(1);
-        }
-        
-        html.light .site-logo {
-            filter: none;
-        }
-
-        .theme-toggle::before {
-            content: '☀️';
-            font-size: 16px;
-        }
-
-        html.light .theme-toggle::before {
-            content: '🌙';
-        }
-        
-        /* Card hover effects */
-        .feature-card {
-            transition: all 0.3s ease;
-        }
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(50, 125, 38, 0.15);
-        }
-
-        * {
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            font-family: 'Outfit', system-ui, sans-serif;
-            transition: background 0.3s ease, color 0.3s ease;
-        }
-
-        /* Gradient Text */
-        .gradient-text {
-            background: linear-gradient(135deg, #22c55e 0%, #22c55e 50%, #16a34a 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        html.light .gradient-text {
-            background: linear-gradient(135deg, #16a34a 0%, #22c55e 50%, #4ade80 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero-bg {
-            background: 
-                radial-gradient(ellipse 100% 80% at 50% -30%, rgba(34, 197, 94, 0.15) 0%, transparent 50%),
-                radial-gradient(ellipse 80% 60% at 90% 70%, rgba(50, 125, 38, 0.12) 0%, transparent 40%),
-                radial-gradient(ellipse 70% 50% at 10% 90%, rgba(22, 163, 74, 0.1) 0%, transparent 40%),
-                var(--bg-primary);
-        }
-
-        .grid-pattern {
-            background-image: 
-                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-            background-size: 60px 60px;
-        }
-
-        html.light .grid-pattern {
-            background-image: 
-                linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
-        }
-
-        /* Navigation */
-        .nav-floating {
-            background: var(--nav-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border-color);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-        }
-
-        .nav-floating.scrolled {
-            background: var(--bg-primary);
-            border-color: var(--border-hover);
-        }
-
-        .nav-link {
-            position: relative;
-            color: var(--text-secondary);
-            transition: color 0.3s ease;
-        }
-
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: linear-gradient(90deg, #22c55e, #16a34a);
-            transition: width 0.3s ease;
-        }
-
-        .nav-link:hover {
-            color: var(--text-primary);
-        }
-
-        .nav-link:hover::after {
-            width: 100%;
-        }
-
-        /* Mobile Menu Overlay */
-        .mobile-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(4px);
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            z-index: 60;
-        }
-
-        .mobile-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        /* Mobile Menu Panel */
-        .mobile-menu {
+        /* Navbar */
+        .navbar {
             position: fixed;
             top: 0;
+            left: 0;
             right: 0;
-            bottom: 0;
-            width: 85%;
-            max-width: 320px;
-            background: var(--bg-primary);
-            transform: translateX(100%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 70;
-            padding: 1.5rem;
-            overflow-y: auto;
+            z-index: 100;
+            padding: 1rem 2rem;
+            background: rgba(2, 6, 23, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
         }
 
-        .mobile-menu.active {
-            transform: translateX(0);
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        /* Buttons */
-        .btn-primary {
-            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-            color: #fff;
-            border-radius: 0.75rem;
-            font-weight: 600;
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .btn {
             padding: 0.75rem 1.5rem;
-            box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4);
-            transition: all 0.3s ease;
-            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
             cursor: pointer;
+            border: none;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: white;
+            box-shadow: 0 4px 20px var(--glow);
         }
 
         .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(34, 197, 94, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px var(--glow);
         }
 
         .btn-secondary {
             background: transparent;
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 0.75rem;
-            font-weight: 500;
-            padding: 0.75rem 1.5rem;
-            transition: all 0.3s ease;
-            cursor: pointer;
+            color: var(--accent);
+            border: 1px solid var(--accent);
         }
 
         .btn-secondary:hover {
-            background: var(--bg-secondary);
-            border-color: var(--border-hover);
-            color: var(--text-primary);
+            background: var(--glow);
         }
 
-        /* Orbs */
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            animation: float-orb 8s ease-in-out infinite;
-        }
-
-        html.light .orb {
-            filter: blur(100px);
-            opacity: 0.6;
-        }
-
-.orb-1 {
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, var(--orb-1), transparent 70%);
-            top: 5%;
-            left: -10%;
-        }
-
-        .orb-2 {
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, var(--orb-2), transparent 70%);
-            bottom: 10%;
-            right: -10%;
-        }
-
-        .orb-2 {
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(38, 108, 28, 0.3), transparent 70%);
-            bottom: 10%;
-            right: -5%;
-            animation-delay: -3s;
-        }
-
-        .orb-3 {
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, var(--orb-3), transparent 70%);
-            top: 50%;
-            right: 20%;
-            animation-delay: -5s;
-        }
-
-        @keyframes float-orb {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -30px) scale(1.05); }
-            66% { transform: translate(-20px, 20px) scale(0.95); }
-        }
-
-        /* Cards */
-        .card-hover {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            transition: all 0.4s ease;
-        }
-
-        .card-hover:hover {
-            transform: translateY(-12px);
-            border-color: var(--card-glow);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 60px -15px var(--card-glow);
-        }
-
-        html.light .card-hover:hover {
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 60px -15px var(--card-glow);
-        }
-
-        .feature-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            transition: all 0.4s ease;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-8px);
-            border-color: var(--card-glow);
-        }
-
-        .plan-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            transition: all 0.5s ease;
-        }
-
-        .plan-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.5), 0 0 80px -20px var(--card-glow);
-        }
-
-        .plan-featured {
-            background: linear-gradient(180deg, rgba(34, 197, 94, 0.15) 0%, var(--bg-card) 100%);
-            border: 2px solid rgba(34, 197, 94, 0.4);
-        }
-
-        .plan-featured:hover {
-            box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.5), 0 0 80px -20px rgba(34, 197, 94, 0.4);
-        }
-
-        /* Plan Toggle */
-        .plan-toggle {
-            display: inline-flex;
-            gap: 0;
-            padding: 4px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 9999px;
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8rem 2rem 4rem;
             position: relative;
+            overflow: hidden;
         }
 
-        .plan-toggle-btn {
-            padding: 0.625rem 1.5rem;
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(5, 150, 105, 0.1) 0%, transparent 40%),
+                var(--bg-primary);
+        }
+
+        .hero-grid {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(148, 163, 184, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(148, 163, 184, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        .hero-content {
+            text-align: center;
+            max-width: 800px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 50px;
+            margin-bottom: 2rem;
+            font-size: 0.875rem;
+            color: var(--accent);
+        }
+
+        .hero-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 3rem;
+            justify-content: center;
+            margin-top: 4rem;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 2rem;
+            background: var(--bg-secondary);
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 4rem;
+        }
+
+        .section-label {
+            color: var(--accent);
             font-size: 0.875rem;
             font-weight: 600;
-            color: var(--text-muted);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: none;
-            background: transparent;
-            position: relative;
-            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
         }
 
-        .plan-toggle-btn:hover {
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .section-desc {
             color: var(--text-secondary);
         }
 
-        .plan-toggle-btn.active {
-            color: var(--text-primary);
-            background: var(--bg-secondary);
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
-        /* Period Buttons */
-        .period-btn.active {
-            background: linear-gradient(135deg, #22c55e 0%, #22c55e 100%);
-            color: white !important;
-            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s;
         }
 
-        /* Plan Prices */
-        .plan-prices {
-            transition: opacity 0.3s ease;
+        .feature-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
 
-        .plan-prices.hidden {
-            display: none;
-        }
-
-        /* Theme Toggle */
-        .theme-toggle {
-            position: relative;
+        .feature-icon {
             width: 48px;
-            height: 24px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
+            height: 48px;
+            background: var(--glow);
             border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
         }
 
-        .theme-toggle::after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 18px;
-            height: 18px;
-            background: white;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
         }
 
-        html.light .theme-toggle::after {
-            left: 26px;
-            background: #18181b;
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
         }
 
-        /* FAQ */
-        .faq-item {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
+        /* Pricing Section */
+        .pricing {
+            padding: 6rem 2rem;
         }
 
-        .faq-item:hover {
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .price-card {
             background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            position: relative;
+            transition: all 0.3s;
         }
 
-        .faq-item[open] {
-            border-color: var(--card-glow);
+        .price-card:hover {
+            border-color: var(--accent);
         }
 
-        .faq-icon {
-            transition: transform 0.4s ease;
+        .price-card.featured {
+            border-color: var(--accent);
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, var(--bg-card) 100%);
         }
 
-        .faq-item[open] .faq-icon {
-            transform: rotate(180deg);
+        .price-card.featured::before {
+            content: 'Mais Popular';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: white;
+            padding: 0.25rem 1rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
         }
 
-        /* Animations */
-        .badge-pulse {
-            animation: badge-pulse 2s ease-in-out infinite;
+        .price-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
         }
 
-        @keyframes badge-pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
-            50% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+        .price-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
         }
 
-        .scroll-indicator {
-            animation: scroll-bounce 2s ease-in-out infinite;
+        .price-desc {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
         }
 
-        @keyframes scroll-bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(12px); }
+        .price-value {
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
         }
 
-        .reveal {
+        .price-amount {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .price-period {
+            color: var(--text-muted);
+        }
+
+        .price-old {
+            color: var(--text-muted);
+            text-decoration: line-through;
+            font-size: 1rem;
+        }
+
+        .price-features {
+            list-style: none;
+            margin: 2rem 0;
+        }
+
+        .price-features li {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+        }
+
+        .price-features li::before {
+            content: '✓';
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .price-card .btn {
+            width: 100%;
+            text-align: center;
+        }
+
+        /* CTA Section */
+        .cta {
+            padding: 6rem 2rem;
+            background: linear-gradient(135deg, var(--accent-dark), var(--accent));
+            text-align: center;
+        }
+
+        .cta h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .cta p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .cta .btn {
+            background: white;
+            color: var(--accent-dark);
+            font-size: 1.1rem;
+            padding: 1rem 2.5rem;
+        }
+
+        .cta .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Footer */
+        .footer {
+            padding: 3rem 2rem;
+            background: var(--bg-secondary);
+            text-align: center;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
             opacity: 0;
-            transform: translateY(40px);
-            transition: all 0.8s ease;
+            visibility: hidden;
+            transition: all 0.3s;
         }
 
-        .reveal.active {
+        .modal-overlay.active {
             opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            max-width: 450px;
+            width: 90%;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.active .modal {
             transform: translateY(0);
         }
 
-        .reveal-delay-1 { transition-delay: 0.1s; }
-        .reveal-delay-2 { transition-delay: 0.2s; }
-        .reveal-delay-3 { transition-delay: 0.3s; }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
 
-        /* Grain */
-        .grain {
-            position: fixed;
-            top: 0;
-            left: 0;
+        .modal-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-group input {
             width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 9999;
-            opacity: var(--grain-opacity);
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            padding: 0.875rem 1rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: border-color 0.3s;
         }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
         }
 
-        ::-webkit-scrollbar-track {
-            background: var(--scrollbar-bg);
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 4px;
+        .quantity-btn {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--accent);
+            font-size: 1.25rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
         }
 
-        /* Plan Display Toggle */
-        .subscription-plans { display: block; }
-        .onepurchase-plans { display: none; }
-        
-        html.show-onepurchase .subscription-plans { display: none; }
-        html.show-onepurchase .onepurchase-plans { display: block; }
-
-        /* Stats counter */
-        .stat-number {
-            font-variant-numeric: tabular-nums;
+        .quantity-btn:hover {
+            background: var(--glow);
+            border-color: var(--accent);
         }
 
-        /* Testimonial Card */
-        .testimonial-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            transition: all 0.4s ease;
+        .quantity-input {
+            width: 80px;
+            text-align: center;
         }
 
-        .testimonial-card:hover {
-            transform: scale(1.02);
-            border-color: var(--card-glow);
+        .total-price {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .total-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .total-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .hero-stats {
+                gap: 2rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.8s ease-out forwards;
         }
     </style>
 </head>
 <body>
-    <div class="grain"></div>
-    
-    <!-- Mobile Menu Overlay -->
-    <div id="mobile-overlay" class="mobile-overlay"></div>
-    
-    <!-- Mobile Menu Panel -->
-    <div id="mobile-menu" class="mobile-menu">
-        <div class="flex items-center justify-between mb-8">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center font-bold text-lg shadow-lg text-white">
-                    A
-                </div>
-                <span class="font-bold text-xl tracking-tight" style="color: var(--text-primary)">FastProxy</span>
-            </div>
-            <button id="mobile-menu-close" class="p-2 rounded-lg" style="color: var(--text-muted)">
-                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-        
-        <div class="flex flex-col gap-1">
-            <a href="#inicio" class="mobile-nav-link text-lg font-medium py-4 px-4 rounded-xl transition-all" style="color: var(--text-secondary)">
-                Inicio
-            </a>
-            <a href="#beneficios" class="mobile-nav-link text-lg font-medium py-4 px-4 rounded-xl transition-all" style="color: var(--text-secondary)">
-                Beneficios
-            </a>
-            <a href="#planos" class="mobile-nav-link text-lg font-medium py-4 px-4 rounded-xl transition-all" style="color: var(--text-secondary)">
-                Planos
-            </a>
-            <a href="portal.html" class="mobile-nav-link text-lg font-medium py-4 px-4 rounded-xl transition-all" style="color: var(--text-secondary)">
-                Area Cliente
-            </a>
-        </div>
-        
-        <div class="mt-8 pt-8" style="border-top: 1px solid var(--border-color)">
-            <a href="portal.html" class="btn-secondary flex items-center justify-center gap-2 w-full py-4 rounded-xl mb-4">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                </svg>
-                Área do Cliente
-            </a>
-            <a href="admin.html" class="btn-secondary flex items-center justify-center gap-2 w-full py-4 rounded-xl mb-4">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-                Admin
-            </a>
-        </div>
-    </div>
-
-    </div>
-    
-    <!-- Navigation -->
-    <nav id="navbar" class="nav-floating fixed top-4 left-1/2 -translate-x-1/2 z-50 rounded-2xl px-6 py-3 w-[calc(100%-2rem)] max-w-6xl mx-auto">
-        <div class="flex items-center justify-between">
-            <!-- Logo -->
-            <a href="#" class="flex items-center gap-3">
-                <img src="https://i.ibb.co/SwQ6ksRy/LOGO-FAST-PROXY.png" alt="FastProxy" class="h-10 site-logo">
-            </a>
-            
-            <!-- Desktop Navigation -->
-            <div class="hidden lg:flex items-center gap-6">
-                <a href="#inicio" class="nav-link text-sm font-medium">Inicio</a>
-                <a href="#beneficios" class="nav-link text-sm font-medium"> Beneficios</a>
-                <a href="#planos" class="nav-link text-sm font-medium">Planos</a>
-                <a href="portal.html" class="nav-link text-sm font-medium"> Area Cliente</a>
-            </div>
-            
-            <!-- Right Side -->
-            <div class="flex items-center gap-3">
-                <a href="portal.html" class="text-sm font-medium px-4 py-2 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition">
-                    Area do Cliente
-                </a>
-                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme"></button>
-                <button id="mobile-menu-btn" class="lg:hidden p-2 rounded-lg" style="color: var(--text-secondary)">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                    </svg>
-                </button>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-content">
+            <a href="#" class="logo">⚡ FastProxy</a>
+            <div class="nav-links">
+                <a href="#features">Recursos</a>
+                <a href="#pricing">Preços</a>
+                <a href="portal.html">Área do Cliente</a>
+                <button class="btn btn-primary" onclick="openModal()">Comprar Agora</button>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section id="inicio" class="relative min-h-screen flex items-center justify-center hero-bg grid-pattern pt-20 overflow-hidden">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-        <div class="orb orb-3"></div>
-        
-        <div class="max-w-7xl mx-auto px-6 py-20 relative z-10">
-            <div class="text-center max-w-4xl mx-auto reveal active">
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-500/10 border border-brand-500/20 mb-8 badge-pulse">
-                    <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
-                    <span class="text-brand-400 text-sm font-medium">Reposições Incluídas</span>
-                </div>
-                
-                <h1 class="font-black text-4xl sm:text-5xl md:text-7xl lg:text-[5rem] tracking-tight leading-[0.95] mb-8">
-                    <span class="gradient-text">Proxies que</span><br>
-                    <span style="color: var(--text-primary)">Nunca Te</span><br>
-                    <span class="gradient-text">Deixam na Mão</span>
-                </h1>
-                
-                <p class="text-base sm:text-lg md:text-xl max-w-2xl mx-auto mb-12 leading-relaxed" style="color: var(--text-zinc)">
-                    Proxies HTTP profissionais com reposições garantidas. 
-                    Comprou, usou, caiu? A gente repõe. Simples assim.
-                </p>
-                
-                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                    <a href="#planos" class="btn-primary text-base px-8 py-4 w-full sm:w-auto">
-                        Ver Planos
-                    </a>
-                    <a href="#como-funciona" class="btn-secondary text-base px-8 py-4 w-full sm:w-auto">
-                        Como Funciona
-                    </a>
-                </div>
-                
-                <div class="flex flex-wrap justify-center gap-6 sm:gap-10 mt-16 text-sm" style="color: var(--text-muted)">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                        <span>Reposições</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                        <span>Ativação Rápida</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                        <span>Suporte</span>
-                    </div>
-                </div>
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-grid"></div>
+        <div class="hero-content fade-in">
+            <div class="hero-badge">
+                Servidores no Brasil • 99.9% Uptime
             </div>
-        </div>
-        
-        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 scroll-indicator">
-            <svg class="w-7 h-7" style="color: var(--text-muted)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-            </svg>
-        </div>
-    </section>
-                        <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                        <span>Entrega Imediata</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                        <span>Suporte 24/7</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 scroll-indicator">
-            <svg class="w-7 h-7" style="color: var(--text-muted)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
-            </svg>
-        </div>
-    </section>
-
-    <!-- Stats Section -->
-    <section class="py-16" style="background: var(--section-bg)">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-                <div class="reveal">
-                    <div class="text-4xl md:text-5xl font-bold gradient-text stat-number">50K+</div>
-                    <p class="text-sm mt-2" style="color: var(--text-muted)">Proxies entregues</p>
-                </div>
-                <div class="reveal reveal-delay-1">
-                    <div class="text-4xl md:text-5xl font-bold gradient-text stat-number">500+</div>
-                    <p class="text-sm mt-2" style="color: var(--text-muted)">Clientes ativos</p>
-                </div>
-                <div class="reveal reveal-delay-2">
-                    <div class="text-4xl md:text-5xl font-bold gradient-text stat-number">99.9%</div>
-                    <p class="text-sm mt-2" style="color: var(--text-muted)">Uptime dos proxies</p>
-                </div>
-                <div class="reveal reveal-delay-3">
-                    <div class="text-4xl md:text-5xl font-bold gradient-text stat-number">24/7</div>
-                    <p class="text-sm mt-2" style="color: var(--text-muted)">Suporte online</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Problem/Solution Section -->
-    <section id="solucao" class="py-20 md:py-28">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="grid md:grid-cols-2 gap-8">
-                <div class="card-hover p-6 md:p-8 rounded-2xl bg-red-500/5 border border-red-500/10">
-                    <div class="px-3 py-1 rounded-full bg-red-500/10 text-red-400 text-xs font-semibold uppercase tracking-wider inline-block mb-4">
-                        Antes
-                    </div>
-                    <h3 class="font-bold text-xl md:text-2xl text-red-400 mb-4">O Problema</h3>
-                    <ul class="space-y-3">
-                        <li class="flex items-start gap-3">
-                            <svg class="w-5 h-5 text-red-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                            <span style="color: var(--text-zinc)">Proxy lento ou instável</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <svg class="w-5 h-5 text-red-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                            <span style="color: var(--text-zinc)">IPs bloqueados ou banidos</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <svg class="w-5 h-5 text-red-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                            <span style="color: var(--text-zinc)">Suporte demorado ou inexistente</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <svg class="w-5 h-5 text-red-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                            <span style="color: var(--text-zinc)">Preço alto sem qualidade</span>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="card-hover p-6 md:p-8 rounded-2xl bg-green-500/5 border border-green-500/20">
-                    <div class="px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-xs font-semibold uppercase tracking-wider inline-block mb-4">
-                        Agora
-                    </div>
-                    <h3 class="font-bold text-xl md:text-2xl text-green-400 mb-4">A Solução</h3>
-                    <ul class="space-y-3">
-                        <li class="flex items-start gap-3">
-                            <svg class="w-5 h-5 text-green-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            <span style="color: var(--text-primary)">Proxies rápidos e estáveis</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <svg class="w-5 h-5 text-green-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            <span style="color: var(--text-primary)">IPs limpos e testados</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <svg class="w-5 h-5 text-green-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            <span style="color: var(--text-primary)">Entrega imediata</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <svg class="w-5 h-5 text-green-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            <span style="color: var(--text-primary)">Suporte rapido 24/7</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Benefits Section -->
-    <section id="beneficios" class="py-20 md:py-28" style="background: var(--section-bg)">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-16 reveal">
-                <span class="text-brand-400 font-semibold text-sm uppercase tracking-widest">POR QUE A FastProxy?</span>
-                <h2 class="font-bold text-3xl md:text-4xl lg:text-5xl mt-4" style="color: var(--text-primary)">Benefícios Exclusivos</h2>
-            </div>
-            
-            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="feature-card p-6 md:p-8 rounded-2xl card-hover">
-                    <div class="w-14 h-14 rounded-2xl bg-brand-500/20 flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                        </svg>
-                    </div>
-                    <h3 class="font-semibold text-lg md:text-xl mb-3" style="color: var(--text-primary)">Reposição Automática</h3>
-                    <p style="color: var(--text-zinc)">Se seu proxy apresentar problemas, realizamos a reposição automaticamente. Sem preocupações.</p>
-                </div>
-                
-                <div class="feature-card p-6 md:p-8 rounded-2xl card-hover">
-                    <div class="w-14 h-14 rounded-2xl bg-green-500/20 flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                        </svg>
-                    </div>
-                    <h3 class="font-semibold text-lg md:text-xl mb-3" style="color: var(--text-primary)">Ativação Instantânea</h3>
-                    <p style="color: var(--text-zinc)">Após aprovação do pagamento, seus proxies são entregue na hora. Ready to use!</p>
-                </div>
-                
-                <div class="feature-card p-6 md:p-8 rounded-2xl card-hover">
-                    <div class="w-14 h-14 rounded-2xl bg-amber-500/20 flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <h3 class="font-semibold text-lg md:text-xl mb-3" style="color: var(--text-primary)">Preço Competitivo</h3>
-                    <p style="color: var(--text-zinc)">Proxies de qualidade com excelente custo-benefício. Perfeito para sua operação.</p>
-                </div>
-                
-                <div class="feature-card p-6 md:p-8 rounded-2xl card-hover">
-                    <div class="w-14 h-14 rounded-2xl bg-green-500/20 flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                        </svg>
-                    </div>
-                    <h3 class="font-semibold text-lg md:text-xl mb-3" style="color: var(--text-primary)">Qualidade Testada</h3>
-                    <p style="color: var(--text-zinc)">Todos os proxies são testados antes da entrega. Garantimos IPs limpos e funcionales.</p>
-                </div>
-                
-                <div class="feature-card p-6 md:p-8 rounded-2xl card-hover">
-                    <div class="w-14 h-14 rounded-2xl bg-cyan-500/20 flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                        </svg>
-                    </div>
-                    <h3 class="font-semibold text-lg md:text-xl mb-3" style="color: var(--text-primary)">Suporte Dedicado</h3>
-                    <p style="color: var(--text-zinc)">Fale diretamente conosco. Tire suas duvidas e resolva problemas rapido.</p>
-                </div>
-                
-                <div class="feature-card p-6 md:p-8 rounded-2xl card-hover">
-                    <div class="w-14 h-14 rounded-2xl bg-rose-500/20 flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                        </svg>
-                    </div>
-                    <h3 class="font-semibold text-lg md:text-xl mb-3" style="color: var(--text-primary)">Painel do Cliente</h3>
-                    <p style="color: var(--text-zinc)">Acesse seu painel para gerenciar seus proxies, ver informações e baixar credenciais.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- How it Works -->
-    <section id="como-funciona" class="py-20 md:py-28">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-16 reveal">
-                <span class="text-brand-400 font-semibold text-sm uppercase tracking-widest">SIMPLES E DIRETO</span>
-                <h2 class="font-bold text-3xl md:text-4xl lg:text-5xl mt-4" style="color: var(--text-primary)">Como Funciona</h2>
-            </div>
-            
-            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="feature-card p-6 md:p-8 rounded-2xl card-hover text-center">
-                    <div class="w-16 h-16 rounded-2xl bg-brand-500/20 flex items-center justify-center font-bold text-brand-400 text-2xl mx-auto mb-6">1</div>
-                    <h3 class="font-semibold text-lg mb-3" style="color: var(--text-primary)">Escolha seu Plano</h3>
-                    <p style="color: var(--text-zinc)">Selecione a quantidade de proxies нужна.</p>
-                </div>
-                
-                <div class="feature-card p-6 md:p-8 rounded-2xl card-hover text-center reveal reveal-delay-1">
-                    <div class="w-16 h-16 rounded-2xl bg-brand-500/20 flex items-center justify-center font-bold text-brand-400 text-2xl mx-auto mb-6">2</div>
-                    <h3 class="font-semibold text-lg mb-3" style="color: var(--text-primary)">Faça o Pagamento</h3>
-                    <p style="color: var(--text-zinc)">Pix ou boleto. Aprovação em minutos.</p>
-                </div>
-                
-                <div class="feature-card p-6 md:p-8 rounded-2xl card-hover text-center reveal reveal-delay-2">
-                    <div class="w-16 h-16 rounded-2xl bg-brand-500/20 flex items-center justify-center font-bold text-brand-400 text-2xl mx-auto mb-6">3</div>
-                    <h3 class="font-semibold text-lg mb-3" style="color: var(--text-primary)">Receba seus Proxies</h3>
-                    <p style="color: var(--text-zinc)">Pronto! Formato user:pass@ip:port</p>
-                </div>
-                
-                <div class="feature-card p-6 md:p-8 rounded-2xl card-hover text-center reveal reveal-delay-3">
-                    <div class="w-16 h-16 rounded-2xl bg-brand-500/20 flex items-center justify-center font-bold text-brand-400 text-2xl mx-auto mb-6">4</div>
-                    <h3 class="font-semibold text-lg mb-3" style="color: var(--text-primary)">Use no seu Software</h3>
-                    <p style="color: var(--text-zinc)">Pronto para uso em bots, ads e automações.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Plans Section -->
-    <section id="planos" class="py-20 md:py-28" style="background: var(--section-bg)">
-        <div class="absolute inset-0 bg-gradient-to-b from-brand-950/20 via-transparent to-transparent pointer-events-none"></div>
-        
-        <div class="max-w-5xl mx-auto px-6 relative z-10">
-            <div class="text-center mb-12 reveal">
-                <span class="text-brand-400 font-semibold text-sm uppercase tracking-widest">ESCOLHA SEU PLANO</span>
-                <h2 class="font-bold text-3xl md:text-4xl lg:text-5xl mt-4" style="color: var(--text-primary)">Proxies IPv6</h2>
-                <p class="text-lg mt-4" style="color: var(--text-zinc)">Proxy IPv6 de Alta Performance ideal para uso em redes sociais e múltiplas contas</p>
-            </div>
-
-            <!-- Simple Plan Options -->
-            <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-                <!-- Monthly Plan -->
-                <div class="plan-card p-8 rounded-2xl border-2 border-[rgba(34,197,94,0.3)]">
-                    <div class="text-center mb-6">
-                        <span class="inline-block px-3 py-1 rounded-full bg-red-500/20 text-red-400 text-xs font-bold mb-3">-25% OFF</span>
-                        <div class="flex items-baseline justify-center gap-2">
-                            <span class="text-2xl line-through" style="color: var(--text-muted)">R$ 39,90</span>
-                            <span class="text-4xl md:text-5xl font-bold gradient-text">R$ 29,90</span>
-                        </div>
-                        <p class="text-sm mt-2" style="color: var(--text-muted)">por proxy / mês</p>
-                    </div>
-                    
-                    <ul class="space-y-3 mb-8 text-sm">
-                        <li class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            <span style="color: var(--text-primary)">Proxies IPv6 de alta velocidade</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            <span style="color: var(--text-primary)">Ideal para Facebook e outras redes</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            <span style="color: var(--text-primary)">Suporte prioritário 24/7</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            <span style="color: var(--text-primary)">Renovação automática</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            <span style="color: var(--text-primary)">Conexões estáveis</span>
-                        </li>
-                    </ul>
-                    
-                    <button onclick="openPurchaseModal('monthly')" class="btn-primary block w-full py-4 rounded-xl text-center font-bold text-lg">Comprar Agora</button>
-                </div>
-                
-                <!-- Annual Plan -->
-                <div class="plan-card plan-featured p-8 rounded-2xl transform md:-translate-y-2">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-brand-500 text-white text-xs font-bold badge-pulse">MAIS VALORIZADO</div>
-                    
-                    <div class="text-center mb-6">
-                        <span class="inline-block px-3 py-1 rounded-full bg-red-500/20 text-red-400 text-xs font-bold mb-3">-50% OFF</span>
-                        <div class="flex items-baseline justify-center gap-2">
-                            <span class="text-2xl line-through" style="color: var(--text-muted)">R$ 478,80</span>
-                            <span class="text-4xl md:text-5xl font-bold gradient-text">R$ 299,00</span>
-                        </div>
-                        <p class="text-sm mt-2" style="color: var(--text-muted)">por proxy / ano</p>
-                        <p class="text-xs font-semibold text-green-400 mt-2">2 meses grátis!</p>
-                    </div>
-                    
-                    <ul class="space-y-3 mb-8 text-sm">
-                        <li class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            <span style="color: var(--text-primary)">Tudo do plano mensal</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            <span style="color: var(--text-primary)">2 meses gratuitos</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            <span style="color: var(--text-primary)">Prioridade máxima no suporte</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            <span style="color: var(--text-primary)">Renovação automática</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            <span style="color: var(--text-primary)">Conexões estáveis</span>
-                        </li>
-                    </ul>
-                    
-                    <button onclick="openPurchaseModal('annual')" class="btn-primary block w-full py-4 rounded-xl text-center font-bold text-lg">Comprar Agora</button>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- How it Works -->
-                    <div class="grid md:grid-cols-3 gap-6 lg:gap-8 mb-8">
-                        <div class="plan-card p-6 md:p-8 rounded-2xl">
-                            <span class="inline-block px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-semibold mb-4">-16%</span>
-                            <h3 class="font-bold text-xl" style="color: var(--text-primary)">Júnior</h3>
-                            <div class="mt-3">
-                                <span class="text-3xl md:text-4xl font-bold gradient-text">R$ 1.497</span>
-                                <p class="text-sm mt-1" style="color: var(--text-muted)">6 meses (R$ 250/mês)</p>
-                            </div>
-                            <ul class="space-y-2 mb-6 text-sm mt-4">
-                                <li class="flex items-center gap-2"><svg class="w-4 h-4 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span style="color: var(--text-zinc)">1 reposição/mês</span></li>
-                                <li class="flex items-center gap-2"><svg class="w-4 h-4 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span style="color: var(--text-zinc)">Proxy + Aquecimento</span></li>
-                                <li class="flex items-center gap-2"><svg class="w-4 h-4 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span style="color: var(--text-zinc)">Suporte 9h-18h</span></li>
-                            </ul>
-                            <button onclick="openPurchaseModal()" class="btn-secondary block w-full py-3 rounded-xl text-center font-semibold text-sm">Selecionar</button>
-                        </div>
-                        
-                        <div class="plan-card plan-featured p-6 md:p-8 rounded-2xl transform md:-translate-y-4">
-                            <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-brand-500 text-white text-xs font-bold badge-pulse">ECONOMIA</div>
-                            <span class="inline-block px-3 py-1 rounded-full bg-brand-500/20 text-brand-400 text-xs font-semibold mb-4">-16%</span>
-                            <h3 class="font-bold text-xl" style="color: var(--text-primary)">Premium</h3>
-                            <div class="mt-3">
-                                <span class="text-3xl md:text-4xl font-bold gradient-text">R$ 2.497</span>
-                                <p class="text-sm mt-1" style="color: var(--text-muted)">6 meses (R$ 416/mês)</p>
-                            </div>
-                            <ul class="space-y-2 mb-6 text-sm mt-4">
-                                <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span style="color: var(--text-primary)">3 reposições/mês</span></li>
-                                <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span style="color: var(--text-primary)">Proxy premium + Backup</span></li>
-                                <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span style="color: var(--text-primary)">Suporte 9h-22h</span></li>
-                            </ul>
-                            <a href="#" class="btn-primary block w-full py-3 rounded-xl text-center font-bold text-sm">Selecionar</a>
-                        </div>
-                        
-                        <div class="plan-card p-6 md:p-8 rounded-2xl">
-                            <span class="inline-block px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-semibold mb-4">-16%</span>
-                            <h3 class="font-bold text-xl" style="color: var(--text-primary)">Máster</h3>
-                            <div class="mt-3">
-                                <span class="text-3xl md:text-4xl font-bold gradient-text">R$ 3.997</span>
-                                <p class="text-sm mt-1" style="color: var(--text-muted)">6 meses (R$ 666/mês)</p>
-                            </div>
-                            <ul class="space-y-2 mb-6 text-sm mt-4">
-                                <li class="flex items-center gap-2"><svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span style="color: var(--text-primary)">5 reposições/mês</span></li>
-                                <li class="flex items-center gap-2"><svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span style="color: var(--text-primary)">Proxy VIP + 2 Backup</span></li>
-                                <li class="flex items-center gap-2"><svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span style="color: var(--text-primary)">Suporte 24h</span></li>
-                            </ul>
-                            <a href="#" class="btn-secondary block w-full py-3 rounded-xl text-center font-semibold text-sm border-2 border-amber-500/30">Selecionar</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Annual Prices -->
-                <div class="plan-prices hidden" data-period="annual">
-                    <div class="grid md:grid-cols-3 gap-6 lg:gap-8 mb-8">
-                        <div class="plan-card p-6 md:p-8 rounded-2xl">
-                            <span class="inline-block px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-semibold mb-4">-24%</span>
-                            <h3 class="font-bold text-xl" style="color: var(--text-primary)">Júnior</h3>
-                            <div class="mt-3">
-                                <span class="text-3xl md:text-4xl font-bold gradient-text">R$ 2.697</span>
-                                <p class="text-sm mt-1" style="color: var(--text-muted)">ano (R$ 225/mês)</p>
-                            </div>
-                            <ul class="space-y-2 mb-6 text-sm mt-4">
-                                <li class="flex items-center gap-2"><svg class="w-4 h-4 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span style="color: var(--text-zinc)">1 reposição/mês</span></li>
-                                <li class="flex items-center gap-2"><svg class="w-4 h-4 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span style="color: var(--text-zinc)">Proxy + Aquecimento</span></li>
-                                <li class="flex items-center gap-2"><svg class="w-4 h-4 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span style="color: var(--text-zinc)">Suporte 9h-18h</span></li>
-                            </ul>
-                            <button onclick="openPurchaseModal()" class="btn-secondary block w-full py-3 rounded-xl text-center font-semibold text-sm">Selecionar</button>
-                        </div>
-                        
-                        <div class="plan-card plan-featured p-6 md:p-8 rounded-2xl transform md:-translate-y-4">
-                            <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-brand-500 text-white text-xs font-bold badge-pulse">MAIS ECONOMIA</div>
-                            <span class="inline-block px-3 py-1 rounded-full bg-brand-500/20 text-brand-400 text-xs font-semibold mb-4">-25%</span>
-                            <h3 class="font-bold text-xl" style="color: var(--text-primary)">Premium</h3>
-                            <div class="mt-3">
-                                <span class="text-3xl md:text-4xl font-bold gradient-text">R$ 4.497</span>
-                                <p class="text-sm mt-1" style="color: var(--text-muted)">ano (R$ 375/mês)</p>
-                            </div>
-                            <ul class="space-y-2 mb-6 text-sm mt-4">
-                                <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span style="color: var(--text-primary)">3 reposições/mês</span></li>
-                                <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span style="color: var(--text-primary)">Proxy premium + Backup</span></li>
-                                <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span style="color: var(--text-primary)">Suporte 9h-22h</span></li>
-                            </ul>
-                            <a href="#" class="btn-primary block w-full py-3 rounded-xl text-center font-bold text-sm">Selecionar</a>
-                        </div>
-                        
-                        <div class="plan-card p-6 md:p-8 rounded-2xl">
-                            <span class="inline-block px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-semibold mb-4">-25%</span>
-                            <h3 class="font-bold text-xl" style="color: var(--text-primary)">Máster</h3>
-                            <div class="mt-3">
-                                <span class="text-3xl md:text-4xl font-bold gradient-text">R$ 7.197</span>
-                                <p class="text-sm mt-1" style="color: var(--text-muted)">ano (R$ 600/mês)</p>
-                            </div>
-                            <ul class="space-y-2 mb-6 text-sm mt-4">
-                                <li class="flex items-center gap-2"><svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span style="color: var(--text-primary)">5 reposições/mês</span></li>
-                                <li class="flex items-center gap-2"><svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span style="color: var(--text-primary)">Proxy VIP + 2 Backup</span></li>
-                                <li class="flex items-center gap-2"><svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span style="color: var(--text-primary)">Suporte 24h</span></li>
-                            </ul>
-                            <a href="#" class="btn-secondary block w-full py-3 rounded-xl text-center font-semibold text-sm border-2 border-amber-500/30">Selecionar</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Enterprise Plan -->
-                <div class="mt-8 p-6 md:p-8 rounded-2xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20">
-                    <div class="flex flex-col md:flex-row items-center gap-6">
-                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shrink-0">
-                            <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                            </svg>
-                        </div>
-                        <div class="text-center md:text-left flex-1">
-                            <div class="flex items-center justify-center md:justify-start gap-2 mb-2">
-                                <span class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-bold">PARA AGÊNCIAS</span>
-                            </div>
-                            <h3 class="font-bold text-xl mb-2" style="color: var(--text-primary)">Enterprise</h3>
-                            <p style="color: var(--text-zinc)">
-                                <strong style="color: var(--text-primary)">10% do investimento em anúncios</strong> ou mínimo de R$ 1.497/mês.
-                                <br>Ideal para quem roda +R$ 15k/mês em ads.
-                            </p>
-                        </div>
-                        <div class="text-center md:text-right shrink-0">
-                            <div class="text-2xl font-bold gradient-text">Sob consulta</div>
-                            <a href="#" class="inline-block mt-2 px-6 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold text-sm hover:opacity-90 transition-opacity">
-                                Falar com Vendas
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Benefits -->
-                <div class="grid md:grid-cols-2 gap-4 mt-8">
-                    <div class="p-4 rounded-xl" style="background: var(--bg-card); border: 1px solid var(--border-color)">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center">
-                                <svg class="w-4 h-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold text-sm" style="color: var(--text-primary)">Reposições acumulam!</h4>
-                                <p class="text-xs" style="color: var(--text-zinc)">Não usadas no mês? Acumulam por até 3 meses.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="p-4 rounded-xl" style="background: var(--bg-card); border: 1px solid var(--border-color)">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center">
-                                <svg class="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold text-sm" style="color: var(--text-primary)">Portabilidade</h4>
-                                <p class="text-xs" style="color: var(--text-zinc)">Se cancelar, leva todos os perfis consigo.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- One Purchase Plans -->
-            <div class="onepurchase-plans">
-                <div class="text-center mb-8">
-                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20 mb-4">
-                        <svg class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <span class="text-amber-400 text-sm font-medium">Compra única - Sem mensalidade</span>
-                    </div>
-                    <p class="text-sm" style="color: var(--text-zinc)">
-                        Garantia de reposição válida por <strong style="color: var(--text-primary)">7 dias</strong> após entrega.
-                        <br>Perfeito para quem quer testar sem compromisso.
-                    </p>
-                </div>
-                
-                <div class="grid md:grid-cols-3 gap-6 lg:gap-8">
-                    <!-- Júnior -->
-                    <div class="plan-card p-6 md:p-8 rounded-2xl">
-                        <div class="mb-6">
-                            <span class="inline-block px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 text-xs font-semibold mb-4">Básico</span>
-                            <h3 class="font-bold text-xl" style="color: var(--text-primary)">Júnior</h3>
-                            <div class="mt-3">
-                                <span class="text-3xl md:text-4xl font-bold gradient-text">R$ 347</span>
-                                <p class="text-xs mt-1" style="color: var(--text-muted)">Pagamento único</p>
-                            </div>
-                        </div>
-                        
-                        <ul class="space-y-2 mb-6 text-sm">
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                <span style="color: var(--text-zinc)"><strong>1 reposição</strong> incluída</span>
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                <span style="color: var(--text-zinc)">Perfil verificado</span>
-                            </li>
-                        </ul>
-                        
-                        <a href="#" class="btn-secondary block w-full py-3 rounded-xl text-center font-semibold text-sm">
-                            Selecionar
-                        </a>
-                    </div>
-                    
-                    <!-- Premium -->
-                    <div class="plan-card plan-featured p-6 md:p-8 rounded-2xl transform md:-translate-y-4">
-                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-brand-500 text-white text-xs font-bold badge-pulse">
-                            MAIS ESCOLHIDO
-                        </div>
-                        
-                        <div class="mb-6">
-                            <span class="inline-block px-3 py-1 rounded-full bg-brand-500/20 text-brand-400 text-xs font-semibold mb-4">Popular</span>
-                            <h3 class="font-bold text-xl" style="color: var(--text-primary)">Premium</h3>
-                            <div class="mt-3">
-                                <span class="text-3xl md:text-4xl font-bold gradient-text">R$ 497</span>
-                                <p class="text-xs mt-1" style="color: var(--text-muted)">Pagamento único</p>
-                            </div>
-                        </div>
-                        
-                        <ul class="space-y-2 mb-6 text-sm">
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                <span style="color: var(--text-primary)"><strong>3 reposições</strong> incluídas</span>
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                <span style="color: var(--text-primary)">Perfil verificado</span>
-                            </li>
-                        </ul>
-                        
-                        <a href="#" class="btn-primary block w-full py-3 rounded-xl text-center font-bold text-sm">
-                            Selecionar
-                        </a>
-                    </div>
-                    
-                    <!-- Máster -->
-                    <div class="plan-card p-6 md:p-8 rounded-2xl">
-                        <div class="mb-6">
-                            <span class="inline-block px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-semibold mb-4">VIP</span>
-                            <h3 class="font-bold text-xl" style="color: var(--text-primary)">Máster</h3>
-                            <div class="mt-3">
-                                <span class="text-3xl md:text-4xl font-bold gradient-text">R$ 647</span>
-                                <p class="text-xs mt-1" style="color: var(--text-muted)">Pagamento único</p>
-                            </div>
-                        </div>
-                        
-                        <ul class="space-y-2 mb-6 text-sm">
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                <span style="color: var(--text-primary)"><strong>5 reposições</strong> incluídas</span>
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                <span style="color: var(--text-primary)">Prioridade máxima</span>
-                            </li>
-                        </ul>
-                        
-                        <a href="#" class="btn-secondary block w-full py-3 rounded-xl text-center font-semibold text-sm border-2 border-amber-500/30">
-                            Selecionar
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Guarantee Clarification -->
-    <section class="py-12" style="background: var(--section-bg)">
-        <div class="max-w-4xl mx-auto px-6">
-            <div class="p-6 md:p-8 rounded-2xl bg-amber-500/5 border border-amber-500/20">
-                <div class="flex items-start gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
-                        <svg class="w-6 h-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-lg mb-2" style="color: var(--text-primary)">Garantia sobre o SERVIÇO, não sobre o RESULTADO</h3>
-                        <p class="text-sm leading-relaxed" style="color: var(--text-zinc)">
-                            <strong style="color: var(--text-primary)">O que é garantido:</strong> Reposição do perfil quando ele cair, conforme seu plano. 
-                            Você recebe manutenção, suporte e infraestrutura durante o período.<br><br>
-                            <strong style="color: var(--text-primary)">O que NÃO é garantido:</strong> O sucesso dos seus anúncios. 
-                            Cada pessoa é única - seu público, sua estratégia, seu produto. Nós fornecemos a ferramenta, 
-                            você faz acontecer. Nosso papel é garantir que você tenha perfis funcionando para rodar suas campanhas.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Testimonials -->
-    <section id="depoimentos" class="py-20 md:py-28">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-16 reveal">
-                <span class="text-brand-400 font-semibold text-sm uppercase tracking-widest">DEPOIMENTOS</span>
-                <h2 class="font-bold text-3xl md:text-4xl lg:text-5xl mt-4" style="color: var(--text-primary)">O Que Dizem Nossos Clientes</h2>
-            </div>
-            
-            <div class="grid md:grid-cols-3 gap-6">
-                <div class="testimonial-card p-6 rounded-2xl">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center font-bold text-white">
-                            L
-                        </div>
-                        <div>
-                            <h4 class="font-semibold" style="color: var(--text-primary)">Lucas Silva</h4>
-                            <p class="text-sm" style="color: var(--text-muted)">@lucass ads</p>
-                        </div>
-                    </div>
-                    <p style="color: var(--text-zinc)">"Finalmente encontrei um serviço que funciona de verdade. Já recuperei o investimento em poucos dias. Suporte top!"</p>
-                </div>
-                
-                <div class="testimonial-card p-6 rounded-2xl reveal reveal-delay-1">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center font-bold text-white">
-                            M
-                        </div>
-                        <div>
-                            <h4 class="font-semibold" style="color: var(--text-primary)">Maria Santos</h4>
-                            <p class="text-sm" style="color: var(--text-muted)">@maria.ecommerce</p>
-                        </div>
-                    </div>
-                    <p style="color: var(--text-zinc)">"Uso há 6 meses e nunca mais tive problemas. Quando um perfil cai, é só pedir reposição. Prático demais!"</p>
-                </div>
-                
-                <div class="testimonial-card p-6 rounded-2xl reveal reveal-delay-2">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center font-bold text-white">
-                            J
-                        </div>
-                        <div>
-                            <h4 class="font-semibold" style="color: var(--text-primary)">João Costa</h4>
-                            <p class="text-sm" style="color: var(--text-muted)">@joaocostabh</p>
-                        </div>
-                    </div>
-                    <p style="color: var(--text-zinc)">"Melhor investimento que fiz pro meu negócio. Recomendo demais, mudou meu faturamento!"</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- FAQ Section -->
-    <section id="faq" class="py-20 md:py-28" style="background: var(--section-bg)">
-        <div class="max-w-3xl mx-auto px-6">
-            <div class="text-center mb-16 reveal">
-                <span class="text-brand-400 font-semibold text-sm uppercase tracking-widest">TIRE SUAS DÚVIDAS</span>
-                <h2 class="font-bold text-3xl md:text-4xl lg:text-5xl mt-4" style="color: var(--text-primary)">FAQ</h2>
-            </div>
-            
-            <div class="space-y-4">
-                <details class="faq-item group p-5 md:p-6 rounded-2xl">
-                    <summary class="flex items-center justify-between cursor-pointer list-none font-semibold text-base md:text-lg" style="color: var(--text-primary)">
-                        <span>O que é uma reposição?</span>
-                        <svg class="faq-icon w-5 h-5 shrink-0 ml-4" style="color: var(--text-muted)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </summary>
-                    <p class="mt-4 leading-relaxed text-sm md:text-base" style="color: var(--text-zinc)">
-                        Quando seu perfil cair e você abrir um chamado, nós fornecemos um novo perfil para substituí-lo.
-                    </p>
-                </details>
-                
-                <details class="faq-item group p-5 md:p-6 rounded-2xl">
-                    <summary class="flex items-center justify-between cursor-pointer list-none font-semibold text-base md:text-lg" style="color: var(--text-primary)">
-                        <span>Assinatura vs Compra Única?</span>
-                        <svg class="faq-icon w-5 h-5 shrink-0 ml-4" style="color: var(--text-muted)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </summary>
-                    <p class="mt-4 leading-relaxed text-sm md:text-base" style="color: var(--text-zinc)">
-                        Na <strong>Assinatura</strong>, você recebe proxy, aquecimento e manutenção. Na <strong>Compra Única</strong>, recebe apenas o perfil com reposições.
-                    </p>
-                </details>
-                
-                <details class="faq-item group p-5 md:p-6 rounded-2xl">
-                    <summary class="flex items-center justify-between cursor-pointer list-none font-semibold text-base md:text-lg" style="color: var(--text-primary)">
-                        <span>Se eu cancelar, perco tudo?</span>
-                        <svg class="faq-icon w-5 h-5 shrink-0 ml-4" style="color: var(--text-muted)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </summary>
-                    <p class="mt-4 leading-relaxed text-sm md:text-base" style="color: var(--text-zinc)">
-                        <strong>Não!</strong> Todos os perfis são seus. Leva proxy, infraestrutura e tudo que foi configurado.
-                    </p>
-                </details>
-                
-                <details class="faq-item group p-5 md:p-6 rounded-2xl">
-                    <summary class="flex items-center justify-between cursor-pointer list-none font-semibold text-base md:text-lg" style="color: var(--text-primary)">
-                        <span>As reposições acumulam?</span>
-                        <svg class="faq-icon w-5 h-5 shrink-0 ml-4" style="color: var(--text-muted)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </summary>
-                    <p class="mt-4 leading-relaxed text-sm md:text-base" style="color: var(--text-zinc)">
-                        Sim! Reposições não usadas acumulam por até 3 meses. Quanto mais tempo, mais segurança.
-                    </p>
-                </details>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="py-20 md:py-28 relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-t from-brand-950/20 via-transparent to-transparent pointer-events-none"></div>
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-500/20 rounded-full blur-[200px]"></div>
-        
-        <div class="max-w-4xl mx-auto px-6 relative z-10 text-center reveal">
-            <h2 class="font-bold text-3xl md:text-5xl lg:text-6xl mb-6" style="color: var(--text-primary)">
-                Pronto para <span class="gradient-text">vender sem medo</span>?
-            </h2>
-            <p class="text-base md:text-lg lg:text-xl max-w-2xl mx-auto mb-10" style="color: var(--text-zinc)">
-                Transforme a instabilidade em vantagem competitiva. 
-                Seus clientes ficam satisfeitos, você ganha recorrência.
+            <h1>
+                Proxies HTTP<br>
+                <span>Ultra Rápidos</span><br>
+                para seu negócio
+            </h1>
+            <p>
+                Proxies dedicados com IP brasileiro, идеально para redes sociais, 
+                automações e campanhas de marketing. Velocidade e estabilidade comprovadas.
             </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="#planos" class="btn-primary text-base px-8 py-4 w-full sm:w-auto">
-                    Escolher meu Plano
+            <div class="hero-buttons">
+                <button class="btn btn-primary" onclick="openModal()">
+                    Começar Agora
+                </button>
+                <a href="#features" class="btn btn-secondary">
+                    Saiba Mais
                 </a>
             </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <div class="stat-value">10K+</div>
+                    <div class="stat-label">Clientes Ativos</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">99.9%</div>
+                    <div class="stat-label">Uptime</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">24/7</div>
+                    <div class="stat-label">Suporte</div>
+                </div>
+            </div>
         </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="features">
+        <div class="section-header">
+            <div class="section-label">Recursos</div>
+            <h2 class="section-title">Por que escolher a FastProxy?</h2>
+            <p class="section-desc">
+                Oferecemos a melhor infraestrutura de proxies do Brasil, 
+                com foco em performance e confiabilidade.
+            </p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🇧🇷</div>
+                <h3>IP 100% Brasileiro</h3>
+                <p>Todos os nossos proxies possuem IP do Brasil, идеально para acessar conteúdos regionais e evitar bloqueios.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Ultra Rápido</h3>
+                <p>Servidores de alta performance com conexão de 1Gbps. Sem lentidão, sem travamentos.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔄</div>
+                <h3>Reposições Grátis</h3>
+                <p>Se seu proxy apresentar problemas, substituímos imediatamente sem custo adicional.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🛡️</div>
+                <h3>Seguro e Confiável</h3>
+                <p>Conexão criptografada e proteção contra vazamentos. Seus dados estão seguros conosco.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>Fácil de Usar</h3>
+                <p>Configuração simples em 2 minutos. Copiar, colar e pronto. Sem complicações.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💬</div>
+                <h3>Suporte 24/7</h3>
+                <p>Equipe especializada disponível a qualquer hora para resolver suas dúvidas e problemas.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing" class="pricing">
+        <div class="section-header">
+            <div class="section-label">Preços</div>
+            <h2 class="section-title">Escolha seu plano</h2>
+            <p class="section-desc">
+                Planos flexíveis para atender qualquer necessidade. 
+                Quanto mais proxies, melhor o preço.
+            </p>
+        </div>
+        <div class="pricing-grid">
+            <div class="price-card">
+                <div class="price-badge">-25% OFF</div>
+                <div class="price-name">Plano Mensal</div>
+                <div class="price-desc">Ideal para testes e uso moderado</div>
+                <div class="price-value">
+                    <span class="price-old">R$ 39,90</span>
+                    <span class="price-amount">R$ 29</span>
+                    <span class="price-period">/mês</span>
+                </div>
+                <ul class="price-features">
+                    <li>1 Proxy HTTP</li>
+                    <li>IP Brasileiro</li>
+                    <li>Velocidade 1Gbps</li>
+                    <li>Suporte 24/7</li>
+                    <li>Reposições grátis</li>
+                </ul>
+                <button class="btn btn-secondary" onclick="openModal('monthly')">
+                    Selecionar
+                </button>
+            </div>
+            <div class="price-card featured">
+                <div class="price-badge">Melhor Custo</div>
+                <div class="price-name">Plano Anual</div>
+                <div class="price-desc">2 meses grátis - Melhor valor</div>
+                <div class="price-value">
+                    <span class="price-old">R$ 478,80</span>
+                    <span class="price-amount">R$ 299</span>
+                    <span class="price-period">/ano</span>
+                </div>
+                <ul class="price-features">
+                    <li>1 Proxy HTTP</li>
+                    <li>IP Brasileiro</li>
+                    <li>Velocidade 1Gbps</li>
+                    <li>Suporte prioritário</li>
+                    <li>Reposições grátis</li>
+                    <li>2 meses grátis</li>
+                </ul>
+                <button class="btn btn-primary" onclick="openModal('annual')">
+                    Selecionar
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+        <h2>Pronto para começar?</h2>
+        <p>Comece hoje mesmo e veja a diferença em suas operações.</p>
+        <button class="btn" onclick="openModal()">
+            Criar Minha Conta Grátis →
+        </button>
     </section>
 
     <!-- Footer -->
-    <footer class="py-12" style="border-top: 1px solid var(--border-color)">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
-                <a href="#" class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center font-bold text-sm text-white">
-                        A
-                    </div>
-                    <span class="font-bold text-xl" style="color: var(--text-primary)">FastProxy</span>
-                </a>
-                <p class="text-sm" style="color: var(--text-muted)">
-                    © 2026 FastProxy. Todos os direitos reservados.
-                </p>
-                <div class="flex items-center gap-6">
-                    <a href="#" class="text-sm" style="color: var(--text-muted)">Termos</a>
-                    <a href="#" class="text-sm" style="color: var(--text-muted)">Privacidade</a>
-                </div>
-            </div>
-        </div>
+    <footer class="footer">
+        <p>© 2024 FastProxy. Todos os direitos reservados. | <a href="#">Termos de Uso</a> | <a href="#">Privacidade</a></p>
     </footer>
 
-    <script>
-        // Theme Toggle
-        const html = document.documentElement;
-        const themeToggle = document.getElementById('theme-toggle');
-        
-        themeToggle.addEventListener('click', () => {
-            html.classList.toggle('light');
-            localStorage.setItem('theme', html.classList.contains('light') ? 'light' : 'dark');
-        });
-
-        if (localStorage.getItem('theme') === 'light') {
-            html.classList.add('light');
-        }
-
-        // Plan Toggle (Assinatura vs Compra Única) - only if exists
-        const planToggle = document.getElementById('plan-toggle');
-        if (planToggle) {
-            const planButtons = planToggle.querySelectorAll('.plan-toggle-btn');
-            
-            planButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    planButtons.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    
-                    if (btn.dataset.plan === 'onepurchase') {
-                        html.classList.add('show-onepurchase');
-                    } else {
-                        html.classList.remove('show-onepurchase');
-                    }
-                });
-            });
-        }
-
-        // Period Toggle (Monthly vs Semiannual vs Annual) - only if exists
-        const periodButtons = document.querySelectorAll('.period-btn');
-        const planPrices = document.querySelectorAll('.plan-prices');
-        
-        if (periodButtons.length > 0) {
-            periodButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    periodButtons.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    
-                    const period = btn.dataset.period;
-                    planPrices.forEach(prices => {
-                        if (prices.dataset.period === period) {
-                            prices.classList.remove('hidden');
-                        } else {
-                            prices.classList.add('hidden');
-                        }
-                    });
-                });
-            });
-        }
-
-        // Mobile Menu
-        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-        const mobileMenuClose = document.getElementById('mobile-menu-close');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const mobileOverlay = document.getElementById('mobile-overlay');
-        
-        function openMobileMenu() {
-            mobileMenu.classList.add('active');
-            mobileOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-        
-        function closeMobileMenu() {
-            mobileMenu.classList.remove('active');
-            mobileOverlay.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-        
-        mobileMenuBtn.addEventListener('click', openMobileMenu);
-        mobileMenuClose.addEventListener('click', closeMobileMenu);
-        mobileOverlay.addEventListener('click', closeMobileMenu);
-        
-        // Close mobile menu when clicking a link
-        mobileMenu.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', closeMobileMenu);
-        });
-
-        // Smooth scroll
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const href = this.getAttribute('href');
-                if (href && href !== '#') {
-                    const target = document.querySelector(href);
-                    if (target) {
-                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                }
-            });
-        });
-
-        // Reveal on scroll
-        const revealElements = document.querySelectorAll('.reveal');
-        const revealObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                }
-            });
-        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-        
-        revealElements.forEach(el => revealObserver.observe(el));
-
-        // Navbar scroll effect
-        const navbar = document.getElementById('navbar');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 100) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
-            }
-        });
-    </script>
-    
     <!-- Purchase Modal -->
-    <div id="purchase-modal" class="fixed inset-0 z-[100] hidden">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closePurchaseModal()"></div>
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md mx-4">
-            <div class="bg-[#0a1a0a] border border-[rgba(50,125,38,0.3)] rounded-2xl p-6 md:p-8">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-bold text-xl" style="color: var(--text-primary)">Comprar Proxies</h3>
-                    <button onclick="closePurchaseModal()" class="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
-                
-                <div class="mb-6">
-                    <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary)">Quantidade de Proxies</label>
-                    <div class="flex items-center gap-4">
-                        <button onclick="updateQuantity(-1)" class="w-10 h-10 rounded-lg bg-[rgba(50,125,38,0.2)] text-brand-400 font-bold text-xl hover:bg-[rgba(50,125,38,0.3)]">-</button>
-                        <input type="number" id="proxy-quantity" value="1" min="1" max="100" 
-                            class="flex-1 text-center text-2xl font-bold bg-transparent border border-[var(--border-color)] rounded-lg py-2"
-                            style="color: var(--text-primary)"
-                            onchange="updatePrice()">
-                        <button onclick="updateQuantity(1)" class="w-10 h-10 rounded-lg bg-[rgba(50,125,38,0.2)] text-brand-400 font-bold text-xl hover:bg-[rgba(50,125,38,0.3)]">+</button>
-                    </div>
-                </div>
-                
-                <div class="mb-6 p-4 rounded-xl bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.2)]">
-                    <div class="flex justify-between items-center">
-                        <span style="color: var(--text-secondary)">Preço por proxy:</span>
-                        <span class="font-semibold" style="color: var(--text-primary)">R$ 29,90</span>
-                    </div>
-                    <div class="flex justify-between items-center mt-2 pt-2 border-t border-[rgba(34,197,94,0.2)]">
-                        <span class="font-bold" style="color: var(--text-primary)">Total:</span>
-                        <span class="text-2xl font-bold gradient-text" id="total-price">R$ 29,90</span>
-                    </div>
-                </div>
-
-                <div id="plan-period-badge" class="mb-4 text-center">
-                    <span class="inline-block px-3 py-1 rounded-full bg-brand-500/20 text-brand-400 text-xs font-semibold">Plano Mensal</span>
-                </div>
-                
-                <div class="mb-4 p-3 rounded-lg bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.2)]">
-                    <ul class="text-xs space-y-1" style="color: var(--text-secondary)">
-                        <li>✅ Proxies IPv6 de alta velocidade</li>
-                        <li>✅ Ideal para Facebook e outras redes</li>
-                        <li>✅ Suporte prioritário 24/7</li>
-                        <li>✅ Renovação automática</li>
-                        <li>✅ Conexões estáveis</li>
-                    </ul>
-                </div>
-                
-                <div class="mb-6">
-                    <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary)">Seu Email (obrigatório)</label>
-                    <input type="email" id="customer-email" placeholder="seu@email.com"
-                        class="w-full px-4 py-3 rounded-xl bg-[rgba(0,0,0,0.3)] border border-[var(--border-color)] focus:border-brand-500 outline-none"
-                        style="color: var(--text-primary)">
-                </div>
-                
-                <div class="mb-6">
-                    <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary)">WhatsApp (opcional)</label>
-                    <input type="tel" id="customer-whatsapp" placeholder="(11) 99999-9999"
-                        class="w-full px-4 py-3 rounded-xl bg-[rgba(0,0,0,0.3)] border border-[var(--border-color)] focus:border-brand-500 outline-none"
-                        style="color: var(--text-primary)">
-                </div>
-                
-                <button onclick="createCheckout()" id="buy-btn" class="btn-primary w-full py-4 text-lg font-bold">
-                    Comprar Agora
-                </button>
-                
-                <p class="text-xs text-center mt-4" style="color: var(--text-muted)">
-                    Pagamento via Cakto. Pix, cartão ou boleto.
-                </p>
+    <div id="purchase-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Comprar Proxy</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
+            <div class="form-group">
+                <label>Quantidade de Proxies</label>
+                <div class="quantity-selector">
+                    <button class="quantity-btn" onclick="changeQty(-1)">−</button>
+                    <input type="number" id="qty" class="quantity-input" value="1" min="1" max="100" onchange="updateTotal()">
+                    <button class="quantity-btn" onclick="changeQty(1)">+</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Seu Email *</label>
+                <input type="email" id="email" placeholder="seu@email.com">
+            </div>
+            <div class="form-group">
+                <label>WhatsApp (opcional)</label>
+                <input type="tel" id="whatsapp" placeholder="(11) 99999-9999">
+            </div>
+            <div class="total-price">
+                <div class="total-label">Total a pagar</div>
+                <div class="total-value" id="total-price">R$ 29,00</div>
+            </div>
+            <button class="btn btn-primary" onclick="processCheckout()" style="width: 100%">
+                Finalizar Compra →
+            </button>
+            <p style="text-align: center; color: var(--text-muted); font-size: 0.75rem; margin-top: 1rem;">
+                Pagamento seguro via Cakto • Pix, Cartão ou Boleto
+            </p>
         </div>
     </div>
 
     <script>
-        const PRICE_PER_PROXY = 29.90;
-        
         let selectedPeriod = 'monthly';
-        
-        function openPurchaseModal(period = 'monthly') {
-            selectedPeriod = period;
-            document.getElementById('purchase-modal').classList.remove('hidden');
+        const PRICE_MONTHLY = 29;
+        const PRICE_ANNUAL = 299;
+
+        function openModal(period) {
+            if (period) selectedPeriod = period;
+            document.getElementById('purchase-modal').classList.add('active');
             document.body.style.overflow = 'hidden';
-            
-            // Update badge
-            const badge = document.getElementById('plan-period-badge');
-            if (badge) {
-                badge.querySelector('span').textContent = period === 'annual' ? 'Plano Anual' : 'Plano Mensal';
-            }
-            
-            updatePrice();
+            updateTotal();
         }
-        
-        function closePurchaseModal() {
-            document.getElementById('purchase-modal').classList.add('hidden');
+
+        function closeModal() {
+            document.getElementById('purchase-modal').classList.remove('active');
             document.body.style.overflow = '';
         }
-        
-        function updateQuantity(delta) {
-            const input = document.getElementById('proxy-quantity');
-            let value = parseInt(input.value) + delta;
-            if (value < 1) value = 1;
-            if (value > 100) value = 100;
-            input.value = value;
-            updatePrice();
+
+        function changeQty(delta) {
+            const input = document.getElementById('qty');
+            let val = parseInt(input.value) + delta;
+            if (val < 1) val = 1;
+            if (val > 100) val = 100;
+            input.value = val;
+            updateTotal();
         }
-        
-        function updatePrice() {
-            const quantity = parseInt(document.getElementById('proxy-quantity').value) || 1;
-            const unitPrice = selectedPeriod === 'annual' ? PRICE_PER_PROXY_YEAR : PRICE_PER_PROXY;
-            const total = (quantity * unitPrice).toFixed(2).replace('.', ',');
-            document.getElementById('total-price').textContent = 'R$ ' + total;
+
+        function updateTotal() {
+            const qty = parseInt(document.getElementById('qty').value) || 1;
+            const price = selectedPeriod === 'annual' ? PRICE_ANNUAL : PRICE_MONTHLY;
+            const total = qty * price;
+            document.getElementById('total-price').textContent = 'R$ ' + total.toLocaleString('pt-BR') + ',00';
         }
-        
-        async function createCheckout() {
-            const btn = document.getElementById('buy-btn');
-            const quantity = parseInt(document.getElementById('proxy-quantity').value);
-            const email = document.getElementById('customer-email').value;
-            const whatsapp = document.getElementById('customer-whatsapp').value;
-            
-            alert('Iniciando checkout... quantidade: ' + quantity + ', email: ' + email);
-            
+
+        async function processCheckout() {
+            const qty = parseInt(document.getElementById('qty').value) || 1;
+            const email = document.getElementById('email').value;
+            const whatsapp = document.getElementById('whatsapp').value;
+
             if (!email) {
                 alert('Por favor, insira seu email');
                 return;
             }
-            
-            btn.disabled = true;
-            btn.textContent = 'Processando...';
-            
+
             try {
-                alert('Enviando requisição...');
                 const response = await fetch('/api/cakto/create-checkout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        proxyCount: quantity,
+                        proxyCount: qty,
                         email: email,
                         whatsapp: whatsapp,
                         period: selectedPeriod
                     })
                 });
-                
-                alert('Resposta recebida: ' + response.status);
+
                 const data = await response.json();
-                alert('Dados: ' + JSON.stringify(data));
                 console.log('Checkout response:', data);
-                
+
                 if (data.success && data.checkoutUrl) {
-                    console.log('Redirecting to:', data.checkoutUrl);
-                    alert('Redirecionando para: ' + data.checkoutUrl);
                     window.location.href = data.checkoutUrl;
                 } else {
-                    alert('Erro: ' + (data.error || data.details || 'Falha ao criar checkout'));
-                    btn.disabled = false;
-                    btn.textContent = 'Comprar Agora';
+                    alert('Erro: ' + (data.error || data.message || 'Tente novamente'));
                 }
             } catch (err) {
-                console.error('Checkout error:', err);
-                alert('Erro de conexão: ' + err.message);
-                btn.disabled = false;
-                btn.textContent = 'Comprar Agora';
+                console.error('Error:', err);
+                alert('Erro de conexão. Tente novamente.');
             }
         }
 
-        // Add onclick to all buttons that should open modal
-        document.querySelectorAll('a[href="#planos"], a[href="#"], button').forEach(btn => {
-            const text = btn.textContent || '';
-            if (text.includes('Ver Planos') || btn.getAttribute('href') === '#planos') {
-                btn.onclick = function(e) {
-                    e.preventDefault();
-                    document.getElementById('planos').scrollIntoView({ behavior: 'smooth' });
-                };
-            } else if (text.includes('Selecionar') || text.includes('Comprar') || btn.classList.contains('btn-primary') || btn.classList.contains('btn-secondary')) {
-                btn.onclick = function(e) {
-                    e.preventDefault();
-                    openPurchaseModal();
-                };
-            }
+        // Close modal on outside click
+        document.getElementById('purchase-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // Close on Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
         });
     </script>
 </body>
