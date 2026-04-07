@@ -83,13 +83,15 @@ router.get('/test-api', async (req, res) => {
     console.log('=== TESTING CAKTO API ===');
     
     const offers = await getCachedOffers();
-    console.log('Offers found:', offers.length);
+    const offerList = offers?.results || offers || [];
+    console.log('Offers found:', offerList.length);
+    console.log('Offers data:', JSON.stringify(offers));
     
     res.json({
       success: true,
       message: 'Cakto API connection successful',
-      offersCount: offers.length,
-      offers: offers.slice(0, 5)
+      offersCount: offerList.length,
+      offers: offerList.slice(0, 5)
     });
   } catch (err) {
     console.error('Test API error:', err.response?.data || err.message);
@@ -127,14 +129,13 @@ router.post('/create-checkout', express.json(), async (req, res) => {
     const targetPrice = isAnnual ? 299.00 : 29.90;
     
     const offers = await getCachedOffers();
+    const offerList = offers?.results || offers || [];
     console.log('Looking for offer with price:', targetPrice);
     console.log('Available offers:', JSON.stringify(offers, null, 2));
     
     let selectedOffer = null;
     
-    if (offers && offers.results) {
-      const offerList = offers.results;
-      
+    if (offerList.length > 0) {
       for (const offer of offerList) {
         const offerPrice = parseFloat(offer.price || 0);
         console.log(`Checking offer ${offer.id}: ${offer.name} - R$ ${offerPrice}`);
