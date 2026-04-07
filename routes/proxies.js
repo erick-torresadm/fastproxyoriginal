@@ -83,7 +83,7 @@ router.get('/my', auth, async (req, res) => {
   }
 });
 
-router.post('/allocate', admin, async (req, res) => {
+router.post('/allocate', auth, admin, async (req, res) => {
   try {
     const { userId, tier, count } = req.body;
     const quantity = count || 1;
@@ -118,7 +118,7 @@ router.post('/allocate', admin, async (req, res) => {
   }
 });
 
-router.post('/', admin, async (req, res) => {
+router.post('/', auth, admin, async (req, res) => {
   try {
     const { ip, port, username, password, tier } = req.body;
 
@@ -135,7 +135,7 @@ router.post('/', admin, async (req, res) => {
   }
 });
 
-router.post('/bulk', admin, async (req, res) => {
+router.post('/bulk', auth, admin, async (req, res) => {
   try {
     const { proxies, tier } = req.body;
     const tierValue = tier || 'basic';
@@ -156,7 +156,7 @@ router.post('/bulk', admin, async (req, res) => {
   }
 });
 
-router.put('/:id', admin, async (req, res) => {
+router.put('/:id', auth, admin, async (req, res) => {
   try {
     const { ip, port, username, password, tier, status } = req.body;
     const proxy = await Proxy.findByIdAndUpdate(
@@ -170,7 +170,7 @@ router.put('/:id', admin, async (req, res) => {
   }
 });
 
-router.delete('/:id', admin, async (req, res) => {
+router.delete('/:id', auth, admin, async (req, res) => {
   try {
     await Proxy.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Proxy excluído' });
