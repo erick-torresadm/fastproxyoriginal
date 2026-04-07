@@ -17,43 +17,14 @@ const PRICES = {
   annual: 299.00
 };
 
-let cachedProductId = null;
+const PRODUCT_IDS = {
+  monthly: 'ea93f8eb-c118-4579-8ad6-d12862addba7',
+  annual: '9af84c23-f246-4ee6-825a-20851d67227d'
+};
+
 let cachedOffers = {};
 let offerCacheTime = {};
 const OFFER_CACHE_DURATION = 5 * 60 * 1000;
-
-async function ensureProduct() {
-  if (cachedProductId) {
-    return cachedProductId;
-  }
-  
-  try {
-    console.log('Checking for existing products...');
-    const products = await Cakto.getProducts();
-    const productList = products?.results || [];
-    
-    if (productList.length > 0) {
-      cachedProductId = productList[0].id;
-      console.log('Using existing product:', cachedProductId);
-      return cachedProductId;
-    }
-    
-    console.log('No products found, creating new product...');
-    const product = await Cakto.createProduct({
-      name: 'Proxy IPv6 FastProxy',
-      description: 'Proxy IPv6 de alta performance para redes sociais',
-      price: 29.90,
-      status: 'active'
-    });
-    
-    cachedProductId = product.id;
-    console.log('Created product:', cachedProductId);
-    return cachedProductId;
-  } catch (err) {
-    console.error('Error ensuring product:', err.message);
-    throw err;
-  }
-}
 
 async function getOrCreateOffer(productId, period, quantity, pricePerUnit) {
   const totalPrice = quantity * pricePerUnit;
@@ -152,15 +123,20 @@ router.post('/create-checkout', express.json(), async (req, res) => {
       });
     }
     
-    const pricePerUnit = PRICES[period] || PRICES.monthly;
+    const productId = PRODUCT_IDS[period];
+    if (!productId) {
+      return res.status(400).json({ error: 'Período inválido' });
+    }
+    
+    const pricePerUnit = PRICES[period];
     const totalPrice = proxyCount * pricePerUnit;
     
     console.log('Price calculation:');
+    console.log('  - Product ID:', productId);
     console.log('  - Price per unit:', pricePerUnit);
     console.log('  - Quantity:', proxyCount);
     console.log('  - Total:', totalPrice);
     
-    const productId = await ensureProduct();
     const offer = await getOrCreateOffer(productId, period, proxyCount, pricePerUnit);
     const { checkout, checkoutUrl } = await createCheckoutForOffer(
       offer.id, 
@@ -177,6 +153,7 @@ router.post('/create-checkout', express.json(), async (req, res) => {
     
     const duration = Date.now() - startTime;
     console.log(`Checkout created in ${duration}ms`);
+    console.log(`Final checkout URL: ${checkoutUrl}`);
     
     res.json({
       success: true,
@@ -206,18 +183,19 @@ router.get('/test-api', async (req, res) => {
     
     const products = await Cakto.getProducts();
     const productList = products?.results || [];
-    console.log('Products found:', productList.length);
     
-    const offers = await Cakto.getAllOffers();
-    const offerList = offers?.results || [];
-    console.log('Offers found:', offerList.length);
+    const proxyProducts = productList.filter(p => 
+      p.name.toLowerCase().includes('proxy') || 
+      p.name.toLowerCase().includes('1 mes') ||
+      p.name.toLowerCase().includes('anual')
+    );
     
     res.json({
       success: true,
       message: 'API connection OK',
-      products: productList.map(p => ({ id: p.id, name: p.name })),
-      offersCount: offerList.length,
-      prices: PRICES
+      prices: PRICES,
+      productIds: PRODUCT_IDS,
+      products: proxyProducts.map(p => ({ id: p.id, name: p.name, price: p.price }))
     });
   } catch (err) {
     console.error('Test API error:', err.message);
