@@ -16,7 +16,7 @@
                     colors: {
                         brand: {
                             50: '#faf5ff', 100: '#f3e8ff', 200: '#e9d5ff', 300: '#d8b4fe', 400: '#c084fc',
-                            500: '#a855f7', 600: '#9333ea', 700: '#7e22ce', 800: '#6b21a8', 900: '#581c87', 950: '#2e1065',
+                            500: '#22c55e', 600: '#22c55e', 700: '#16a34a', 800: '#6b21a8', 900: '#581c87', 950: '#2e1065',
                         }
                     },
                     fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], }
@@ -36,11 +36,11 @@
         * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; margin: 0; padding: 0; box-sizing: border-box; }
         body { background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; }
         .gradient-text { background: linear-gradient(135deg, #c084fc, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .gradient-bg { background: linear-gradient(135deg, #9333ea, #4f46e5); }
+        .gradient-bg { background: linear-gradient(135deg, #22c55e, #4f46e5); }
         .card { background: var(--bg-card); border: 1px solid var(--border-color); backdrop-filter: blur(20px); }
         .input-field { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); transition: all 0.3s; }
-        .input-field:focus { border-color: #9333ea; box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.2); outline: none; }
-        .btn-primary { background: linear-gradient(135deg, #9333ea, #4f46e5); transition: all 0.3s; }
+        .input-field:focus { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.2); outline: none; }
+        .btn-primary { background: linear-gradient(135deg, #22c55e, #4f46e5); transition: all 0.3s; }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(147, 51, 234, 0.3); }
         .plan-card { transition: all 0.3s; }
         .plan-card:hover { transform: translateY(-8px); box-shadow: 0 20px 60px rgba(147, 51, 234, 0.25); }
@@ -59,10 +59,9 @@
     <nav class="fixed top-0 w-full z-50 bg-black/50 backdrop-blur-xl border-b border-white/10">
         <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
             <a href="/" class="flex items-center gap-3 hover:opacity-80 transition">
-                <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                </div>
-                <span class="text-xl font-bold gradient-text">FastProxy</span>
+<a href="/" class="flex items-center gap-3">
+                        <img src="https://i.ibb.co/SwQ6ksRy/LOGO-FAST-PROXY.png" alt="FastProxy" class="h-10">
+                    </a>
             </a>
             
             <!-- Desktop Menu -->

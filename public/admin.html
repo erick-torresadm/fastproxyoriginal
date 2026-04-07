@@ -60,10 +60,7 @@
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <a href="/" class="flex items-center gap-3">
-                    <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                    </div>
-                    <span class="text-xl font-bold gradient-text">FastProxy</span>
+                    <img src="https://i.ibb.co/SwQ6ksRy/LOGO-FAST-PROXY.png" alt="FastProxy" class="h-10">
                 </a>
                 <span class="text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400">Admin</span>
             </div>
@@ -188,14 +185,31 @@
                 <!-- Stock -->
                 <section id="tab-stock" class="hidden">
                     <div class="card rounded-2xl overflow-hidden">
-                        <div class="p-4 border-b border-white/10 flex justify-between items-center">
-                            <h2 class="font-bold">Proxies em Estoque</h2>
-                            <button onclick="loadProxies()" class="text-green-400 hover:text-green-300"><i class="fas fa-sync"></i></button>
+                        <div class="p-4 border-b border-white/10 flex flex-wrap gap-3 items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <h2 class="font-bold">Proxies em Estoque</h2>
+                                <label class="flex items-center gap-2 text-sm text-white/50 cursor-pointer">
+                                    <input type="checkbox" id="select-all-proxies" onchange="toggleSelectAll()" class="w-4 h-4 accent-green-500">
+                                    Selecionar Todos
+                                </label>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <select id="bulk-action" class="input-field rounded-lg px-3 py-2 text-sm text-white">
+                                    <option value="">Ação em massa...</option>
+                                    <option value="delete">Excluir selecionados</option>
+                                    <option value="available">Status: Disponível</option>
+                                    <option value="active">Status: Ativo</option>
+                                    <option value="expired">Status: Expirado</option>
+                                </select>
+                                <button onclick="executeBulkAction()" class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-lg text-sm text-white">Aplicar</button>
+                                <button onclick="loadProxies()" class="text-green-400 hover:text-green-300"><i class="fas fa-sync"></i></button>
+                            </div>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full">
                                 <thead class="bg-white/5">
                                     <tr class="text-left text-sm text-white/50">
+                                        <th class="px-4 py-3 w-10"><input type="checkbox" id="select-all-top" onchange="toggleSelectAll()" class="w-4 h-4 accent-green-500"></th>
                                         <th class="px-4 py-3">Proxy</th>
                                         <th class="px-4 py-3">Tier</th>
                                         <th class="px-4 py-3">Status</th>
@@ -403,6 +417,7 @@
                 
                 if (proxies.length > 0) {
                     tbody.innerHTML = proxies.map(p => `<tr class="border-t border-white/5 hover:bg-white/5">
+                        <td class="px-4 py-3 w-10"><input type="checkbox" class="proxy-checkbox w-4 h-4 accent-green-500" value="${p._id}"></td>
                         <td class="px-4 py-3 font-mono text-sm">${p.username}:${p.password}@${p.ip}:${p.port}</td>
                         <td class="px-4 py-3"><span class="px-2 py-1 rounded text-xs ${tierColors[p.tier] || 'bg-gray-500/20 text-gray-400'}">${p.tier || 'basic'}</span></td>
                         <td class="px-4 py-3 text-sm ${p.status === 'available' ? 'text-green-400' : 'text-blue-400'}">${p.status === 'available' ? 'Disponível' : 'Ativo'}</td>
@@ -414,9 +429,41 @@
                         </td>
                     </tr>`).join('');
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-white/40">Nenhum proxy</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-white/40">Nenhum proxy</td></tr>';
                 }
             } catch (err) { console.error(err); }
+        }
+
+        function toggleSelectAll() {
+            const checkboxes = document.querySelectorAll('.proxy-checkbox');
+            const selectAll = document.getElementById('select-all-proxies').checked || document.getElementById('select-all-top').checked;
+            checkboxes.forEach(cb => cb.checked = selectAll);
+        }
+
+        async function executeBulkAction() {
+            const action = document.getElementById('bulk-action').value;
+            const selected = Array.from(document.querySelectorAll('.proxy-checkbox:checked')).map(cb => cb.value);
+            
+            if (selected.length === 0) {
+                showToast('Selecione pelo menos um proxy', 'error');
+                return;
+            }
+            
+            if (action === 'delete') {
+                if (!confirm(`Excluir ${selected.length} proxy(s)?`)) return;
+                for (const id of selected) {
+                    await api(`/api/proxies/${id}`, 'DELETE');
+                }
+                showToast(`${selected.length} proxy(s) excluído(s)`);
+            } else if (['available', 'active', 'expired'].includes(action)) {
+                for (const id of selected) {
+                    await api(`/api/proxies/${id}`, 'PUT', { status: action });
+                }
+                showToast(`Status alterado para ${selected.length} proxy(s)`);
+            }
+            
+            loadProxies();
+            loadStats();
         }
 
         async function deleteProxy(id) {
