@@ -138,30 +138,21 @@ async function createPendingUser(orderId, email, whatsapp, productName, amount) 
 
 router.get('/create-webhook', async (req, res) => {
   try {
-    console.log('Testing Cakto...');
-    console.log('CLIENT_ID:', process.env.CAKTO_CLIENT_ID ? 'set' : 'NOT SET');
-    console.log('CLIENT_SECRET:', process.env.CAKTO_CLIENT_SECRET ? 'set' : 'NOT SET');
-    console.log('BASE_URL:', process.env.CAKTO_BASE_URL);
-    
     const axios = require('axios');
+    const qs = require('querystring');
     
     const tokenRes = await axios.post(
-      process.env.CAKTO_BASE_URL + '/oauth/token',
-      {
-        grant_type: 'client_credentials',
+      process.env.CAKTO_BASE_URL + '/public_api/token/',
+      qs.stringify({
         client_id: process.env.CAKTO_CLIENT_ID,
         client_secret: process.env.CAKTO_CLIENT_SECRET
-      },
-      { headers: { 'Content-Type': 'application/json' } }
+      }),
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
     );
     
-    res.json({ success: true, token: tokenRes.data.access_token?.substring(0, 20) + '...' });
+    res.json({ success: true, token: tokenRes.data.access_token?.substring(0, 20) + '...', expires: tokenRes.data.expires_in });
   } catch (err) {
-    console.error('Full error:', err.message);
-    if (err.response) {
-      console.error('Response:', err.response.data);
-    }
-    res.status(500).json({ error: err.message, hasResponse: !!err.response, data: err.response?.data });
+    res.status(500).json({ error: err.message, data: err.response?.data });
   }
 });
 
