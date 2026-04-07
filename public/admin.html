@@ -242,6 +242,17 @@
         <p id="toast-msg" class="text-sm"></p>
     </div>
 
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 p-4">
+        <div class="card rounded-2xl p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold gradient-text" id="modal-title"></h3>
+                <button onclick="closeModal()" class="text-white/40 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
     <script>
         const API_URL = '';
         let token = localStorage.getItem('fastproxy_admin_token');
@@ -397,7 +408,9 @@
                         <td class="px-4 py-3 text-sm ${p.status === 'available' ? 'text-green-400' : 'text-blue-400'}">${p.status === 'available' ? 'Disponível' : 'Ativo'}</td>
                         <td class="px-4 py-3 text-sm text-white/50">${new Date(p.createdAt).toLocaleDateString('pt-BR')}</td>
                         <td class="px-4 py-3 text-center">
-                            <button onclick="deleteProxy('${p._id}')" class="text-red-400 hover:text-red-300"><i class="fas fa-trash"></i></button>
+                            <button onclick="allocateThisProxy('${p._id}', '${p.username}:${p.password}@${p.ip}:${p.port}')" class="text-green-400 hover:text-green-300 mr-2" title="Vincular a usuário"><i class="fas fa-link"></i></button>
+                            <button onclick="editProxyStatus('${p._id}', '${p.status}')" class="text-blue-400 hover:text-blue-300 mr-2" title="Mudar status"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteProxy('${p._id}')" class="text-red-400 hover:text-red-300" title="Excluir"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>`).join('');
                 } else {
@@ -416,6 +429,84 @@
                     loadStats();
                 }
             } catch (err) { showToast('Erro', 'error'); }
+        }
+
+        async function allocateThisProxy(proxyId, proxyStr) {
+            try {
+                const usersData = await api('/api/auth/users');
+                const users = usersData.data?.users || [];
+                
+                if (users.length === 0) {
+                    showToast('Nenhum usuário cadastrado', 'error');
+                    return;
+                }
+                
+                const userOptions = users.map(u => `<option value="${u._id}">${u.name} (${u.email})</option>`).join('');
+                
+                document.getElementById('modal').classList.remove('hidden');
+                document.getElementById('modal-title').textContent = 'Vincular Proxy';
+                document.getElementById('modal-content').innerHTML = `
+                    <div class="space-y-4">
+                        <div class="p-3 bg-black/30 rounded-lg font-mono text-sm text-green-400">${proxyStr}</div>
+                        <div>
+                            <label class="block text-sm text-white/50 mb-2">Selecionar Usuário</label>
+                            <select id="allocate-user" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                                ${userOptions}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-white/50 mb-2">Status</label>
+                            <select id="allocate-status" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                                <option value="active">Ativo</option>
+                                <option value="available">Disponível</option>
+                                <option value="expired">Expirado</option>
+                            </select>
+                        </div>
+                        <button onclick="confirmAllocate('${proxyId}')" class="btn-primary w-full py-3 rounded-xl font-semibold text-white">
+                            <i class="fas fa-link mr-2"></i>Vincular
+                        </button>
+                    </div>
+                `;
+            } catch (err) { showToast('Erro', 'error'); }
+        }
+
+        async function confirmAllocate(proxyId) {
+            const userId = document.getElementById('allocate-user').value;
+            const status = document.getElementById('allocate-status').value;
+            
+            try {
+                const data = await api(`/api/proxies/${proxyId}`, 'PUT', {
+                    userId,
+                    status
+                });
+                if (data.success) {
+                    showToast('Proxy vinculadas!');
+                    closeModal();
+                    loadProxies();
+                    loadStats();
+                    loadUsers();
+                } else {
+                    showToast(data.message || 'Erro', 'error');
+                }
+            } catch (err) { showToast('Erro', 'error'); }
+        }
+
+        async function editProxyStatus(proxyId, currentStatus) {
+            const newStatus = prompt('Status atual: ' + currentStatus + '\nNovo status (available/active/expired):');
+            if (!newStatus || !['available', 'active', 'expired'].includes(newStatus)) return;
+            
+            try {
+                const data = await api(`/api/proxies/${proxyId}`, 'PUT', { status: newStatus });
+                if (data.success) {
+                    showToast('Status atualizado!');
+                    loadProxies();
+                    loadStats();
+                }
+            } catch (err) { showToast('Erro', 'error'); }
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
         }
 
         async function loadUsers() {

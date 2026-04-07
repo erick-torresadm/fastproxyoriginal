@@ -158,10 +158,14 @@ router.post('/bulk', auth, admin, async (req, res) => {
 
 router.put('/:id', auth, admin, async (req, res) => {
   try {
-    const { ip, port, username, password, tier, status } = req.body;
+    const { ip, port, username, password, tier, status, userId } = req.body;
+    const updateData = { ip, port, username, password, tier, status };
+    if (userId) updateData.userId = userId;
+    if (status === 'active' && userId) updateData.assignedAt = new Date();
+    
     const proxy = await Proxy.findByIdAndUpdate(
       req.params.id,
-      { ip, port, username, password, tier, status },
+      updateData,
       { new: true }
     );
     res.json({ success: true, data: { proxy } });
