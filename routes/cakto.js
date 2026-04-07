@@ -138,21 +138,11 @@ async function createPendingUser(orderId, email, whatsapp, productName, amount) 
 
 router.get('/create-webhook', async (req, res) => {
   try {
-    if (!process.env.CAKTO_CLIENT_ID || !process.env.CAKTO_CLIENT_SECRET) {
-      return res.status(400).json({ error: 'Cakto not configured in Vercel' });
-    }
-    
-    const webhook = await Cakto.createWebhook({
-      url: `${process.env.APP_URL}/api/cakto/webhook`,
-      events: ['order.completed', 'payment.approved', 'order.refunded', 'order.canceled', 'payment.refused'],
-      name: 'FastProxy Webhook',
-      is_active: true
-    });
-    
-    res.json({ success: true, webhook });
+    const token = await Cakto.getAccessToken();
+    res.json({ success: true, token: token.substring(0, 20) + '...' });
   } catch (err) {
-    console.error('Create webhook error:', err.response?.data || err.message);
-    res.status(500).json({ error: err.message });
+    console.error('Cakto error:', err.response?.data || err.message);
+    res.status(500).json({ error: err.message, details: err.response?.data });
   }
 });
 
