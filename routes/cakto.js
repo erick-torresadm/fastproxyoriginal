@@ -324,10 +324,17 @@ router.get('/create-default-offers', async (req, res) => {
           price: config.price,
           currency: 'BRL',
           product: productId,
-          type: 'recurring',
-          intervalType: config.price >= 100 ? 'year' : 'month',
-          interval: config.price >= 100 ? 1 : 1,
-          status: 'active'
+          type: 'unique',
+          intervalType: 'lifetime',
+          interval: 1,
+          units: 1,
+          default: true,
+          status: 'active',
+          trial_days: 0,
+          max_retries: 3,
+          retry_interval: 1,
+          quantity_recurrences: -1,
+          recurrence_period: 30
         };
         
         console.log('Offer data:', JSON.stringify(offerData, null, 2));
@@ -337,8 +344,9 @@ router.get('/create-default-offers', async (req, res) => {
         console.log('Created offer:', JSON.stringify(offer, null, 2));
       } catch (offerErr) {
         console.error('Error creating offer:', offerErr.response?.data || offerErr.message);
-        createdOffers.push({ error: offerErr.message, config: config });
+        createdOffers.push({ error: offerErr.response?.data || offerErr.message, config: config });
       }
+    }
     }
     
     cachedOffers = null;
