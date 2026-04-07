@@ -30,13 +30,15 @@ const connectDB = async () => {
   if (mongoose.connection.readyState >= 1) return;
   try {
     await mongoose.connect(MONGODB_URI, {
-      socketTimeoutMS: 30000,
-      serverSelectionTimeoutMS: 30000,
-      maxPoolSize: 10,
+      socketTimeoutMS: 60000,
+      serverSelectionTimeoutMS: 60000,
+      maxPoolSize: 5,
+      minPoolSize: 1,
     });
     console.log('✅ MongoDB conectado!');
   } catch (error: any) {
     console.error('❌ MongoDB error:', error.message);
+    throw error;
   }
 };
 
