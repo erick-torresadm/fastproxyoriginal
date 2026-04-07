@@ -30,12 +30,13 @@ const connectDB = async () => {
   if (mongoose.connection.readyState >= 1) return;
   try {
     await mongoose.connect(MONGODB_URI, {
-      socketTimeoutMS: 10000,
-      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 30000,
+      serverSelectionTimeoutMS: 30000,
+      maxPoolSize: 10,
     });
     console.log('✅ MongoDB conectado!');
-  } catch (error) {
-    console.error('❌ MongoDB error:', error);
+  } catch (error: any) {
+    console.error('❌ MongoDB error:', error.message);
   }
 };
 
@@ -50,13 +51,6 @@ app.use(cors({
   credentials: true 
 }));
 app.use(express.json({ limit: '50kb' }));
-
-app.use(async (req: any, res: any, next: any) => {
-  if (!req.path.startsWith('/api/health')) {
-    await connectDB();
-  }
-  next();
-});
 
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
@@ -113,6 +107,13 @@ const orderSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const Order = mongoose.models.Order || mongoose.model('Order', orderSchema);
+
+app.use(async (req: any, res: any, next: any) => {
+  if (!req.path.startsWith('/api/health')) {
+    await connectDB();
+  }
+  next();
+});
 
 const authenticate = async (req: any, res: any, next: any) => {
   try {
@@ -225,8 +226,9 @@ app.post('/api/plans', authenticate, adminOnly, async (req: any, res: any) => {
   }
 });
 
-app.post('/api/plans/seed', authenticate, adminOnly, async (req: any, res: any) => {
+app.post('/api/plans/seed', async (req: any, res: any) => {
   try {
+    await connectDB();
     const plans = [
       { name: 'Starter', tier: 'starter', price: 47, proxyCount: 5 },
       { name: 'Business', tier: 'business', price: 97, proxyCount: 20 },
@@ -234,8 +236,20 @@ app.post('/api/plans/seed', authenticate, adminOnly, async (req: any, res: any) 
     ];
     await Plan.deleteMany({});
     await Plan.insertMany(plans);
-    res.json({ success: true, message: 'Planos criados', data: { count: plans.length } });
-  } catch (error) {
+    
+    const adminExists = await User.findOne({ email: 'admin@fastproxy.com' });
+    if (!adminExists) {
+      await User.create({
+        name: 'Admin',
+        email: 'admin@fastproxy.com',
+        password: 'admin123',
+        role: 'admin'
+      });
+    }
+    
+    res.json({ success: true, message: 'Planos e admin criados!', data: { count: plans.length } });
+  } catch (error: any) {
+    console.error('Seed error:', error.message);
     res.status(500).json({ success: false, message: 'Erro interno' });
   }
 });
