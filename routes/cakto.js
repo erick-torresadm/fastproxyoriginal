@@ -7,7 +7,11 @@ const Order = require('../models/Order');
 
 router.post('/webhook', express.json(), async (req, res) => {
   try {
-    if (!process.env.CAKTO_CLIENT_ID || !process.env.CAKTO_CLIENT_SECRET || process.env.CAKTO_CLIENT_ID === 'demo') {
+    console.log('=== CAKTO WEBHOOK RECEIVED ===');
+    console.log('CAKTO_CLIENT_ID:', process.env.CAKTO_CLIENT_ID ? 'SET' : 'MISSING');
+    console.log('CAKTO_CLIENT_SECRET:', process.env.CAKTO_CLIENT_SECRET ? 'SET' : 'MISSING');
+    
+    if (!process.env.CAKTO_CLIENT_ID || !process.env.CAKTO_CLIENT_SECRET) {
       console.log('Cakto not configured, skipping webhook');
       return res.json({ received: true, status: 'skipped' });
     }
@@ -136,23 +140,88 @@ async function createPendingUser(orderId, email, whatsapp, productName, amount) 
   console.log(`Created pending user/order for email: ${email}`);
 }
 
-router.get('/create-webhook', async (req, res) => {
+router.get('/test', async (req, res) => {
   try {
-    const axios = require('axios');
-    const qs = require('querystring');
-    
-    const tokenRes = await axios.post(
-      process.env.CAKTO_BASE_URL + '/public_api/token/',
-      qs.stringify({
-        client_id: process.env.CAKTO_CLIENT_ID,
-        client_secret: process.env.CAKTO_CLIENT_SECRET
-      }),
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
-    );
-    
-    res.json({ success: true, token: tokenRes.data.access_token?.substring(0, 20) + '...', expires: tokenRes.data.expires_in });
+    console.log('GET /test called');
+    res.json({ success: true, message: 'Test route works' });
   } catch (err) {
-    res.status(500).json({ error: err.message, data: err.response?.data });
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/test', express.json(), async (req, res) => {
+  try {
+    const { orderId, email, productName, amount } = req.body;
+    
+    const mockEvent = {
+      event: 'order.completed',
+      order_id: orderId,
+      order: {
+        id: orderId,
+        customer: { email: email || 'test@example.com', phone: '11999999999' },
+        items: [{ product: { name: productName || '5 proxies' } }],
+        total: amount || 100
+      }
+    };
+    
+    console.log('=== TEST WEBHOOK ===');
+    console.log('Mock event:', JSON.stringify(mockEvent, null, 2));
+    
+    await handleSuccessfulPayment(orderId, mockEvent);
+    
+    res.json({ success: true, message: 'Test webhook processed' });
+  } catch (err) {
+    console.error('Test webhook error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/create-checkout', express.json(), async (req, res) => {
+  try {
+    const { proxyCount, email, whatsapp } = req.body;
+    
+    if (!proxyCount || proxyCount < 1) {
+      return res.status(400).json({ error: 'Quantidade de proxies inválida' });
+    }
+
+    const pricePerProxy = 59.90;
+    const totalPrice = pricePerProxy * proxyCount;
+    const productName = `${proxyCount} proxy${proxyCount > 1 ? 's' : ''} HTTP Premium`;
+
+    console.log('=== CRIANDO CHECKOUT ===');
+    console.log('Proxy count:', proxyCount);
+    console.log('Total price:', totalPrice);
+
+    const checkoutData = {
+      items: [{
+        name: productName,
+        quantity: 1,
+        price: totalPrice,
+        is_variable: false
+      }],
+      customer: {
+        email: email || '',
+        phone: whatsapp || ''
+      },
+      configs: {
+        redirect_after_payment: true,
+        redirect_url: `${process.env.APP_URL}/portal.html`,
+        notification_url: `${process.env.APP_URL}/api/cakto/webhook`
+      }
+    };
+
+    const checkout = await Cakto.createCheckout(checkoutData);
+    
+    console.log('Checkout criado:', checkout.id);
+    
+    res.json({ 
+      success: true, 
+      checkoutUrl: checkout.url,
+      checkoutId: checkout.id 
+    });
+  } catch (err) {
+    console.error('Create checkout error:', err.response?.data || err.message);
+    res.status(500).json({ error: err.message, details: err.response?.data });
   }
 });
 
