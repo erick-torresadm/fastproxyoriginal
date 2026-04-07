@@ -1837,16 +1837,19 @@
                 });
                 
                 const data = await response.json();
+                console.log('Checkout response:', data);
                 
                 if (data.success && data.checkoutUrl) {
+                    console.log('Redirecting to:', data.checkoutUrl);
                     window.location.href = data.checkoutUrl;
                 } else {
-                    alert('Erro: ' + (data.error || 'Falha ao criar checkout'));
+                    alert('Erro: ' + (data.error || data.details || 'Falha ao criar checkout'));
                     btn.disabled = false;
                     btn.textContent = 'Comprar Agora';
                 }
             } catch (err) {
-                alert('Erro de conexão. Tente novamente.');
+                console.error('Checkout error:', err);
+                alert('Erro de conexão: ' + err.message);
                 btn.disabled = false;
                 btn.textContent = 'Comprar Agora';
             }
