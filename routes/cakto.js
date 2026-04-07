@@ -184,13 +184,14 @@ router.post('/create-checkout', express.json(), async (req, res) => {
       return res.status(400).json({ error: 'Quantidade de proxies inválida' });
     }
 
-    const pricePerProxy = 59.90;
+    const pricePerProxy = 29.90;
     const totalPrice = pricePerProxy * proxyCount;
-    const productName = `${proxyCount} proxy${proxyCount > 1 ? 's' : ''} HTTP Premium`;
+    const productName = `${proxyCount} proxy${proxyCount > 1 ? 's' : ''} IPv6 Premium`;
 
     console.log('=== CRIANDO CHECKOUT ===');
     console.log('Proxy count:', proxyCount);
     console.log('Total price:', totalPrice);
+    console.log('Email:', email);
 
     const checkoutData = {
       items: [{
@@ -210,6 +211,8 @@ router.post('/create-checkout', express.json(), async (req, res) => {
       }
     };
 
+    console.log('Checkout data:', JSON.stringify(checkoutData, null, 2));
+    
     const checkout = await Cakto.createCheckout(checkoutData);
     
     console.log('Checkout criado:', checkout.id);
