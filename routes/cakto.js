@@ -250,6 +250,47 @@ router.get('/test-create-offer', async (req, res) => {
   }
 });
 
+router.get('/test-create-checkout/:offerId', async (req, res) => {
+  try {
+    const { offerId } = req.params;
+    console.log('Testing checkout creation for offer:', offerId);
+    
+    const checkoutData = {
+      offer: offerId,
+      email: 'test@test.com',
+      customer_data: {
+        email: 'test@test.com',
+        phone: '11999999999'
+      },
+      extra_data: {
+        test: true
+      }
+    };
+    
+    console.log('Checkout data:', JSON.stringify(checkoutData, null, 2));
+    
+    const checkout = await Cakto.createCheckout(checkoutData);
+    
+    console.log('Checkout created:', JSON.stringify(checkout, null, 2));
+    
+    res.json({
+      success: true,
+      checkout: checkout
+    });
+  } catch (err) {
+    console.error('Test checkout error:', err.message);
+    console.error('Response:', err.response?.data);
+    console.error('Status:', err.response?.status);
+    
+    res.status(500).json({
+      success: false,
+      error: err.message,
+      details: err.response?.data,
+      status: err.response?.status
+    });
+  }
+});
+
 router.post('/webhook', express.json(), async (req, res) => {
   try {
     console.log('=== WEBHOOK RECEIVED ===');
