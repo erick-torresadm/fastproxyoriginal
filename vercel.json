@@ -14,6 +14,7 @@
     { "src": "/api/(.*)", "dest": "server.js" },
     { "src": "/portal.html", "dest": "public/portal.html" },
     { "src": "/admin.html", "dest": "public/admin.html" },
+    { "src": "/cancel.html", "dest": "public/cancel.html" },
     { "src": "/(.*)", "dest": "public/index.html" }
   ],
   "env": {

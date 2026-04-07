@@ -213,7 +213,8 @@
                                         <th class="px-4 py-3">Proxy</th>
                                         <th class="px-4 py-3">Tier</th>
                                         <th class="px-4 py-3">Status</th>
-                                        <th class="px-4 py-3">Criado</th>
+                                        <th class="px-4 py-3">Usuário</th>
+                                        <th class="px-4 py-3">Expira</th>
                                         <th class="px-4 py-3 text-center">Ações</th>
                                     </tr>
                                 </thead>
@@ -257,10 +258,10 @@
     </div>
 
     <!-- Modal -->
-    <div id="modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 p-4">
-        <div class="card rounded-2xl p-6 w-full max-w-md">
+    <div id="modal" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-50 p-4" onclick="closeModal()">
+        <div class="bg-zinc-900 border border-white/20 rounded-2xl p-6 w-full max-w-md" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold gradient-text" id="modal-title"></h3>
+                <h3 class="text-xl font-bold text-white" id="modal-title"></h3>
                 <button onclick="closeModal()" class="text-white/40 hover:text-white"><i class="fas fa-times"></i></button>
             </div>
             <div id="modal-content"></div>
@@ -420,11 +421,16 @@
                         <td class="px-4 py-3 w-10"><input type="checkbox" class="proxy-checkbox w-4 h-4 accent-green-500" value="${p._id}"></td>
                         <td class="px-4 py-3 font-mono text-sm">${p.username}:${p.password}@${p.ip}:${p.port}</td>
                         <td class="px-4 py-3"><span class="px-2 py-1 rounded text-xs ${tierColors[p.tier] || 'bg-gray-500/20 text-gray-400'}">${p.tier || 'basic'}</span></td>
-                        <td class="px-4 py-3 text-sm ${p.status === 'available' ? 'text-green-400' : 'text-blue-400'}">${p.status === 'available' ? 'Disponível' : 'Ativo'}</td>
-                        <td class="px-4 py-3 text-sm text-white/50">${new Date(p.createdAt).toLocaleDateString('pt-BR')}</td>
+                        <td class="px-4 py-3 text-sm ${p.status === 'available' ? 'text-green-400' : 'text-blue-400'}">${p.status === 'available' ? 'Disponível' : p.status === 'active' ? 'Ativo' : 'Expirado'}</td>
+                        <td class="px-4 py-3 text-sm">
+                            ${p.userId ? `<div class="text-white">${p.userId.name || 'Usuário'}</div><div class="text-white/50 text-xs">${p.userId.email || ''}</div>` : '<span class="text-white/30">-</span>'}
+                        </td>
+                        <td class="px-4 py-3 text-sm ${p.expiresAt ? (new Date(p.expiresAt) < new Date() ? 'text-red-400' : 'text-white/50') : 'text-white/30'}">
+                            ${p.expiresAt ? new Date(p.expiresAt).toLocaleDateString('pt-BR') : '-'}
+                        </td>
                         <td class="px-4 py-3 text-center">
-                            <button onclick="allocateThisProxy('${p._id}', '${p.username}:${p.password}@${p.ip}:${p.port}')" class="text-green-400 hover:text-green-300 mr-2" title="Vincular a usuário"><i class="fas fa-link"></i></button>
-                            <button onclick="editProxyStatus('${p._id}', '${p.status}')" class="text-blue-400 hover:text-blue-300 mr-2" title="Mudar status"><i class="fas fa-edit"></i></button>
+                            <button onclick="allocateThisProxy('${p._id}', '${p.username}:${p.password}@${p.ip}:${p.port}')" class="text-green-400 hover:text-green-300 mr-2" title="Vincular"><i class="fas fa-link"></i></button>
+                            <button onclick="editProxyStatus('${p._id}', '${p.status}')" class="text-blue-400 hover:text-blue-300 mr-2" title="Status"><i class="fas fa-edit"></i></button>
                             <button onclick="deleteProxy('${p._id}')" class="text-red-400 hover:text-red-300" title="Excluir"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>`).join('');
@@ -488,18 +494,34 @@
                     return;
                 }
                 
-                const userOptions = users.map(u => `<option value="${u._id}">${u.name} (${u.email})</option>`).join('');
+                const userList = users.map(u => `<div class="user-option flex items-center justify-between p-3 hover:bg-white/5 rounded-lg cursor-pointer transition" onclick="selectUser('${u._id}', '${u.name}', '${u.email}', '${u.whatsapp || ''}')">
+                    <div>
+                        <div class="font-medium text-white">${u.name}</div>
+                        <div class="text-sm text-white/50">${u.email}</div>
+                        ${u.whatsapp ? `<div class="text-xs text-green-400">${u.whatsapp}</div>` : ''}
+                    </div>
+                    <div class="text-xs text-white/30">${u.proxyCount || 0} proxies</div>
+                </div>`).join('');
                 
                 document.getElementById('modal').classList.remove('hidden');
                 document.getElementById('modal-title').textContent = 'Vincular Proxy';
                 document.getElementById('modal-content').innerHTML = `
                     <div class="space-y-4">
-                        <div class="p-3 bg-black/30 rounded-lg font-mono text-sm text-green-400">${proxyStr}</div>
+                        <div class="p-3 bg-green-500/10 border border-green-500/30 rounded-lg font-mono text-sm text-green-400">${proxyStr}</div>
                         <div>
-                            <label class="block text-sm text-white/50 mb-2">Selecionar Usuário</label>
-                            <select id="allocate-user" class="input-field w-full rounded-xl px-4 py-3 text-white">
-                                ${userOptions}
-                            </select>
+                            <input type="text" id="user-search" placeholder="Buscar por nome, email ou WhatsApp..." class="input-field w-full rounded-xl px-4 py-3 text-white" oninput="filterUsers()">
+                        </div>
+                        <div id="user-list" class="max-h-60 overflow-y-auto space-y-1">
+                            ${userList}
+                        </div>
+                        <div id="selected-user" class="hidden p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <div class="font-medium text-white" id="sel-user-name"></div>
+                                    <div class="text-sm text-white/50" id="sel-user-email"></div>
+                                </div>
+                                <button onclick="clearUser()" class="text-white/50 hover:text-white"><i class="fas fa-times"></i></button>
+                            </div>
                         </div>
                         <div>
                             <label class="block text-sm text-white/50 mb-2">Status</label>
@@ -509,12 +531,36 @@
                                 <option value="expired">Expirado</option>
                             </select>
                         </div>
+                        <input type="hidden" id="allocate-user-id">
                         <button onclick="confirmAllocate('${proxyId}')" class="btn-primary w-full py-3 rounded-xl font-semibold text-white">
                             <i class="fas fa-link mr-2"></i>Vincular
                         </button>
                     </div>
                 `;
             } catch (err) { showToast('Erro', 'error'); }
+        }
+
+        function filterUsers() {
+            const search = document.getElementById('user-search').value.toLowerCase();
+            const options = document.querySelectorAll('.user-option');
+            options.forEach(opt => {
+                const text = opt.innerText.toLowerCase();
+                opt.classList.toggle('hidden', !text.includes(search));
+            });
+        }
+
+        function selectUser(id, name, email, whatsapp) {
+            document.getElementById('allocate-user-id').value = id;
+            document.getElementById('sel-user-name').textContent = name;
+            document.getElementById('sel-user-email').textContent = email;
+            document.getElementById('user-list').classList.add('hidden');
+            document.getElementById('selected-user').classList.remove('hidden');
+        }
+
+        function clearUser() {
+            document.getElementById('allocate-user-id').value = '';
+            document.getElementById('user-list').classList.remove('hidden');
+            document.getElementById('selected-user').classList.add('hidden');
         }
 
         async function confirmAllocate(proxyId) {

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastProxy - Cancelamento</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4', 100: '#dcfce7', 200: '#bbf7d0', 300: '#86efac', 400: '#4ade80',
+                            500: '#22c55e', 600: '#16a34a', 700: '#15803d', 800: '#166534', 900: '#14532d',
+                        }
+                    },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background: #09090b; color: #fff; font-family: 'Inter', sans-serif; min-height: 100vh; }
+        .gradient-text { background: linear-gradient(135deg, #22c55e, #16a34a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .gradient-bg { background: linear-gradient(135deg, #16a34a, #22c55e); }
+        .btn-primary { background: linear-gradient(135deg, #16a34a, #22c55e); }
+        .btn-primary:hover { opacity: 0.9; }
+    </style>
+</head>
+<body class="bg-zinc-950 flex items-center justify-center">
+    <div class="w-full max-w-md mx-auto p-6">
+        <div class="text-center mb-8">
+            <a href="/">
+                <img src="https://i.ibb.co/SwQ6ksRy/LOGO-FAST-PROXY.png" alt="FastProxy" class="h-12 mx-auto mb-6">
+            </a>
+            <h1 class="text-2xl font-bold text-white mb-2">Cancelar Assinatura</h1>
+            <p class="text-white/50">Tem certeza que deseja cancelar sua assinatura?</p>
+        </div>
+
+        <div id="login-section" class="space-y-4">
+            <div>
+                <label class="block text-sm text-white/50 mb-2">Email</label>
+                <input type="email" id="login-email" required class="w-full bg-zinc-900 border border-white/10 rounded-xl px-4 py-3 text-white" placeholder="seu@email.com">
+            </div>
+            <div>
+                <label class="block text-sm text-white/50 mb-2">Senha</label>
+                <input type="password" id="login-password" required class="w-full bg-zinc-900 border border-white/10 rounded-xl px-4 py-3 text-white" placeholder="••••••••">
+            </div>
+            <button onclick="login()" class="btn-primary w-full py-3 rounded-xl font-semibold text-white">
+                Continuar
+            </button>
+        </div>
+
+        <div id="cancel-section" class="hidden space-y-4">
+            <div class="bg-zinc-900 border border-white/10 rounded-xl p-4">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-white/50">Plano</span>
+                    <span class="text-white font-medium" id="user-plan">-</span>
+                </div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-white/50">Proxies</span>
+                    <span class="text-white" id="user-proxies">0</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-white/50">Expira em</span>
+                    <span class="text-white" id="user-expires">-</span>
+                </div>
+            </div>
+
+            <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
+                <h3 class="text-red-400 font-medium mb-2">Esta ação não pode ser desfeita</h3>
+                <p class="text-sm text-white/50">Se confirmar, você perderá acesso aos seus proxies imediatamente.</p>
+            </div>
+
+            <button onclick="confirmCancel()" class="bg-red-600 hover:bg-red-500 w-full py-3 rounded-xl font-semibold text-white">
+                Confirmar Cancelamento
+            </button>
+            <a href="portal.html" class="block text-center text-white/50 hover:text-white py-2">
+                Voltar
+            </a>
+        </div>
+
+        <div id="success-section" class="hidden text-center">
+            <div class="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-check text-2xl text-green-400"></i>
+            </div>
+            <h2 class="text-xl font-bold text-white mb-2">Cancelamento Realizado</h2>
+            <p class="text-white/50 mb-6">Sua assinatura foi cancelada com sucesso.</p>
+            <a href="/" class="btn-primary inline-block px-6 py-3 rounded-xl font-semibold text-white">
+                Voltar ao Início
+            </a>
+        </div>
+
+        <p class="text-center text-white/30 text-sm mt-8">
+            © 2026 FastProxy. Todos os direitos reservados.
+        </p>
+    </div>
+
+    <script>
+        const API_URL = '';
+        let token = localStorage.getItem('fastproxy_token');
+        let userEmail = '';
+
+        async function login() {
+            try {
+                const res = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: document.getElementById('login-email').value,
+                        password: document.getElementById('login-password').value
+                    })
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    token = data.data.token;
+                    userEmail = data.data.user.email;
+                    localStorage.setItem('fastproxy_token', token);
+                    
+                    document.getElementById('login-section').classList.add('hidden');
+                    document.getElementById('cancel-section').classList.remove('hidden');
+                    
+                    loadUserData();
+                } else {
+                    alert(data.message || 'Erro ao fazer login');
+                }
+            } catch (err) {
+                alert('Erro de conexão');
+            }
+        }
+
+        async function loadUserData() {
+            try {
+                const res = await fetch(`${API_URL}/api/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    document.getElementById('user-proxies').textContent = data.data.user.proxyCount || '0';
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function confirmCancel() {
+            if (!confirm('Tem certeza que deseja cancelar?')) return;
+            
+            alert('Funcionalidade em desenvolvimento. Entre em contato com o suporte.');
+        }
+
+        if (token) {
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('cancel-section').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
