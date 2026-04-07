@@ -145,35 +145,46 @@ app.get('/api/health', async (req, res) => {
 
 app.get('/api/setup', async (req: any, res: any) => {
   try {
+    console.log('Iniciando setup...');
     await connectDB();
+    console.log('Conectado ao MongoDB');
+    
+    // Recriar modelos para garantir
+    const UserModel = mongoose.models.User || mongoose.model('User', userSchema);
+    const PlanModel = mongoose.models.Plan || mongoose.model('Plan', planSchema);
+    
     const plans = [
       { name: 'Starter', tier: 'starter', price: 47, proxyCount: 5 },
       { name: 'Business', tier: 'business', price: 97, proxyCount: 20 },
       { name: 'Enterprise', tier: 'enterprise', price: 197, proxyCount: 50 }
     ];
-    await Plan.deleteMany({});
-    await Plan.insertMany(plans);
     
-    const adminExists = await User.findOne({ email: 'admin@fastproxy.com' });
+    await PlanModel.deleteMany({});
+    await PlanModel.insertMany(plans);
+    console.log('Planos inseridos');
+    
+    const adminExists = await UserModel.findOne({ email: 'admin@fastproxy.com' });
     if (!adminExists) {
-      await User.create({
+      await UserModel.create({
         name: 'Admin',
         email: 'admin@fastproxy.com',
         password: 'admin123',
         role: 'admin'
       });
-      res.json({ success: true, message: 'Admin e planos criados!', admin: 'admin@fastproxy.com', password: 'admin123' });
+      console.log('Admin criado');
+      res.json({ success: true, message: 'Setup concluído!', admin: 'admin@fastproxy.com', password: 'admin123' });
     } else {
-      res.json({ success: true, message: 'Admin e planos já existem!' });
+      res.json({ success: true, message: 'Setup já estava completo!' });
     }
   } catch (error: any) {
     console.error('Setup error:', error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: error.message, stack: error.stack });
   }
 });
 
 app.post('/api/auth/register', limiter, async (req: any, res: any) => {
   try {
+    await connectDB();
     const name = sanitize(req.body.name);
     const email = sanitize(req.body.email).toLowerCase();
     const password = req.body.password;
@@ -198,6 +209,7 @@ app.post('/api/auth/register', limiter, async (req: any, res: any) => {
 
 app.post('/api/auth/login', authLimiter, async (req: any, res: any) => {
   try {
+    await connectDB();
     const email = sanitize(req.body.email || '').toLowerCase();
     const password = req.body.password;
     
@@ -229,6 +241,7 @@ app.post('/api/auth/login', authLimiter, async (req: any, res: any) => {
 
 app.get('/api/auth/me', authenticate, async (req: any, res: any) => {
   try {
+    await connectDB();
     const user = await User.findById(req.user.userId);
     if (!user) return res.status(404).json({ success: false, message: 'Usuário não encontrado' });
     res.json({ success: true, data: { user: { id: user._id, name: user.name, email: user.email, whatsapp: user.whatsapp, role: user.role } } });
@@ -239,19 +252,22 @@ app.get('/api/auth/me', authenticate, async (req: any, res: any) => {
 
 app.get('/api/plans', async (req: any, res: any) => {
   try {
+    await connectDB();
     const plans = await Plan.find({ isActive: true }).sort({ price: 1 });
     res.json({ success: true, data: { plans } });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Erro interno' });
+  } catch (error: any) {
+    console.error('Plans error:', error.message);
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
 app.post('/api/plans', authenticate, adminOnly, async (req: any, res: any) => {
   try {
+    await connectDB();
     const plan = await Plan.create(req.body);
     res.status(201).json({ success: true, data: { plan } });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Erro interno' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
@@ -265,26 +281,15 @@ app.post('/api/plans/seed', async (req: any, res: any) => {
     ];
     await Plan.deleteMany({});
     await Plan.insertMany(plans);
-    
-    const adminExists = await User.findOne({ email: 'admin@fastproxy.com' });
-    if (!adminExists) {
-      await User.create({
-        name: 'Admin',
-        email: 'admin@fastproxy.com',
-        password: 'admin123',
-        role: 'admin'
-      });
-    }
-    
-    res.json({ success: true, message: 'Planos e admin criados!', data: { count: plans.length } });
+    res.json({ success: true, message: 'Planos criados', data: { count: plans.length } });
   } catch (error: any) {
-    console.error('Seed error:', error.message);
-    res.status(500).json({ success: false, message: 'Erro interno' });
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
 app.get('/api/proxies', authenticate, adminOnly, async (req: any, res: any) => {
   try {
+    await connectDB();
     const { tier, status } = req.query;
     const query: any = {};
     if (tier) query.tier = tier;
@@ -292,32 +297,35 @@ app.get('/api/proxies', authenticate, adminOnly, async (req: any, res: any) => {
     
     const proxies = await Proxy.find(query).populate('assignedTo', 'name email').sort({ createdAt: -1 });
     res.json({ success: true, data: { proxies } });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Erro interno' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
 app.get('/api/proxies/my', authenticate, async (req: any, res: any) => {
   try {
+    await connectDB();
     const proxies = await Proxy.find({ assignedTo: req.user.userId, status: 'active' }).populate('planId', 'name');
     res.json({ success: true, data: { proxies } });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Erro interno' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
 app.delete('/api/proxies/:id', authenticate, adminOnly, async (req: any, res: any) => {
   try {
+    await connectDB();
     const proxy = await Proxy.findByIdAndDelete(req.params.id);
     if (!proxy) return res.status(404).json({ success: false, message: 'Proxy não encontrado' });
     res.json({ success: true, message: 'Proxy excluído' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Erro interno' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
 app.post('/api/proxies/bulk', limiter, authenticate, adminOnly, async (req: any, res: any) => {
   try {
+    await connectDB();
     const { proxies } = req.body;
     if (!proxies || !Array.isArray(proxies)) {
       return res.status(400).json({ success: false, message: 'Proxies inválidos' });
@@ -355,29 +363,32 @@ app.post('/api/proxies/bulk', limiter, authenticate, adminOnly, async (req: any,
 
 app.get('/api/orders', authenticate, adminOnly, async (req: any, res: any) => {
   try {
+    await connectDB();
     const orders = await Order.find()
       .populate('userId', 'name email whatsapp')
       .populate('planId', 'name tier')
       .sort({ createdAt: -1 });
     res.json({ success: true, data: { orders } });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Erro interno' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
 app.get('/api/orders/my', authenticate, async (req: any, res: any) => {
   try {
+    await connectDB();
     const orders = await Order.find({ userId: req.user.userId })
       .populate('planId', 'name tier proxyCount')
       .sort({ createdAt: -1 });
     res.json({ success: true, data: { orders } });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Erro interno' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
 app.post('/api/orders', authenticate, async (req: any, res: any) => {
   try {
+    await connectDB();
     const { planId } = req.body;
     
     const plan = await Plan.findById(planId);
@@ -390,14 +401,15 @@ app.post('/api/orders', authenticate, async (req: any, res: any) => {
     });
     
     res.status(201).json({ success: true, data: { order } });
-  } catch (error) {
-    console.error('Create order error:', error);
-    res.status(500).json({ success: false, message: 'Erro interno' });
+  } catch (error: any) {
+    console.error('Create order error:', error.message);
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
 app.post('/api/orders/:id/approve', authenticate, adminOnly, async (req: any, res: any) => {
   try {
+    await connectDB();
     const order = await Order.findById(req.params.id).populate('planId');
     if (!order) return res.status(404).json({ success: false, message: 'Pedido não encontrado' });
     
@@ -423,19 +435,20 @@ app.post('/api/orders/:id/approve', authenticate, adminOnly, async (req: any, re
     await order.save();
     
     res.json({ success: true, data: { order, proxiesAssigned: proxyCount } });
-  } catch (error) {
-    console.error('Approve error:', error);
-    res.status(500).json({ success: false, message: 'Erro interno' });
+  } catch (error: any) {
+    console.error('Approve error:', error.message);
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
 app.post('/api/orders/:id/reject', authenticate, adminOnly, async (req: any, res: any) => {
   try {
+    await connectDB();
     const order = await Order.findByIdAndUpdate(req.params.id, { status: 'rejected' }, { new: true });
     if (!order) return res.status(404).json({ success: false, message: 'Pedido não encontrado' });
     res.json({ success: true, data: { order } });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Erro interno' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
