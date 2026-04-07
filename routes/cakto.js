@@ -213,4 +213,141 @@ router.post('/create-checkout', express.json(), async (req, res) => {
   }
 });
 
+router.post('/create-offer', express.json(), async (req, res) => {
+  try {
+    const { name, price, productId } = req.body;
+    
+    console.log('=== CREATING OFFER ===');
+    console.log('Name:', name, 'Price:', price, 'Product:', productId);
+    
+    if (!name || !price) {
+      return res.status(400).json({ error: 'Nome e preço são obrigatórios' });
+    }
+    
+    const offerData = {
+      name: name,
+      price: parseFloat(price),
+      currency: 'BRL',
+      product: productId,
+      type: 'recurring',
+      intervalType: 'month',
+      interval: 1,
+      status: 'active'
+    };
+    
+    console.log('Creating offer with data:', JSON.stringify(offerData, null, 2));
+    
+    const offer = await Cakto.createOffer(offerData);
+    console.log('Offer created:', JSON.stringify(offer, null, 2));
+    
+    res.json({
+      success: true,
+      offer: offer
+    });
+  } catch (err) {
+    console.error('Create offer error:', err.response?.data || err.message);
+    res.status(500).json({ 
+      error: err.message,
+      details: err.response?.data
+    });
+  }
+});
+
+router.post('/create-product', express.json(), async (req, res) => {
+  try {
+    const { name, description, price } = req.body;
+    
+    console.log('=== CREATING PRODUCT ===');
+    
+    const productData = {
+      name: name || 'Proxy IPv6 FastProxy',
+      description: description || 'Proxy IPv6 de alta performance',
+      price: parseFloat(price) || 29.90,
+      currency: 'BRL',
+      status: 'active'
+    };
+    
+    const product = await Cakto.createProduct(productData);
+    console.log('Product created:', JSON.stringify(product, null, 2));
+    
+    res.json({
+      success: true,
+      product: product
+    });
+  } catch (err) {
+    console.error('Create product error:', err.response?.data || err.message);
+    res.status(500).json({ 
+      error: err.message,
+      details: err.response?.data
+    });
+  }
+});
+
+router.get('/create-default-offers', async (req, res) => {
+  try {
+    console.log('=== CREATING DEFAULT OFFERS ===');
+    
+    const products = await Cakto.getProducts();
+    console.log('Existing products:', JSON.stringify(products, null, 2));
+    
+    let productId = null;
+    
+    if (products?.results?.length > 0) {
+      productId = products.results[0].id;
+      console.log('Using existing product:', productId);
+    } else {
+      const product = await Cakto.createProduct({
+        name: 'Proxy IPv6 FastProxy',
+        description: 'Proxy IPv6 de alta performance para redes sociais e múltiplas contas',
+        price: 29.90,
+        currency: 'BRL',
+        status: 'active'
+      });
+      productId = product.id;
+      console.log('Created new product:', productId);
+    }
+    
+    const createdOffers = [];
+    
+    const offerConfigs = [
+      { name: 'Proxy Mensal - FastProxy', price: 29.90 },
+      { name: 'Proxy Anual - FastProxy', price: 299.00 }
+    ];
+    
+    for (const config of offerConfigs) {
+      try {
+        const offer = await Cakto.createOffer({
+          name: config.name,
+          price: config.price,
+          currency: 'BRL',
+          product: productId,
+          type: 'recurring',
+          intervalType: 'month',
+          interval: config.price >= 100 ? 12 : 1,
+          status: 'active'
+        });
+        createdOffers.push(offer);
+        console.log('Created offer:', offer.name, offer.price);
+      } catch (offerErr) {
+        console.error('Error creating offer:', offerErr.message);
+      }
+    }
+    
+    cachedOffers = null;
+    offersCacheTime = 0;
+    
+    res.json({
+      success: true,
+      message: 'Ofertas criadas com sucesso',
+      offers: createdOffers
+    });
+  } catch (err) {
+    console.error('Create default offers error:', err.response?.data || err.message);
+    res.status(500).json({ 
+      error: err.message,
+      details: err.response?.data
+    });
+  }
+});
+
 module.exports = router;
