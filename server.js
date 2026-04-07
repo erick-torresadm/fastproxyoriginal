@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 
 console.log('=== LOADING SERVER ===');
 console.log('CAKTO_CLIENT_ID:', process.env.CAKTO_CLIENT_ID ? 'set' : 'missing');
@@ -11,17 +12,18 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-let caktoRoutes;
 try {
-  caktoRoutes = require('./routes/cakto');
+  const caktoRoutes = require('./routes/cakto');
   app.use('/api/cakto', caktoRoutes);
   console.log('✅ Cakto routes loaded');
+  console.log('Routes registered:', app._router ? app._router.stack.length : 0);
 } catch (err) {
   console.error('❌ Error loading Cakto routes:', err.message);
+  console.error('Stack:', err.stack);
 }
 
-app.get('/test-cakto', async (req, res) => {
-  res.json({ message: 'Direct test works' });
+app.get('/test', (req, res) => {
+  res.json({ message: 'Server is working' });
 });
 
 app.get('/debug/env', (req, res) => {
@@ -48,7 +50,7 @@ app.get('/debug/routes', (req, res) => {
       }
     });
   }
-  res.json({ routes });
+  res.json({ routes, stackLength: app._router ? app._router.stack.length : 0 });
 });
 
 app.get('/', (req, res) => {
