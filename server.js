@@ -12,14 +12,18 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+let caktoRoutes;
 try {
-  const caktoRoutes = require('./routes/cakto');
+  caktoRoutes = require('./routes/cakto');
+  console.log('CaktoRoutes type:', typeof caktoRoutes);
+  console.log('CaktoRoutes:', caktoRoutes);
   app.use('/api/cakto', caktoRoutes);
-  console.log('✅ Cakto routes loaded');
-  console.log('Routes registered:', app._router ? app._router.stack.length : 0);
+  console.log('✅ Cakto routes registered');
+  console.log('Routes after:', app._router ? app._router.stack.length : 0);
 } catch (err) {
   console.error('❌ Error loading Cakto routes:', err.message);
   console.error('Stack:', err.stack);
+  console.error('Err:', err);
 }
 
 app.get('/test', (req, res) => {
