@@ -287,15 +287,16 @@ router.get('/create-default-offers', async (req, res) => {
   try {
     console.log('=== CREATING DEFAULT OFFERS ===');
     
-    const products = await Cakto.getProducts();
-    console.log('Existing products:', JSON.stringify(products, null, 2));
-    
     let productId = null;
+    
+    const products = await Cakto.getProducts();
+    console.log('Products response:', JSON.stringify(products, null, 2));
     
     if (products?.results?.length > 0) {
       productId = products.results[0].id;
       console.log('Using existing product:', productId);
     } else {
+      console.log('No products found, creating new product...');
       const product = await Cakto.createProduct({
         name: 'Proxy IPv6 FastProxy',
         description: 'Proxy IPv6 de alta performance para redes sociais e múltiplas contas',
@@ -304,7 +305,7 @@ router.get('/create-default-offers', async (req, res) => {
         status: 'active'
       });
       productId = product.id;
-      console.log('Created new product:', productId);
+      console.log('Created new product:', JSON.stringify(product, null, 2));
     }
     
     const createdOffers = [];
@@ -316,20 +317,27 @@ router.get('/create-default-offers', async (req, res) => {
     
     for (const config of offerConfigs) {
       try {
-        const offer = await Cakto.createOffer({
+        console.log(`Creating offer: ${config.name} - R$ ${config.price}`);
+        
+        const offerData = {
           name: config.name,
           price: config.price,
           currency: 'BRL',
           product: productId,
           type: 'recurring',
-          intervalType: 'month',
-          interval: config.price >= 100 ? 12 : 1,
+          intervalType: config.price >= 100 ? 'year' : 'month',
+          interval: config.price >= 100 ? 1 : 1,
           status: 'active'
-        });
+        };
+        
+        console.log('Offer data:', JSON.stringify(offerData, null, 2));
+        
+        const offer = await Cakto.createOffer(offerData);
         createdOffers.push(offer);
-        console.log('Created offer:', offer.name, offer.price);
+        console.log('Created offer:', JSON.stringify(offer, null, 2));
       } catch (offerErr) {
-        console.error('Error creating offer:', offerErr.message);
+        console.error('Error creating offer:', offerErr.response?.data || offerErr.message);
+        createdOffers.push({ error: offerErr.message, config: config });
       }
     }
     
