@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastProxy - Painel Admin</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#faf5ff', 100: '#f3e8ff', 200: '#e9d5ff', 300: '#d8b4fe', 400: '#c084fc',
+                            500: '#a855f7', 600: '#9333ea', 700: '#7e22ce', 800: '#6b21a8', 900: '#581c87', 950: '#2e1065',
+                        }
+                    },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --bg-primary: #09090b;
+            --bg-secondary: rgba(24, 24, 27, 0.5);
+            --bg-card: rgba(24, 24, 27, 0.9);
+            --text-primary: #ffffff;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.15);
+        }
+        * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; }
+        .gradient-text { background: linear-gradient(135deg, #c084fc, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .gradient-bg { background: linear-gradient(135deg, #9333ea, #4f46e5); }
+        .card { background: var(--bg-card); border: 1px solid var(--border-color); backdrop-filter: blur(20px); }
+        .input-field { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); transition: all 0.3s; }
+        .input-field:focus { border-color: #9333ea; box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.2); outline: none; }
+        .btn-primary { background: linear-gradient(135deg, #9333ea, #4f46e5); transition: all 0.3s; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(147, 51, 234, 0.3); }
+        .glow { box-shadow: 0 0 60px rgba(147, 51, 234, 0.2); }
+        .spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .menu-dropdown { animation: fadeIn 0.2s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full z-50 bg-black/50 backdrop-blur-xl border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="flex items-center gap-3 hover:opacity-80 transition">
+                    <img src="img/LOGO FAST PROXY.png" alt="FastProxy" class="h-10 w-auto object-contain">
+                    <span class="text-xl font-bold gradient-text">FastProxy</span>
+                </a>
+                <span class="text-xs px-2 py-1 rounded-full bg-purple-500/20 text-purple-400">Admin</span>
+            </div>
+            
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex items-center gap-2">
+                <button onclick="toggleMenu('proxies')" class="px-4 py-2 rounded-xl text-sm font-medium bg-purple-500/20 text-purple-400 flex items-center gap-2">
+                    <i class="fas fa-shield-alt"></i> Proxies <i class="fas fa-chevron-down text-xs"></i>
+                </button>
+                <button onclick="toggleMenu('pedidos')" class="px-4 py-2 rounded-xl text-sm font-medium text-white/50 hover:bg-white/5 flex items-center gap-2">
+                    <i class="fas fa-shopping-cart"></i> Pedidos <i class="fas fa-chevron-down text-xs"></i>
+                </button>
+                <button onclick="toggleMenu('clientes')" class="px-4 py-2 rounded-xl text-sm font-medium text-white/50 hover:bg-white/5 flex items-center gap-2">
+                    <i class="fas fa-users"></i> Clientes <i class="fas fa-chevron-down text-xs"></i>
+                </button>
+                <button onclick="toggleMenu('planos')" class="px-4 py-2 rounded-xl text-sm font-medium text-white/50 hover:bg-white/5 flex items-center gap-2">
+                    <i class="fas fa-box"></i> Planos <i class="fas fa-chevron-down text-xs"></i>
+                </button>
+            </div>
+            
+            <!-- User Info -->
+            <div id="nav-info" class="hidden items-center gap-4">
+                <span id="admin-user" class="text-white/60"></span>
+                <button onclick="logout()" class="text-sm text-white/40 hover:text-white transition">Sair</button>
+            </div>
+        </div>
+        
+        <!-- Dropdown Proxies -->
+        <div id="menu-proxies" class="hidden absolute left-0 right-0 top-full bg-black/95 backdrop-blur-xl border-b border-white/10">
+            <div class="max-w-7xl mx-auto px-6 py-4 grid md:grid-cols-3 gap-4">
+                <button onclick="showTab('proxies'); closeMenus()" class="block text-left p-4 rounded-xl hover:bg-white/5 transition">
+                    <h4 class="font-semibold text-purple-400 mb-1"><i class="fas fa-list mr-2"></i>Todos os Proxies</h4>
+                    <p class="text-sm text-white/50">Ver todos os proxies em estoque</p>
+                </button>
+                <button onclick="openCreateProxyModal(); closeMenus()" class="block text-left p-4 rounded-xl hover:bg-white/5 transition">
+                    <h4 class="font-semibold text-green-400 mb-1"><i class="fas fa-plus-circle mr-2"></i>Criar Proxy</h4>
+                    <p class="text-sm text-white/50">Adicionar novo proxy ao estoque</p>
+                </button>
+                <button onclick="openBulkProxyModal(); closeMenus()" class="block text-left p-4 rounded-xl hover:bg-white/5 transition">
+                    <h4 class="font-semibold text-blue-400 mb-1"><i class="fas fa-upload mr-2"></i>Upload Bulk</h4>
+                    <p class="text-sm text-white/50">Importar múltiplos proxies</p>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Dropdown Pedidos -->
+        <div id="menu-pedidos" class="hidden absolute left-0 right-0 top-full bg-black/95 backdrop-blur-xl border-b border-white/10">
+            <div class="max-w-7xl mx-auto px-6 py-4">
+                <button onclick="showTab('orders'); closeMenus()" class="block w-full text-left p-4 rounded-xl hover:bg-white/5 transition">
+                    <h4 class="font-semibold text-purple-400 mb-1"><i class="fas fa-list mr-2"></i>Ver Pedidos</h4>
+                    <p class="text-sm text-white/50">Gerenciar pedidos pendentes e aprovados</p>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Dropdown Clientes -->
+        <div id="menu-clientes" class="hidden absolute left-0 right-0 top-full bg-black/95 backdrop-blur-xl border-b border-white/10">
+            <div class="max-w-7xl mx-auto px-6 py-4 grid md:grid-cols-2 gap-4">
+                <button onclick="showTab('users'); closeMenus()" class="block text-left p-4 rounded-xl hover:bg-white/5 transition">
+                    <h4 class="font-semibold text-purple-400 mb-1"><i class="fas fa-users mr-2"></i>Todos os Clientes</h4>
+                    <p class="text-sm text-white/50">Ver lista de clientes</p>
+                </button>
+                <button onclick="openCreateUserModal(); closeMenus()" class="block text-left p-4 rounded-xl hover:bg-white/5 transition">
+                    <h4 class="font-semibold text-green-400 mb-1"><i class="fas fa-user-plus mr-2"></i>Criar Cliente</h4>
+                    <p class="text-sm text-white/50">Cadastrar novo cliente</p>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Dropdown Planos -->
+        <div id="menu-planos" class="hidden absolute left-0 right-0 top-full bg-black/95 backdrop-blur-xl border-b border-white/10">
+            <div class="max-w-7xl mx-auto px-6 py-4 grid md:grid-cols-2 gap-4">
+                <button onclick="showTab('plans'); closeMenus()" class="block text-left p-4 rounded-xl hover:bg-white/5 transition">
+                    <h4 class="font-semibold text-purple-400 mb-1"><i class="fas fa-list mr-2"></i>Ver Planos</h4>
+                    <p class="text-sm text-white/50">Gerenciar planos disponíveis</p>
+                </button>
+                <button onclick="openCreatePlanModal(); closeMenus()" class="block text-left p-4 rounded-xl hover:bg-white/5 transition">
+                    <h4 class="font-semibold text-green-400 mb-1"><i class="fas fa-plus mr-2"></i>Criar Plano</h4>
+                    <p class="text-sm text-white/50">Adicionar novo plano</p>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-16 px-6">
+        <div class="max-w-7xl mx-auto">
+            <!-- Login Section -->
+            <div id="login-section" class="max-w-md mx-auto mt-20">
+                <div class="text-center mb-8">
+                    <div class="w-20 h-20 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-4 glow">
+                        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    </div>
+                    <h1 class="text-3xl font-bold gradient-text">Painel Administrativo</h1>
+                    <p class="text-white/50 mt-2">Gerencie proxies, pedidos e clientes</p>
+                </div>
+                
+                <form onsubmit="handleLogin(event)" class="card rounded-2xl p-8 space-y-6">
+                    <div>
+                        <label class="block text-sm text-white/50 mb-2">Email</label>
+                        <input type="email" id="login-email" required value="admin@fastproxy.com" class="input-field w-full rounded-xl px-4 py-3 text-white" placeholder="admin@fastproxy.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-white/50 mb-2">Senha</label>
+                        <input type="password" id="login-password" required value="admin123" class="input-field w-full rounded-xl px-4 py-3 text-white" placeholder="••••••••">
+                    </div>
+                    <button type="submit" id="login-btn" class="btn-primary w-full py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-2">
+                        <span>Entrar</span>
+                    </button>
+                    <div id="login-error" class="hidden text-red-400 text-sm text-center p-3 rounded-xl bg-red-500/10"></div>
+                </form>
+            </div>
+
+            <!-- Main Section -->
+            <div id="main-section" class="hidden">
+                <!-- Tabs -->
+                <div class="flex gap-2 mb-8 border-b border-white/10 pb-4 overflow-x-auto">
+                    <button onclick="showTab('proxies')" id="tab-proxies" class="px-5 py-2 rounded-xl text-sm font-medium bg-purple-500/20 text-purple-400 transition whitespace-nowrap">
+                        <i class="fas fa-shield-alt mr-2"></i>Proxies
+                    </button>
+                    <button onclick="showTab('orders')" id="tab-orders" class="px-5 py-2 rounded-xl text-sm font-medium text-white/50 hover:bg-white/5 transition whitespace-nowrap">
+                        <i class="fas fa-shopping-cart mr-2"></i>Pedidos
+                    </button>
+                    <button onclick="showTab('users')" id="tab-users" class="px-5 py-2 rounded-xl text-sm font-medium text-white/50 hover:bg-white/5 transition whitespace-nowrap">
+                        <i class="fas fa-users mr-2"></i>Clientes
+                    </button>
+                    <button onclick="showTab('plans')" id="tab-plans" class="px-5 py-2 rounded-xl text-sm font-medium text-white/50 hover:bg-white/5 transition whitespace-nowrap">
+                        <i class="fas fa-box mr-2"></i>Planos
+                    </button>
+                </div>
+
+                <!-- PROXIES -->
+                <section id="section-proxies">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">Proxies</h2>
+                        <div class="flex gap-3">
+                            <button onclick="openCreateProxyModal()" class="btn-primary px-4 py-2 rounded-lg text-sm text-white">
+                                <i class="fas fa-plus mr-2"></i>Novo Proxy
+                            </button>
+                            <button onclick="loadProxies()" class="text-sm text-purple-400 hover:text-purple-300 transition"><i class="fas fa-sync-alt mr-1"></i> Atualizar</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Stats -->
+                    <div class="grid grid-cols-4 gap-4 mb-6">
+                        <div class="card rounded-xl p-4 border border-purple-500/20">
+                            <p class="text-white/50 text-sm">Total</p>
+                            <p class="text-2xl font-bold" id="stat-total">0</p>
+                        </div>
+                        <div class="card rounded-xl p-4 border border-green-500/20">
+                            <p class="text-white/50 text-sm">Disponíveis</p>
+                            <p class="text-2xl font-bold text-green-400" id="stat-available">0</p>
+                        </div>
+                        <div class="card rounded-xl p-4 border border-blue-500/20">
+                            <p class="text-white/50 text-sm">Alugados</p>
+                            <p class="text-2xl font-bold text-blue-400" id="stat-rented">0</p>
+                        </div>
+                        <div class="card rounded-xl p-4 border border-amber-500/20">
+                            <p class="text-white/50 text-sm">Expirados</p>
+                            <p class="text-2xl font-bold text-amber-400" id="stat-expired">0</p>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="flex gap-4 mb-6 flex-wrap">
+                        <select id="filter-tier" onchange="loadProxies()" class="input-field rounded-lg px-4 py-2 text-sm text-white">
+                            <option value="">Todos os Tipos</option>
+                            <option value="shared">Compartilhado</option>
+                            <option value="dedicated">Dedicado</option>
+                            <option value="premium">Premium</option>
+                        </select>
+                        <select id="filter-status" onchange="loadProxies()" class="input-field rounded-lg px-4 py-2 text-sm text-white">
+                            <option value="">Todos Status</option>
+                            <option value="available">Disponível</option>
+                            <option value="active">Ativo</option>
+                            <option value="expired">Expirado</option>
+                        </select>
+                        <input type="text" id="search-proxy" placeholder="Buscar por IP..." class="input-field rounded-lg px-4 py-2 text-sm text-white flex-1 min-w-[200px]" oninput="loadProxies()">
+                    </div>
+                    
+                    <div class="card rounded-2xl overflow-hidden">
+                        <table class="w-full">
+                            <thead class="bg-white/5">
+                                <tr class="text-left text-sm text-white/50">
+                                    <th class="px-6 py-4">IP:Port</th>
+                                    <th class="px-6 py-4">Usuário</th>
+                                    <th class="px-6 py-4">Tipo</th>
+                                    <th class="px-6 py-4">Status</th>
+                                    <th class="px-6 py-4">Cliente</th>
+                                    <th class="px-6 py-4">Expira</th>
+                                    <th class="px-6 py-4 text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="proxies-table"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- PEDIDOS -->
+                <section id="section-orders" class="hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">Pedidos</h2>
+                        <button onclick="loadOrders()" class="text-sm text-purple-400 hover:text-purple-300"><i class="fas fa-sync-alt mr-1"></i> Atualizar</button>
+                    </div>
+                    
+                    <!-- Stats -->
+                    <div class="grid grid-cols-4 gap-4 mb-6">
+                        <div class="card rounded-xl p-4 border border-purple-500/20">
+                            <p class="text-white/50 text-sm">Total</p>
+                            <p class="text-2xl font-bold" id="ostat-total">0</p>
+                        </div>
+                        <div class="card rounded-xl p-4 border border-yellow-500/20">
+                            <p class="text-white/50 text-sm">Pendentes</p>
+                            <p class="text-2xl font-bold text-yellow-400" id="ostat-pending">0</p>
+                        </div>
+                        <div class="card rounded-xl p-4 border border-green-500/20">
+                            <p class="text-white/50 text-sm">Aprovados</p>
+                            <p class="text-2xl font-bold text-green-400" id="ostat-approved">0</p>
+                        </div>
+                        <div class="card rounded-xl p-4 border border-blue-500/20">
+                            <p class="text-white/50 text-sm">Receita</p>
+                            <p class="text-2xl font-bold text-blue-400" id="ostat-revenue">R$ 0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card rounded-2xl overflow-hidden">
+                        <table class="w-full">
+                            <thead class="bg-white/5">
+                                <tr class="text-left text-sm text-white/50">
+                                    <th class="px-6 py-4">Cliente</th>
+                                    <th class="px-6 py-4">Plano</th>
+                                    <th class="px-6 py-4">Status</th>
+                                    <th class="px-6 py-4">Data</th>
+                                    <th class="px-6 py-4 text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-table"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- CLIENTES -->
+                <section id="section-users" class="hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">Clientes</h2>
+                        <div class="flex gap-3">
+                            <button onclick="openCreateUserModal()" class="btn-primary px-4 py-2 rounded-lg text-sm text-white">
+                                <i class="fas fa-plus mr-2"></i>Novo Cliente
+                            </button>
+                            <button onclick="loadUsers()" class="text-sm text-purple-400 hover:text-purple-300"><i class="fas fa-sync-alt mr-1"></i> Atualizar</button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-4 mb-6">
+                        <div class="card rounded-xl p-4 border border-purple-500/20">
+                            <p class="text-white/50 text-sm">Total</p>
+                            <p class="text-2xl font-bold" id="ustat-total">0</p>
+                        </div>
+                        <div class="card rounded-xl p-4 border border-green-500/20">
+                            <p class="text-white/50 text-sm">Ativos</p>
+                            <p class="text-2xl font-bold text-green-400" id="ustat-active">0</p>
+                        </div>
+                        <div class="card rounded-xl p-4 border border-blue-500/20">
+                            <p class="text-white/50 text-sm">Inativos</p>
+                            <p class="text-2xl font-bold text-blue-400" id="ustat-inactive">0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card rounded-2xl overflow-hidden">
+                        <table class="w-full">
+                            <thead class="bg-white/5">
+                                <tr class="text-left text-sm text-white/50">
+                                    <th class="px-6 py-4">Nome</th>
+                                    <th class="px-6 py-4">Email</th>
+                                    <th class="px-6 py-4">WhatsApp</th>
+                                    <th class="px-6 py-4">Proxy Ativos</th>
+                                    <th class="px-6 py-4">Criado em</th>
+                                    <th class="px-6 py-4 text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- PLANOS -->
+                <section id="section-plans" class="hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">Planos</h2>
+                        <div class="flex gap-3">
+                            <button onclick="openCreatePlanModal()" class="btn-primary px-4 py-2 rounded-lg text-sm text-white">
+                                <i class="fas fa-plus mr-2"></i>Novo Plano
+                            </button>
+                            <button onclick="loadPlans()" class="text-sm text-purple-400 hover:text-purple-300"><i class="fas fa-sync-alt mr-1"></i> Atualizar</button>
+                        </div>
+                    </div>
+                    
+                    <div id="plans-grid" class="grid md:grid-cols-3 gap-6"></div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="card rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold gradient-text" id="modal-title"></h3>
+                <button onclick="closeModal()" class="text-white/40 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 card rounded-xl p-4 hidden z-50">
+        <p id="toast-message" class="text-sm"></p>
+    </div>
+
+    <script>
+        const API_URL = '';
+        let token = localStorage.getItem('fastproxy_admin_token');
+
+        function showTab(tab) {
+            ['proxies', 'orders', 'users', 'plans'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.remove('bg-purple-500/20', 'text-purple-400');
+                document.getElementById(`tab-${t}`).classList.add('text-white/50', 'hover:bg-white/5');
+                document.getElementById(`section-${t}`).classList.add('hidden');
+            });
+            document.getElementById(`tab-${tab}`).classList.remove('text-white/50', 'hover:bg-white/5');
+            document.getElementById(`tab-${tab}`).classList.add('bg-purple-500/20', 'text-purple-400');
+            document.getElementById(`section-${tab}`).classList.remove('hidden');
+
+            if (tab === 'proxies') loadProxies();
+            if (tab === 'orders') loadOrders();
+            if (tab === 'users') loadUsers();
+            if (tab === 'plans') loadPlans();
+        }
+
+        function toggleMenu(menu) {
+            const menus = ['proxies', 'pedidos', 'clientes', 'planos'];
+            menus.forEach(m => document.getElementById(`menu-${m}`).classList.add('hidden'));
+            document.getElementById(`menu-${menu}`).classList.remove('hidden');
+        }
+
+        function closeMenus() {
+            ['proxies', 'pedidos', 'clientes', 'planos'].forEach(m => document.getElementById(`menu-${m}`).classList.add('hidden'));
+        }
+
+        async function api(endpoint, method = 'GET', body = null) {
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            const res = await fetch(`${API_URL}${endpoint}`, { method, headers, body: body ? JSON.stringify(body) : null });
+            return res.json();
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const msg = document.getElementById('toast-message');
+            msg.textContent = message;
+            toast.className = `fixed bottom-6 right-6 card rounded-xl p-4 z-50 ${type === 'success' ? 'border-green-500/50' : type === 'error' ? 'border-red-500/50' : 'border-white/10'}`;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('login-btn');
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            btn.innerHTML = '<i class="fas fa-spinner spinner mr-2"></i> Entrando...';
+            btn.disabled = true;
+            
+            try {
+                const data = await api('/api/auth/login', 'POST', { email, password });
+                if (data.success && data.data.user.role === 'admin') {
+                    token = data.data.token;
+                    localStorage.setItem('fastproxy_admin_token', token);
+                    document.getElementById('admin-user').textContent = data.data.user.name;
+                    document.getElementById('login-section').classList.add('hidden');
+                    document.getElementById('main-section').classList.remove('hidden');
+                    document.getElementById('nav-info').classList.remove('hidden');
+                    document.getElementById('nav-info').classList.add('flex');
+                    loadProxies();
+                } else {
+                    document.getElementById('login-error').textContent = data.message || 'Credenciais inválidas';
+                    document.getElementById('login-error').classList.remove('hidden');
+                }
+            } catch (err) {
+                document.getElementById('login-error').textContent = 'Erro de conexão';
+                document.getElementById('login-error').classList.remove('hidden');
+            } finally {
+                btn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Entrar';
+                btn.disabled = false;
+            }
+        }
+
+        function logout() {
+            token = null;
+            localStorage.removeItem('fastproxy_admin_token');
+            document.getElementById('login-section').classList.remove('hidden');
+            document.getElementById('main-section').classList.add('hidden');
+            document.getElementById('nav-info').classList.add('hidden');
+            document.getElementById('nav-info').classList.remove('flex');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
+            document.getElementById('modal').classList.remove('flex');
+        }
+
+        // ============ PROXIES ============
+        async function loadProxies() {
+            try {
+                const tier = document.getElementById('filter-tier').value;
+                const status = document.getElementById('filter-status').value;
+                const search = document.getElementById('search-proxy').value;
+                
+                let url = '/api/proxies?';
+                if (tier) url += `tier=${tier}&`;
+                if (status) url += `status=${status}&`;
+                if (search) url += `search=${search}&`;
+                
+                const data = await api(url);
+                const proxies = data.data?.proxies || [];
+                
+                document.getElementById('stat-total').textContent = proxies.length;
+                document.getElementById('stat-available').textContent = proxies.filter(p => p.status === 'available').length;
+                document.getElementById('stat-rented').textContent = proxies.filter(p => p.status === 'active').length;
+                document.getElementById('stat-expired').textContent = proxies.filter(p => p.status === 'expired').length;
+                
+                const tbody = document.getElementById('proxies-table');
+                if (proxies.length > 0) {
+                    const tierColors = { shared: 'bg-green-500/20 text-green-400', dedicated: 'bg-purple-500/20 text-purple-400', premium: 'bg-amber-500/20 text-amber-400' };
+                    const statusColors = { available: 'bg-green-500/20 text-green-400', active: 'bg-blue-500/20 text-blue-400', expired: 'bg-red-500/20 text-red-400' };
+                    const statusText = { available: 'Disponível', active: 'Ativo', expired: 'Expirado' };
+                    
+                    tbody.innerHTML = proxies.map(proxy => `
+                        <tr class="border-t border-white/5 hover:bg-white/5">
+                            <td class="px-6 py-4"><span class="text-green-400 font-mono">${proxy.ip}:${proxy.port}</span></td>
+                            <td class="px-6 py-4 text-white/70">${proxy.username}</td>
+                            <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${tierColors[proxy.tier] || tierColors.shared}">${proxy.tier?.toUpperCase()}</span></td>
+                            <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${statusColors[proxy.status]}">${statusText[proxy.status]}</span></td>
+                            <td class="px-6 py-4 text-white/50">${proxy.userId?.name || '-'}</td>
+                            <td class="px-6 py-4 text-sm text-white/40">${proxy.expiresAt ? new Date(proxy.expiresAt).toLocaleDateString('pt-BR') : '-'}</td>
+                            <td class="px-6 py-4 text-center">
+                                <button onclick="editProxy('${proxy._id}')" class="text-blue-400 hover:text-blue-300 mr-3"><i class="fas fa-edit"></i></button>
+                                <button onclick="deleteProxy('${proxy._id}')" class="text-red-400 hover:text-red-300"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-12 text-center text-white/40">Nenhum proxy encontrado</td></tr>';
+                }
+            } catch (err) { console.error('Erro:', err); }
+        }
+
+        function openCreateProxyModal() {
+            document.getElementById('modal').classList.remove('hidden');
+            document.getElementById('modal').classList.add('flex');
+            document.getElementById('modal-title').textContent = 'Criar Proxy';
+            document.getElementById('modal-content').innerHTML = `
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm text-white/50 mb-2">IP</label>
+                            <input type="text" id="proxy-ip" placeholder="177.54.146.90" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-white/50 mb-2">Porta</label>
+                            <input type="number" id="proxy-port" placeholder="11331" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm text-white/50 mb-2">Usuário</label>
+                            <input type="text" id="proxy-user" placeholder="fastproxy123" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-white/50 mb-2">Senha</label>
+                            <input type="text" id="proxy-password" placeholder="fast123" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-white/50 mb-2">Tipo</label>
+                        <select id="proxy-tier" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                            <option value="shared">Compartilhado</option>
+                            <option value="dedicated">Dedicado</option>
+                            <option value="premium">Premium</option>
+                        </select>
+                    </div>
+                    <button onclick="createProxy()" class="btn-primary w-full py-3 rounded-xl font-semibold text-white">
+                        <i class="fas fa-plus mr-2"></i>Criar Proxy
+                    </button>
+                </div>
+            `;
+        }
+
+        async function createProxy() {
+            const ip = document.getElementById('proxy-ip').value.trim();
+            const port = document.getElementById('proxy-port').value.trim();
+            const username = document.getElementById('proxy-user').value.trim();
+            const password = document.getElementById('proxy-password').value.trim();
+            const tier = document.getElementById('proxy-tier').value;
+            
+            if (!ip || !port || !username || !password) { showToast('Preencha todos os campos', 'error'); return; }
+            
+            try {
+                const data = await api('/api/proxies', 'POST', { ip, port: parseInt(port), username, password, tier });
+                if (data.success) {
+                    showToast('Proxy criado com sucesso!');
+                    closeModal();
+                    loadProxies();
+                } else { showToast(data.message || 'Erro', 'error'); }
+            } catch (err) { showToast('Erro de conexão', 'error'); }
+        }
+
+        function openBulkProxyModal() {
+            document.getElementById('modal').classList.remove('hidden');
+            document.getElementById('modal').classList.add('flex');
+            document.getElementById('modal-title').textContent = 'Upload Bulk de Proxies';
+            document.getElementById('modal-content').innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-white/50 mb-2">Tipo</label>
+                        <select id="bulk-tier" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                            <option value="shared">Compartilhado</option>
+                            <option value="dedicated">Dedicado</option>
+                            <option value="premium">Premium</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-white/50 mb-2">Cole os proxies (um por linha)</label>
+                        <p class="text-xs text-white/30 mb-2">Formato: ip:port:usuario:senha</p>
+                        <textarea id="bulk-proxies" rows="6" placeholder="177.54.146.90:11331:fastproxy123:fast123&#10;177.54.146.91:11332:fastproxy124:fast456" class="input-field w-full rounded-xl px-4 py-3 text-white font-mono text-sm"></textarea>
+                        <p id="bulk-count" class="text-sm text-white/40 mt-2">0 proxies detectados</p>
+                    </div>
+                    <button onclick="createBulkProxies()" class="btn-primary w-full py-3 rounded-xl font-semibold text-white">
+                        <i class="fas fa-upload mr-2"></i>Importar Proxies
+                    </button>
+                </div>
+            `;
+            
+            document.getElementById('bulk-proxies').addEventListener('input', function() {
+                const lines = this.value.trim().split('\n').filter(l => l.trim());
+                document.getElementById('bulk-count').textContent = `${lines.length} proxies detectados`;
+            });
+        }
+
+        async function createBulkProxies() {
+            const tier = document.getElementById('bulk-tier').value;
+            const content = document.getElementById('bulk-proxies').value.trim();
+            
+            if (!content) { showToast('Cole os proxies primeiro', 'error'); return; }
+            
+            const lines = content.split('\n').filter(l => l.trim());
+            const proxies = lines.map(line => {
+                const parts = line.split(':');
+                return { ip: parts[0], port: parseInt(parts[1]), username: parts[2], password: parts[3], tier };
+            }).filter(p => p.ip && p.port && p.username && p.password);
+            
+            try {
+                const data = await api('/api/proxies/bulk', 'POST', { proxies });
+                if (data.success) {
+                    showToast(`${proxies.length} proxies importados!`);
+                    closeModal();
+                    loadProxies();
+                } else { showToast(data.message || 'Erro', 'error'); }
+            } catch (err) { showToast('Erro de conexão', 'error'); }
+        }
+
+        async function deleteProxy(id) {
+            if (!confirm('Tem certeza que deseja excluir este proxy?')) return;
+            
+            try {
+                const data = await api(`/api/proxies/${id}`, 'DELETE');
+                if (data.success) {
+                    showToast('Proxy excluído');
+                    loadProxies();
+                } else { showToast(data.message || 'Erro', 'error'); }
+            } catch (err) { showToast('Erro de conexão', 'error'); }
+        }
+
+        // ============ PEDIDOS ============
+        async function loadOrders() {
+            try {
+                const data = await api('/api/orders');
+                const orders = data.data?.orders || [];
+                
+                document.getElementById('ostat-total').textContent = orders.length;
+                document.getElementById('ostat-pending').textContent = orders.filter(o => o.status === 'pending').length;
+                document.getElementById('ostat-approved').textContent = orders.filter(o => o.status === 'approved' || o.status === 'active').length;
+                
+                const revenue = orders.filter(o => o.status === 'active' || o.status === 'approved').reduce((sum, o) => sum + (o.planId?.price || 0), 0);
+                document.getElementById('ostat-revenue').textContent = `R$ ${revenue}`;
+                
+                const tbody = document.getElementById('orders-table');
+                if (orders.length > 0) {
+                    const statusColors = { pending: 'bg-yellow-500/20 text-yellow-400', approved: 'bg-green-500/20 text-green-400', active: 'bg-blue-500/20 text-blue-400', rejected: 'bg-red-500/20 text-red-400', expired: 'bg-gray-500/20 text-gray-400' };
+                    const statusText = { pending: 'Pendente', approved: 'Aprovado', active: 'Ativo', rejected: 'Rejeitado', expired: 'Expirado' };
+                    
+                    tbody.innerHTML = orders.map(order => `
+                        <tr class="border-t border-white/5 hover:bg-white/5">
+                            <td class="px-6 py-4"><div class="font-medium">${order.userId?.name || 'N/A'}</div><div class="text-xs text-white/40">${order.userId?.email || ''}</div></td>
+                            <td class="px-6 py-4">${order.planId?.name || 'Plano deletado'}</td>
+                            <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium ${statusColors[order.status]}">${statusText[order.status]}</span></td>
+                            <td class="px-6 py-4 text-sm text-white/40">${new Date(order.createdAt).toLocaleDateString('pt-BR')}</td>
+                            <td class="px-6 py-4 text-center">
+                                ${order.status === 'pending' ? `<button onclick="openApproveOrderModal('${order._id}')" class="text-green-400 hover:text-green-300 mr-3"><i class="fas fa-check"></i></button><button onclick="rejectOrder('${order._id}')" class="text-red-400 hover:text-red-300"><i class="fas fa-times"></i></button>` : order.status === 'approved' ? `<button onclick="allocateProxiesToOrder('${order._id}')" class="text-blue-400 hover:text-blue-300"><i class="fas fa-paper-plane"></i></button>` : '-'}
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-12 text-center text-white/40">Nenhum pedido encontrado</td></tr>';
+                }
+            } catch (err) { console.error('Erro:', err); }
+        }
+
+        function openApproveOrderModal(orderId) {
+            document.getElementById('modal').classList.remove('hidden');
+            document.getElementById('modal').classList.add('flex');
+            document.getElementById('modal-title').textContent = 'Aprovar Pedido';
+            document.getElementById('modal-content').innerHTML = `
+                <p class="text-white/50 mb-4">Selecione os proxies para alocar ao cliente:</p>
+                <div class="max-h-64 overflow-y-auto mb-4 space-y-2" id="available-proxies-list"></div>
+                <div class="flex gap-3">
+                    <button onclick="approveOrderWithProxies('${orderId}')" class="btn-primary flex-1 py-3 rounded-xl font-semibold text-white">
+                        Aprovar e Entregar
+                    </button>
+                    <button onclick="closeModal()" class="flex-1 py-3 rounded-xl font-semibold text-white/50 bg-white/5">Cancelar</button>
+                </div>
+            `;
+            
+            api('/api/proxies?status=available').then(data => {
+                const proxies = data.data?.proxies || [];
+                const list = document.getElementById('available-proxies-list');
+                list.innerHTML = proxies.map(p => `
+                    <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 cursor-pointer">
+                        <input type="checkbox" class="proxy-checkbox" value="${p._id}" data-proxy='${JSON.stringify(p)}'>
+                        <span class="text-green-400 font-mono text-sm">${p.ip}:${p.port}</span>
+                        <span class="text-xs text-white/40">${p.username}</span>
+                    </label>
+                `).join('');
+            });
+        }
+
+        async function approveOrderWithProxies(orderId) {
+            const selected = Array.from(document.querySelectorAll('.proxy-checkbox:checked')).map(cb => cb.value);
+            
+            if (selected.length === 0) { showToast('Selecione pelo menos um proxy', 'error'); return; }
+            
+            try {
+                const data = await api(`/api/orders/${orderId}/approve`, 'POST', { proxyIds: selected });
+                if (data.success) {
+                    showToast('Pedido aprovado e proxies enviados!');
+                    closeModal();
+                    loadOrders();
+                    loadProxies();
+                } else { showToast(data.message || 'Erro', 'error'); }
+            } catch (err) { showToast('Erro de conexão', 'error'); }
+        }
+
+        async function rejectOrder(orderId) {
+            if (!confirm('Tem certeza que deseja rejeitar este pedido?')) return;
+            
+            try {
+                const data = await api(`/api/orders/${orderId}/reject`, 'POST');
+                if (data.success) {
+                    showToast('Pedido rejeitado');
+                    loadOrders();
+                } else { showToast(data.message || 'Erro', 'error'); }
+            } catch (err) { showToast('Erro de conexão', 'error'); }
+        }
+
+        async function allocateProxiesToOrder(orderId) {
+            openApproveOrderModal(orderId);
+        }
+
+        // ============ CLIENTES ============
+        async function loadUsers() {
+            try {
+                const data = await api('/api/auth/users');
+                const users = data.data?.users || [];
+                
+                document.getElementById('ustat-total').textContent = users.length;
+                document.getElementById('ustat-active').textContent = users.filter(u => u.isActive).length;
+                document.getElementById('ustat-inactive').textContent = users.filter(u => !u.isActive).length;
+                
+                const tbody = document.getElementById('users-table');
+                if (users.length > 0) {
+                    tbody.innerHTML = users.map(user => `
+                        <tr class="border-t border-white/5 hover:bg-white/5">
+                            <td class="px-6 py-4 font-medium">${user.name}</td>
+                            <td class="px-6 py-4 text-white/70">${user.email}</td>
+                            <td class="px-6 py-4 text-white/50">${user.whatsapp || '-'}</td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 rounded-full text-xs font-medium ${user.proxyCount > 0 ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/40'}">
+                                    ${user.proxyCount || 0}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-white/40">${new Date(user.createdAt).toLocaleDateString('pt-BR')}</td>
+                            <td class="px-6 py-4 text-center">
+                                <button onclick="viewUserProxies('${user._id}')" class="text-purple-400 hover:text-purple-300 mr-3"><i class="fas fa-shield-alt"></i></button>
+                                <button onclick="editUser('${user._id}')" class="text-blue-400 hover:text-blue-300 mr-3"><i class="fas fa-edit"></i></button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-12 text-center text-white/40">Nenhum cliente encontrado</td></tr>';
+                }
+            } catch (err) { console.error('Erro:', err); }
+        }
+
+        function openCreateUserModal() {
+            document.getElementById('modal').classList.remove('hidden');
+            document.getElementById('modal').classList.add('flex');
+            document.getElementById('modal-title').textContent = 'Criar Cliente';
+            document.getElementById('modal-content').innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-white/50 mb-2">Nome</label>
+                        <input type="text" id="new-user-name" placeholder="Nome completo" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-white/50 mb-2">Email</label>
+                        <input type="email" id="new-user-email" placeholder="email@exemplo.com" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-white/50 mb-2">WhatsApp</label>
+                        <input type="tel" id="new-user-whatsapp" placeholder="11999999999" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-white/50 mb-2">Senha</label>
+                        <input type="password" id="new-user-password" placeholder="Senha padrão" value="cliente123" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                    </div>
+                    <button onclick="createUser()" class="btn-primary w-full py-3 rounded-xl font-semibold text-white">Criar Cliente</button>
+                </div>
+            `;
+        }
+
+        async function createUser() {
+            const name = document.getElementById('new-user-name').value.trim();
+            const email = document.getElementById('new-user-email').value.trim();
+            const whatsapp = document.getElementById('new-user-whatsapp').value.trim();
+            const password = document.getElementById('new-user-password').value;
+            
+            if (!name || !email) { showToast('Nome e email são obrigatórios', 'error'); return; }
+            
+            try {
+                const data = await api('/api/auth/register', 'POST', { name, email, password, whatsapp });
+                if (data.success) {
+                    showToast('Cliente criado com sucesso!');
+                    closeModal();
+                    loadUsers();
+                } else { showToast(data.message || 'Erro', 'error'); }
+            } catch (err) { showToast('Erro de conexão', 'error'); }
+        }
+
+        // ============ PLANOS ============
+async function loadPlans() {
+            try {
+                const data = await api('/api/plans');
+                const plans = data.data?.plans || [];
+                
+                const grid = document.getElementById('plans-grid');
+                const tierColors = {
+                    starter: { border: 'border-green-500/30', badge: 'bg-green-500/20 text-green-400' },
+                    business: { border: 'border-purple-500/30', badge: 'bg-purple-500/20 text-purple-400' },
+                    enterprise: { border: 'border-amber-500/30', badge: 'bg-amber-500/20 text-amber-400' }
+                };
+                
+                grid.innerHTML = plans.map(plan => {
+                    const c = tierColors[plan.tier] || tierColors.starter;
+                    return `
+                        <div class="card rounded-2xl p-6 border ${c.border}">
+                            <div class="flex justify-between items-start mb-4">
+                                <span class="px-3 py-1 rounded-full text-xs font-medium ${c.badge}">${plan.tier?.toUpperCase()}</span>
+                                <button onclick="deletePlan('${plan._id}')" class="text-red-400 hover:text-red-300"><i class="fas fa-trash"></i></button>
+                            </div>
+                            <h3 class="text-xl font-bold mb-1">${plan.name}</h3>
+                            <p class="text-sm text-white/50 mb-4">${plan.proxyCount} proxies</p>
+                            <div class="mb-4">
+                                <span class="text-3xl font-bold gradient-text">R$ ${plan.price}</span>
+                                <span class="text-sm text-white/40 ml-2">/mês</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) { console.error('Erro:', err); }
+        }
+
+        function openCreatePlanModal() {
+            document.getElementById('modal').classList.remove('hidden');
+            document.getElementById('modal').classList.add('flex');
+            document.getElementById('modal-title').textContent = 'Criar Plano';
+            document.getElementById('modal-content').innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-white/50 mb-2">Nome</label>
+                        <input type="text" id="plan-name" placeholder="Business" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm text-white/50 mb-2">Preço (R$)</label>
+                            <input type="number" id="plan-price" placeholder="97" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-white/50 mb-2">Qtd Proxies</label>
+                            <input type="number" id="plan-proxy-count" placeholder="20" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-white/50 mb-2">Tipo</label>
+                        <select id="plan-tier" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                            <option value="starter">Starter</option>
+                            <option value="business">Business</option>
+                            <option value="enterprise">Enterprise</option>
+                        </select>
+                    </div>
+                    <button onclick="createPlan()" class="btn-primary w-full py-3 rounded-xl font-semibold text-white">Criar Plano</button>
+                </div>
+            `;
+        }
+
+        async function createPlan() {
+            const name = document.getElementById('plan-name').value.trim();
+            const price = parseFloat(document.getElementById('plan-price').value);
+            const proxyCount = parseInt(document.getElementById('plan-proxy-count').value);
+            const tier = document.getElementById('plan-tier').value;
+            
+            if (!name || !price || !proxyCount) { showToast('Preencha todos os campos', 'error'); return; }
+            
+            try {
+                const data = await api('/api/plans', 'POST', { name, price, proxyCount, tier });
+                if (data.success) {
+                    showToast('Plano criado com sucesso!');
+                    closeModal();
+                    loadPlans();
+                } else { showToast(data.message || 'Erro', 'error'); }
+            } catch (err) { showToast('Erro de conexão', 'error'); }
+        }
+
+        async function deletePlan(id) {
+            if (!confirm('Tem certeza que deseja excluir este plano?')) return;
+            
+            try {
+                const data = await api(`/api/plans/${id}`, 'DELETE');
+                if (data.success) {
+                    showToast('Plano excluído');
+                    loadPlans();
+                } else { showToast(data.message || 'Erro', 'error'); }
+            } catch (err) { showToast('Erro de conexão', 'error'); }
+        }
+
+        // Init
+        if (token) {
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('main-section').classList.remove('hidden');
+            document.getElementById('nav-info').classList.remove('hidden');
+            document.getElementById('nav-info').classList.add('flex');
+            loadProxies();
+        }
+    </script>
+</body>
+</html>

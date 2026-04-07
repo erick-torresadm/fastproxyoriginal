@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastProxy - Proxies HTTP Premium</title>
+    <meta name="description" content="FastProxy: Proxies HTTP dedicados para suas campanhas. Alta velocidade, estabilidade e suporte 24/7.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#faf5ff', 100: '#f3e8ff', 200: '#e9d5ff', 300: '#d8b4fe', 400: '#c084fc',
+                            500: '#a855f7', 600: '#9333ea', 700: '#7e22ce', 800: '#6b21a8', 900: '#581c87', 950: '#2e1065',
+                        }
+                    },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --bg-primary: #09090b;
+            --bg-secondary: rgba(24, 24, 27, 0.5);
+            --bg-card: rgba(24, 24, 27, 0.9);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.5);
+            --text-zinc: #a1a1aa;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.15);
+            --nav-bg: rgba(9, 9, 11, 0.7);
+            --orb-1: rgba(147, 51, 234, 0.4);
+            --orb-2: rgba(99, 102, 241, 0.3);
+            --orb-3: rgba(59, 130, 246, 0.25);
+            --card-glow: rgba(147, 51, 234, 0.3);
+            --grain-opacity: 0.03;
+            --section-bg: rgba(24, 24, 27, 0.3);
+            --scrollbar-bg: #09090b;
+        }
+
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Inter', system-ui, sans-serif;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #a855f7 0%, #6366f1 50%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-bg {
+            background: 
+                radial-gradient(ellipse 80% 50% at 50% -20%, var(--orb-1), transparent),
+                radial-gradient(ellipse 60% 40% at 80% 60%, var(--orb-2), transparent),
+                radial-gradient(ellipse 50% 30% at 20% 80%, var(--orb-3), transparent);
+        }
+
+        .grid-pattern {
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        .nav-floating {
+            background: var(--nav-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .nav-link {
+            position: relative;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #a855f7, #3b82f6);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover { color: var(--text-primary); }
+        .nav-link:hover::after { width: 100%; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+            color: white;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            box-shadow: 0 4px 15px rgba(147, 51, 234, 0.3);
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(147, 51, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            animation: float-orb 8s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--orb-1), transparent 70%);
+            top: 5%;
+            left: -10%;
+        }
+
+        .orb-2 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, var(--orb-2), transparent 70%);
+            bottom: 10%;
+            right: -5%;
+            animation-delay: -3s;
+        }
+
+        .orb-3 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, var(--orb-3), transparent 70%);
+            top: 50%;
+            right: 20%;
+            animation-delay: -5s;
+        }
+
+        @keyframes float-orb {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.05); }
+            66% { transform: translate(-20px, 20px) scale(0.95); }
+        }
+
+        .card-hover {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            transition: all 0.4s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-12px);
+            border-color: var(--card-glow);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 60px -15px var(--card-glow);
+        }
+
+        .plan-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            transition: all 0.5s ease;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.5), 0 0 80px -20px var(--card-glow);
+        }
+
+        .plan-featured {
+            background: linear-gradient(180deg, rgba(147, 51, 234, 0.15) 0%, var(--bg-card) 100%);
+            border: 2px solid rgba(147, 51, 234, 0.4);
+        }
+
+        .badge-pulse {
+            animation: badge-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes badge-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(147, 51, 234, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(147, 51, 234, 0); }
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s ease;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal-delay-3 { transition-delay: 0.3s; }
+
+        .grain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: var(--grain-opacity);
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--scrollbar-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+
+        .stat-number { font-variant-numeric: tabular-nums; }
+    </style>
+</head>
+<body>
+    <div class="grain"></div>
+
+    <!-- Navigation -->
+    <nav class="nav-floating fixed top-4 left-1/2 -translate-x-1/2 z-50 rounded-2xl px-6 py-3 w-[calc(100%-2rem)] max-w-6xl mx-auto">
+        <div class="flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3">
+                <img src="img/LOGO FAST PROXY.png" alt="FastProxy" class="h-10 w-auto object-contain">
+                <span class="font-bold text-xl tracking-tight hidden sm:block gradient-text">FastProxy</span>
+            </a>
+            
+            <div class="hidden lg:flex items-center gap-8">
+                <a href="#inicio" class="nav-link text-sm font-medium">Início</a>
+                <a href="#beneficios" class="nav-link text-sm font-medium">Benefícios</a>
+                <a href="#como-funciona" class="nav-link text-sm font-medium">Como Funciona</a>
+                <a href="#planos" class="nav-link text-sm font-medium">Planos</a>
+                <a href="#faq" class="nav-link text-sm font-medium">FAQ</a>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <a href="portal.html" class="text-sm font-medium text-white/70 hover:text-white transition">Login</a>
+                <a href="#planos" class="btn-primary text-sm font-semibold">
+                    COMEÇAR AGORA
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="inicio" class="relative min-h-screen flex items-center justify-center hero-bg grid-pattern pt-20 overflow-hidden">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+        
+        <div class="max-w-7xl mx-auto px-6 py-20 relative z-10">
+            <div class="text-center max-w-4xl mx-auto reveal">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-500/10 border border-brand-500/20 mb-8 badge-pulse">
+                    <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
+                    <span class="text-brand-400 text-sm font-medium">IPs Dedicados</span>
+                </div>
+                
+                <h1 class="font-black text-4xl sm:text-5xl md:text-7xl lg:text-[5rem] tracking-tight leading-[0.95] mb-8">
+                    <span class="gradient-text">Proxies</span><br>
+                    <span style="color: var(--text-primary)">Que</span><br>
+                    <span class="gradient-text">Entregam Resultado</span>
+                </h1>
+                
+                <p class="text-base sm:text-lg md:text-xl max-w-2xl mx-auto mb-12 leading-relaxed" style="color: var(--text-zinc)">
+                    Proxies HTTP dedicados para suas campanhas digitais. 
+                    Estabilidade, velocidade e suporte que você pode confiar.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <a href="#planos" class="btn-primary text-base px-8 py-4 w-full sm:w-auto">
+                        Ver Planos
+                    </a>
+                    <a href="#como-funciona" class="btn-secondary text-base px-8 py-4 w-full sm:w-auto">
+                        Como Funciona
+                    </a>
+                </div>
+                
+                <div class="flex flex-wrap justify-center gap-6 sm:gap-10 mt-16 text-sm" style="color: var(--text-muted)">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>IPs Dedicados</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>Entrega Imediata</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>Suporte 24/7</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-16" style="background: var(--section-bg)">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div class="reveal">
+                    <div class="text-4xl md:text-5xl font-bold gradient-text stat-number">50K+</div>
+                    <p class="text-sm mt-2" style="color: var(--text-muted)">IPs Ativos</p>
+                </div>
+                <div class="reveal reveal-delay-1">
+                    <div class="text-4xl md:text-5xl font-bold gradient-text stat-number">99.9%</div>
+                    <p class="text-sm mt-2" style="color: var(--text-muted)">Uptime</p>
+                </div>
+                <div class="reveal reveal-delay-2">
+                    <div class="text-4xl md:text-5xl font-bold gradient-text stat-number">1.000+</div>
+                    <p class="text-sm mt-2" style="color: var(--text-muted)">Clientes</p>
+                </div>
+                <div class="reveal reveal-delay-3">
+                    <div class="text-4xl md:text-5xl font-bold gradient-text stat-number">&lt;50ms</div>
+                    <p class="text-sm mt-2" style="color: var(--text-muted)">Latência</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section id="beneficios" class="py-20 md:py-28">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16 reveal">
+                <span class="text-brand-400 font-semibold text-sm uppercase tracking-widest">POR QUE A FASTPROXY?</span>
+                <h2 class="font-bold text-3xl md:text-4xl lg:text-5xl mt-4" style="color: var(--text-primary)">Benefícios Exclusivos</h2>
+            </div>
+            
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="feature-card p-6 md:p-8 rounded-2xl card-hover">
+                    <div class="w-14 h-14 rounded-2xl bg-brand-500/20 flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold text-lg md:text-xl mb-3" style="color: var(--text-primary)">IPs Dedicados</h3>
+                    <p style="color: var(--text-zinc)">Cada cliente recebe IPs exclusivos que não são compartilhados com outros usuários.</p>
+                </div>
+                
+                <div class="feature-card p-6 md:p-8 rounded-2xl card-hover">
+                    <div class="w-14 h-14 rounded-2xl bg-green-500/20 flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold text-lg md:text-xl mb-3" style="color: var(--text-primary)">Entrega Imediata</h3>
+                    <p style="color: var(--text-zinc)">Após confirmação do pagamento, seus proxies são entregue em minutos.</p>
+                </div>
+                
+                <div class="feature-card p-6 md:p-8 rounded-2xl card-hover">
+                    <div class="w-14 h-14 rounded-2xl bg-amber-500/20 flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold text-lg md:text-xl mb-3" style="color: var(--text-primary)">Melhor Preço</h3>
+                    <p style="color: var(--text-zinc)">Proxies de qualidade com preço justo. Ideal para quem busca resultados.</p>
+                </div>
+                
+                <div class="feature-card p-6 md:p-8 rounded-2xl card-hover">
+                    <div class="w-14 h-14 rounded-2xl bg-purple-500/20 flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold text-lg md:text-xl mb-3" style="color: var(--text-primary)">Alta Rotação</h3>
+                    <p style="color: var(--text-zinc)">Troque seus IPs quando quiser. Sem limitações, sem burocracias.</p>
+                </div>
+                
+                <div class="feature-card p-6 md:p-8 rounded-2xl card-hover">
+                    <div class="w-14 h-14 rounded-2xl bg-cyan-500/20 flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold text-lg md:text-xl mb-3" style="color: var(--text-primary)">Suporte Humanizado</h3>
+                    <p style="color: var(--text-zinc)">Fale diretamente conosco pelo WhatsApp. Sem robôs, sem enrolação.</p>
+                </div>
+                
+                <div class="feature-card p-6 md:p-8 rounded-2xl card-hover">
+                    <div class="w-14 h-14 rounded-2xl bg-rose-500/20 flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold text-lg md:text-xl mb-3" style="color: var(--text-primary)">Painel do Cliente</h3>
+                    <p style="color: var(--text-zinc)">Acesse seu portal para gerenciar seus proxies a qualquer momento.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it Works -->
+    <section id="como-funciona" class="py-20 md:py-28" style="background: var(--section-bg)">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16 reveal">
+                <span class="text-brand-400 font-semibold text-sm uppercase tracking-widest">SIMPLES E DIRETO</span>
+                <h2 class="font-bold text-3xl md:text-4xl lg:text-5xl mt-4" style="color: var(--text-primary)">Como Funciona</h2>
+            </div>
+            
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="feature-card p-6 md:p-8 rounded-2xl card-hover text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-brand-500/20 flex items-center justify-center font-bold text-brand-400 text-2xl mx-auto mb-6">1</div>
+                    <h3 class="font-semibold text-lg mb-3" style="color: var(--text-primary)">Escolha seu Plano</h3>
+                    <p style="color: var(--text-zinc)">Selecione a quantidade de proxies ideal para sua necessidade.</p>
+                </div>
+                
+                <div class="feature-card p-6 md:p-8 rounded-2xl card-hover text-center reveal reveal-delay-1">
+                    <div class="w-16 h-16 rounded-2xl bg-brand-500/20 flex items-center justify-center font-bold text-brand-400 text-2xl mx-auto mb-6">2</div>
+                    <h3 class="font-semibold text-lg mb-3" style="color: var(--text-primary)">Efetue o Pagamento</h3>
+                    <p style="color: var(--text-zinc)">Pix ou cartão. Confirmação em segundos.</p>
+                </div>
+                
+                <div class="feature-card p-6 md:p-8 rounded-2xl card-hover text-center reveal reveal-delay-2">
+                    <div class="w-16 h-16 rounded-2xl bg-brand-500/20 flex items-center justify-center font-bold text-brand-400 text-2xl mx-auto mb-6">3</div>
+                    <h3 class="font-semibold text-lg mb-3" style="color: var(--text-primary)">Receba seus Proxies</h3>
+                    <p style="color: var(--text-zinc)">Pronto! Acesse seu painel e baixe seus proxies.</p>
+                </div>
+                
+                <div class="feature-card p-6 md:p-8 rounded-2xl card-hover text-center reveal reveal-delay-3">
+                    <div class="w-16 h-16 rounded-2xl bg-brand-500/20 flex items-center justify-center font-bold text-brand-400 text-2xl mx-auto mb-6">4</div>
+                    <h3 class="font-semibold text-lg mb-3" style="color: var(--text-primary)">Use nos seus bots</h3>
+                    <p style="color: var(--text-zinc)">Formato: user:pass@ip:port pronto para usar.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Plans Section -->
+    <section id="planos" class="py-20 md:py-28">
+        <div class="absolute inset-0 bg-gradient-to-b from-brand-950/20 via-transparent to-transparent pointer-events-none"></div>
+        
+        <div class="max-w-5xl mx-auto px-6 relative z-10">
+            <div class="text-center mb-12 reveal">
+                <span class="text-brand-400 font-semibold text-sm uppercase tracking-widest">ESCOLHA SEU PLANO</span>
+                <h2 class="font-bold text-3xl md:text-4xl lg:text-5xl mt-4" style="color: var(--text-primary)">Planos</h2>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 lg:gap-8 mb-8">
+                <!-- Starter -->
+                <div class="plan-card p-6 md:p-8 rounded-2xl">
+                    <div class="mb-6">
+                        <span class="inline-block px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 text-xs font-semibold mb-4">Início</span>
+                        <h3 class="font-bold text-xl" style="color: var(--text-primary)">Starter</h3>
+                        <div class="flex items-baseline gap-1 mt-3">
+                            <span class="text-3xl md:text-4xl font-bold gradient-text">R$ 47</span>
+                            <span class="text-sm" style="color: var(--text-muted)">/mês</span>
+                        </div>
+                    </div>
+                    
+                    <ul class="space-y-2 mb-6 text-sm">
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span style="color: var(--text-zinc)"><strong>5 proxies</strong></span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span style="color: var(--text-zinc)">IPs compartilhados</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span style="color: var(--text-zinc)">Troca ilimitada</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span style="color: var(--text-zinc)">Suporte 9h-18h</span>
+                        </li>
+                    </ul>
+                    
+                    <a href="#" class="btn-secondary block w-full py-3 rounded-xl text-center font-semibold text-sm">Selecionar</a>
+                </div>
+                
+                <!-- Business -->
+                <div class="plan-card plan-featured p-6 md:p-8 rounded-2xl transform md:-translate-y-4">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-brand-500 text-white text-xs font-bold badge-pulse">MAIS ESCOLHIDO</div>
+                    
+                    <div class="mb-6">
+                        <span class="inline-block px-3 py-1 rounded-full bg-brand-500/20 text-brand-400 text-xs font-semibold mb-4">Recomendado</span>
+                        <h3 class="font-bold text-xl" style="color: var(--text-primary)">Business</h3>
+                        <div class="flex items-baseline gap-1 mt-3">
+                            <span class="text-3xl md:text-4xl font-bold gradient-text">R$ 97</span>
+                            <span class="text-sm" style="color: var(--text-muted)">/mês</span>
+                        </div>
+                    </div>
+                    
+                    <ul class="space-y-2 mb-6 text-sm">
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span style="color: var(--text-primary)"><strong>20 proxies</strong></span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span style="color: var(--text-primary)">IPs dedicados</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span style="color: var(--text-primary)">Troca ilimitada</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span style="color: var(--text-primary)">Suporte 9h-22h</span>
+                        </li>
+                    </ul>
+                    
+                    <a href="#" class="btn-primary block w-full py-3 rounded-xl text-center font-bold text-sm">Selecionar</a>
+                </div>
+                
+                <!-- Enterprise -->
+                <div class="plan-card p-6 md:p-8 rounded-2xl">
+                    <div class="mb-6">
+                        <span class="inline-block px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-semibold mb-4">VIP</span>
+                        <h3 class="font-bold text-xl" style="color: var(--text-primary)">Enterprise</h3>
+                        <div class="flex items-baseline gap-1 mt-3">
+                            <span class="text-3xl md:text-4xl font-bold gradient-text">R$ 197</span>
+                            <span class="text-sm" style="color: var(--text-muted)">/mês</span>
+                        </div>
+                    </div>
+                    
+                    <ul class="space-y-2 mb-6 text-sm">
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span style="color: var(--text-primary)"><strong>50 proxies</strong></span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span style="color: var(--text-primary)">IPs dedicados Premium</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span style="color: var(--text-primary)">Troca ilimitada</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span style="color: var(--text-primary)">Suporte 24/7</span>
+                        </li>
+                    </ul>
+                    
+                    <a href="#" class="btn-secondary block w-full py-3 rounded-xl text-center font-semibold text-sm">Selecionar</a>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <p class="text-sm" style="color: var(--text-zinc)">Precisa de mais? <a href="#" class="text-brand-400 hover:text-brand-300">Fale conosco</a></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Format Section -->
+    <section class="py-20 md:py-28" style="background: var(--section-bg)">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="text-center mb-12 reveal">
+                <span class="text-brand-400 font-semibold text-sm uppercase tracking-widest">FORMATO</span>
+                <h2 class="font-bold text-3xl md:text-4xl mt-4" style="color: var(--text-primary)">Como usar seus proxies</h2>
+            </div>
+
+            <div class="card-hover rounded-2xl p-6 md:p-8 bg-black/30 border border-white/10">
+                <div class="flex flex-col md:flex-row items-center gap-8">
+                    <div class="flex-1">
+                        <p class="text-white/60 mb-4">Seus proxies são entregados no formato:</p>
+                        <div class="bg-black/50 rounded-xl p-4 font-mono text-sm text-green-400 border border-green-500/20">
+                            usuario:senha@ip:porta
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-white/60 mb-4">Exemplo:</p>
+                        <div class="bg-black/50 rounded-xl p-4 font-mono text-sm text-white/80 border border-white/10 overflow-x-auto">
+                            fastproxy123:fast123@177.54.146.90:11331
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-20 md:py-28">
+        <div class="max-w-3xl mx-auto px-6">
+            <div class="text-center mb-12 reveal">
+                <span class="text-brand-400 font-semibold text-sm uppercase tracking-widest">DUVIDAS FREQUENTES</span>
+                <h2 class="font-bold text-3xl md:text-4xl mt-4" style="color: var(--text-primary)">FAQ</h2>
+            </div>
+
+            <div class="space-y-4">
+                <details class="faq-item rounded-xl p-6 cursor-pointer">
+                    <summary class="flex justify-between items-center font-semibold list-none">
+                        <span style="color: var(--text-primary)">O que é um proxy HTTP?</span>
+                        <svg class="w-5 h-5 faq-icon" style="color: var(--text-muted)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <p class="mt-4 text-white/60">Um proxy HTTP é um servidor intermediário que permite navegar na internet com um IP diferente do seu. É ideal para bots, scraping e campanhas digitais.</p>
+                </details>
+
+                <details class="faq-item rounded-xl p-6 cursor-pointer">
+                    <summary class="flex justify-between items-center font-semibold list-none">
+                        <span style="color: var(--text-primary)">Os proxies funcionam em qualquer ferramenta?</span>
+                        <svg class="w-5 h-5 faq-icon" style="color: var(--text-muted)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <p class="mt-4 text-white/60">Sim! Nossos proxies são compatível com qualquer ferramenta que use autenticação user:pass@ip:port. Inclui bots de Telegram, Instagram, Facebook, e qualquer bot ou script.</p>
+                </details>
+
+                <details class="faq-item rounded-xl p-6 cursor-pointer">
+                    <summary class="flex justify-between items-center font-semibold list-none">
+                        <span style="color: var(--text-primary)">Posso trocar meus IPs?</span>
+                        <svg class="w-5 h-5 faq-icon" style="color: var(--text-muted)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <p class="mt-4 text-white/60">Sim! Todos os planos incluem troca ilimitada de IPs. Acesse seu painel e solicite novos IPs quando precisar.</p>
+                </details>
+
+                <details class="faq-item rounded-xl p-6 cursor-pointer">
+                    <summary class="flex justify-between items-center font-semibold list-none">
+                        <span style="color: var(--text-primary)">Como recebo meus proxies?</span>
+                        <svg class="w-5 h-5 faq-icon" style="color: var(--text-muted)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <p class="mt-4 text-white/60">Após confirmação do pagamento, você recebe acesso instantâneo ao seu painel de cliente onde pode baixar ou copiar seus proxies.</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-white/10">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center gap-3">
+                    <img src="img/LOGO FAST PROXY.png" alt="FastProxy" class="h-10 w-auto object-contain">
+                    <span class="font-bold text-xl gradient-text">FastProxy</span>
+                </div>
+                
+                <div class="flex items-center gap-6 text-sm" style="color: var(--text-muted)">
+                    <a href="#" class="hover:text-white transition">Termos</a>
+                    <a href="#" class="hover:text-white transition">Privacidade</a>
+                    <a href="#" class="hover:text-white transition">Contato</a>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" style="color: var(--text-muted)">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="text-center mt-8 text-sm" style="color: var(--text-muted)">
+                © 2024 FastProxy. Todos os direitos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Reveal animations
+        const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('active');
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // FAQ toggle
+        document.querySelectorAll('.faq-item').forEach(item => {
+            item.addEventListener('toggle', () => {
+                if (item.open) {
+                    document.querySelectorAll('.faq-item[open]').forEach(other => {
+                        if (other !== item) other.open = false;
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
