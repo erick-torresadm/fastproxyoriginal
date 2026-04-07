@@ -108,7 +108,10 @@ router.post('/create-checkout', express.json(), async (req, res) => {
     const { proxyCount, email, whatsapp, period } = req.body;
     
     console.log('=== CREATE CHECKOUT REQUEST ===');
-    console.log('Body:', req.body);
+    console.log('proxyCount:', proxyCount);
+    console.log('email:', email);
+    console.log('whatsapp:', whatsapp);
+    console.log('period:', period);
     
     if (!email) {
       return res.status(400).json({ error: 'Email é obrigatório' });
@@ -118,94 +121,87 @@ router.post('/create-checkout', express.json(), async (req, res) => {
       return res.status(400).json({ error: 'Quantidade de proxies inválida' });
     }
 
+    const isAnnual = period === 'annual';
+    const pricePerProxy = isAnnual ? 299.00 : 29.90;
+    const totalPrice = proxyCount * pricePerProxy;
+    
+    console.log('isAnnual:', isAnnual);
+    console.log('pricePerProxy:', pricePerProxy);
+    console.log('totalPrice:', totalPrice);
+    
     if (!process.env.CAKTO_CLIENT_ID) {
+      console.log('CAKTO_CLIENT_ID not set, returning test URL');
       return res.json({ 
         success: true, 
-        checkoutUrl: `https://pay.cakto.com.br/checkout/test?email=${encodeURIComponent(email)}&amount=${proxyCount * 29.90}&proxies=${proxyCount}&period=${period}`,
-        message: 'Checkout de teste',
-        testMode: true
+        checkoutUrl: `https://pay.cakto.com.br/checkout/test?email=${encodeURIComponent(email)}&amount=${totalPrice}&proxies=${proxyCount}&period=${period}`,
+        message: 'Checkout de teste (Cakto não configurado)',
+        testMode: true,
+        total: totalPrice
       });
     }
 
-    const isAnnual = period === 'annual';
-    const targetPrice = isAnnual ? 299.00 : 29.90;
-    const totalPrice = proxyCount * targetPrice;
-    
     try {
-      const offers = await getCachedOffers();
-      const offerList = offers?.results || offers || [];
-      console.log('Looking for offer with price:', targetPrice);
-      
-      let selectedOffer = null;
-      
-      if (offerList.length > 0) {
-        for (const offer of offerList) {
-          const offerPrice = parseFloat(offer.price || 0);
-          if (Math.abs(offerPrice - targetPrice) < 0.01) {
-            selectedOffer = offer;
-            console.log(`Found matching offer: ${offer.id}`);
-            break;
-          }
-        }
-      }
-      
-      if (!selectedOffer) {
-        console.log('No matching offer found, returning test URL');
-        return res.json({ 
-          success: true, 
-          checkoutUrl: `https://pay.cakto.com.br/checkout/test?email=${encodeURIComponent(email)}&amount=${totalPrice}&proxies=${proxyCount}&period=${period}`,
-          message: 'Checkout de teste - oferta não encontrada na Cakto',
-          testMode: true,
-          total: totalPrice
-        });
-      }
+      console.log('Attempting to create Cakto checkout...');
       
       const checkoutData = {
-        offer: selectedOffer.id,
         email: email,
+        amount: totalPrice,
+        currency: 'BRL',
         customer_data: {
           email: email,
           phone: whatsapp || ''
         },
-        quantity: proxyCount,
+        items: [{
+          name: `${proxyCount} Proxy(s) IPv6 - FastProxy (${period})`,
+          quantity: 1,
+          price: totalPrice
+        }],
         extra_data: {
           proxy_count: proxyCount,
           period: period,
-          whatsapp: whatsapp || ''
+          whatsapp: whatsapp || '',
+          price_per_proxy: pricePerProxy
         }
       };
       
-      console.log('Creating checkout with data:', JSON.stringify(checkoutData, null, 2));
+      console.log('Checkout data:', JSON.stringify(checkoutData, null, 2));
       
       const checkout = await Cakto.createCheckout(checkoutData);
-      console.log('Checkout created:', JSON.stringify(checkout, null, 2));
+      console.log('Cakto response:', JSON.stringify(checkout, null, 2));
       
-      const checkoutUrl = checkout.payment_url || checkout.url || `https://pay.cakto.com.br/checkout/${checkout.id}`;
+      let checkoutUrl = checkout.payment_url || checkout.url || checkout.checkout_url;
+      
+      if (!checkoutUrl && checkout.id) {
+        checkoutUrl = `https://pay.cakto.com.br/checkout/${checkout.id}`;
+      }
+      
+      console.log('Final checkoutUrl:', checkoutUrl);
       
       return res.json({ 
         success: true, 
         checkoutUrl: checkoutUrl,
         checkoutId: checkout.id,
+        total: totalPrice,
         message: 'Checkout criado com sucesso'
       });
     } catch (caktoErr) {
-      console.error('Cakto error:', caktoErr.message);
+      console.error('Cakto API error:', caktoErr.message);
+      console.error('Cakto error response:', caktoErr.response?.data);
       
       return res.json({ 
         success: true, 
         checkoutUrl: `https://pay.cakto.com.br/checkout/test?email=${encodeURIComponent(email)}&amount=${totalPrice}&proxies=${proxyCount}&period=${period}`,
         message: 'Fallback para checkout de teste',
         testMode: true,
+        total: totalPrice,
         error: caktoErr.message
       });
     }
   } catch (err) {
     console.error('Create checkout error:', err);
-    res.json({ 
-      success: true, 
-      checkoutUrl: `https://pay.cakto.com.br/checkout/test?email=${encodeURIComponent(req.body.email || 'test@test.com')}&amount=${(req.body.proxyCount || 1) * 29.90}&proxies=${req.body.proxyCount || 1}&period=${req.body.period || 'monthly'}`,
-      message: 'Checkout de emergência',
-      testMode: true
+    res.status(500).json({ 
+      error: err.message,
+      stack: err.stack
     });
   }
 });
