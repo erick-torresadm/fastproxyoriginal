@@ -1079,7 +1079,7 @@
                         </li>
                     </ul>
                     
-                    <button onclick="openPurchaseModal()" class="btn-primary block w-full py-4 rounded-xl text-center font-bold text-lg">Comprar Agora</button>
+                    <button onclick="openPurchaseModal('monthly')" class="btn-primary block w-full py-4 rounded-xl text-center font-bold text-lg">Comprar Agora</button>
                 </div>
                 
                 <!-- Annual Plan -->
@@ -1119,7 +1119,7 @@
                         </li>
                     </ul>
                     
-                    <button onclick="openPurchaseModal()" class="btn-primary block w-full py-4 rounded-xl text-center font-bold text-lg">Comprar Agora</button>
+                    <button onclick="openPurchaseModal('annual')" class="btn-primary block w-full py-4 rounded-xl text-center font-bold text-lg">Comprar Agora</button>
                 </div>
             </div>
         </div>
@@ -1608,25 +1608,27 @@
             });
         }
 
-        // Period Toggle (Monthly vs Semiannual vs Annual)
+        // Period Toggle (Monthly vs Semiannual vs Annual) - only if exists
         const periodButtons = document.querySelectorAll('.period-btn');
         const planPrices = document.querySelectorAll('.plan-prices');
         
-        periodButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                periodButtons.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                
-                const period = btn.dataset.period;
-                planPrices.forEach(prices => {
-                    if (prices.dataset.period === period) {
-                        prices.classList.remove('hidden');
-                    } else {
-                        prices.classList.add('hidden');
-                    }
+        if (periodButtons.length > 0) {
+            periodButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    periodButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    const period = btn.dataset.period;
+                    planPrices.forEach(prices => {
+                        if (prices.dataset.period === period) {
+                            prices.classList.remove('hidden');
+                        } else {
+                            prices.classList.add('hidden');
+                        }
+                    });
                 });
             });
-        });
+        }
 
         // Mobile Menu
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
@@ -1726,6 +1728,10 @@
                     </div>
                 </div>
 
+                <div id="plan-period-badge" class="mb-4 text-center">
+                    <span class="inline-block px-3 py-1 rounded-full bg-brand-500/20 text-brand-400 text-xs font-semibold">Plano Mensal</span>
+                </div>
+                
                 <div class="mb-4 p-3 rounded-lg bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.2)]">
                     <ul class="text-xs space-y-1" style="color: var(--text-secondary)">
                         <li>✅ Proxies IPv6 de alta velocidade</li>
@@ -1764,9 +1770,21 @@
     <script>
         const PRICE_PER_PROXY = 29.90;
         
-        const PRICE_PER_PROXY_YEAR = 299.00;
+        let selectedPeriod = 'monthly';
         
-        function openPurchaseModal() {
+        function openPurchaseModal(period = 'monthly') {
+            selectedPeriod = period;
+            document.getElementById('purchase-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            
+            // Update badge
+            const badge = document.getElementById('plan-period-badge');
+            if (badge) {
+                badge.querySelector('span').textContent = period === 'annual' ? 'Plano Anual' : 'Plano Mensal';
+            }
+            
+            updatePrice();
+        }
             document.getElementById('purchase-modal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
         }
@@ -1787,7 +1805,8 @@
         
         function updatePrice() {
             const quantity = parseInt(document.getElementById('proxy-quantity').value) || 1;
-            const total = (quantity * PRICE_PER_PROXY).toFixed(2).replace('.', ',');
+            const unitPrice = selectedPeriod === 'annual' ? PRICE_PER_PROXY_YEAR : PRICE_PER_PROXY;
+            const total = (quantity * unitPrice).toFixed(2).replace('.', ',');
             document.getElementById('total-price').textContent = 'R$ ' + total;
         }
         
@@ -1812,7 +1831,8 @@
                     body: JSON.stringify({ 
                         proxyCount: quantity,
                         email: email,
-                        whatsapp: whatsapp
+                        whatsapp: whatsapp,
+                        period: selectedPeriod
                     })
                 });
                 

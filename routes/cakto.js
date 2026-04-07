@@ -178,36 +178,76 @@ router.post('/test', express.json(), async (req, res) => {
 
 router.post('/create-checkout', express.json(), async (req, res) => {
   try {
-    const { proxyCount, email, whatsapp } = req.body;
+    const { proxyCount, email, whatsapp, period } = req.body;
     
     if (!proxyCount || proxyCount < 1) {
       return res.status(400).json({ error: 'Quantidade de proxies inválida' });
     }
 
-    const pricePerProxy = 29.90;
-    const totalPrice = pricePerProxy * proxyCount;
-    const productName = `${proxyCount} proxy${proxyCount > 1 ? 's' : ''} IPv6 Premium`;
-
     console.log('=== CRIANDO CHECKOUT ===');
     console.log('Proxy count:', proxyCount);
-    console.log('Total price:', totalPrice);
     console.log('Email:', email);
+    console.log('Period:', period || 'monthly');
 
+    // First, get or create product
+    let products = await Cakto.getProducts({ name: 'Proxy IPv6' });
+    let productId;
+    
+    if (products.results && products.results.length > 0) {
+      productId = products.results[0].id;
+      console.log('Product found:', productId);
+    } else {
+      // Create product
+      const newProduct = await Cakto.createProduct({
+        name: 'Proxy IPv6',
+        description: 'Proxies IPv6 de alta performance para redes sociais',
+        price: 29.90,
+        type: 'subscription',
+        paymentMethods: ['pix', 'credit_card', 'boleto']
+      });
+      productId = newProduct.id;
+      console.log('Product created:', productId);
+    }
+
+    // Now get or create offer based on period
+    const isAnnual = period === 'annual';
+    const offerPrice = isAnnual ? 299.00 : 29.90;
+    const offerName = isAnnual ? 'Proxy IPv6 Anual' : 'Proxy IPv6 Mensal';
+    
+    let offers = await Cakto.getOffers({ product: productId });
+    let offer;
+    
+    if (offers.results && offers.results.length > 0) {
+      // Use first active offer
+      offer = offers.results.find(o => o.status === 'active') || offers.results[0];
+    } else {
+      // Create offer
+      offer = await Cakto.createOffer({
+        name: offerName,
+        price: offerPrice,
+        product: productId,
+        units: 1,
+        status: 'active',
+        type: isAnnual ? 'subscription' : 'subscription',
+        intervalType: isAnnual ? 'year' : 'month',
+        interval: 1,
+        recurrence_period: isAnnual ? 365 : 30,
+        quantity_recurrences: -1
+      });
+      console.log('Offer created:', offer.id);
+    }
+
+    // Now create checkout with offer
     const checkoutData = {
-      items: [{
-        name: productName,
-        quantity: 1,
-        price: totalPrice,
-        is_variable: false
-      }],
+      offer: offer.id,
       customer: {
         email: email || '',
         phone: whatsapp || ''
       },
       configs: {
         redirect_after_payment: true,
-        redirect_url: `${process.env.APP_URL}/portal.html`,
-        notification_url: `${process.env.APP_URL}/api/cakto/webhook`
+        redirect_url: `${process.env.APP_URL || 'https://fastproxyoriginal-3yul.vercel.app'}/portal.html`,
+        notification_url: `${process.env.APP_URL || 'https://fastproxyoriginal-3yul.vercel.app'}/api/cakto/webhook`
       }
     };
 
@@ -215,7 +255,7 @@ router.post('/create-checkout', express.json(), async (req, res) => {
     
     const checkout = await Cakto.createCheckout(checkoutData);
     
-    console.log('Checkout criado:', checkout.id);
+    console.log('Checkout created:', checkout.id, checkout.url);
     
     res.json({ 
       success: true, 
