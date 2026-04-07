@@ -70,6 +70,30 @@ router.post('/login', async (req, res) => {
   }
 });
 
+router.post('/setup', async (req, res) => {
+  try {
+    const bcrypt = require('bcryptjs');
+    const User = require('../models/User');
+    
+    const adminExists = await User.findOne({ email: 'admin@fastproxy.com' });
+    if (adminExists) {
+      return res.json({ success: true, message: 'Admin já existe' });
+    }
+    
+    const hashedPassword = await bcrypt.hash('admin123', 10);
+    await User.create({
+      name: 'Admin',
+      email: 'admin@fastproxy.com',
+      password: hashedPassword,
+      role: 'admin'
+    });
+    
+    res.json({ success: true, message: 'Admin criado com sucesso' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Erro no setup', error: err.message });
+  }
+});
+
 router.get('/me', auth, async (req, res) => {
   res.json({
     success: true,
