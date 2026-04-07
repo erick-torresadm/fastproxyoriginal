@@ -14,8 +14,8 @@ router.get('/', async (req, res) => {
 
 router.post('/', admin, async (req, res) => {
   try {
-    const { name, price, proxyCount, tier } = req.body;
-    const plan = await Plan.create({ name, price, proxyCount, tier });
+    const { name, price, proxyCount, tier, period, replacements, isFeatured } = req.body;
+    const plan = await Plan.create({ name, price, proxyCount, tier, period, replacements, isFeatured });
     res.status(201).json({ success: true, data: { plan } });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Erro ao criar plano', error: err.message });

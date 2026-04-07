@@ -3,7 +3,32 @@ const router = express.Router();
 const Proxy = require('../models/Proxy');
 const { auth, admin } = require('../middleware/auth');
 
-router.get('/', async (req, res) => {
+const IP_BASE = process.env.PROXY_IP || '177.54.146.90';
+const PORT_START = parseInt(process.env.PROXY_PORT_START || '11331');
+const PORT_END = parseInt(process.env.PROXY_PORT_END || '11368');
+
+async function getNextPort() {
+  const usedPorts = await Proxy.distinct('port', { status: 'active' });
+  for (let port = PORT_START; port <= PORT_END; port++) {
+    if (!usedPorts.includes(port)) return port;
+  }
+  return null;
+}
+
+function generateUsername() {
+  return 'fastproxy' + Math.floor(Math.random() * 9000 + 1000);
+}
+
+function generatePassword() {
+  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let password = '';
+  for (let i = 0; i < 6; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return password;
+}
+
+router.get('/', admin, async (req, res) => {
   try {
     const { tier, status, search } = req.query;
     const query = {};
@@ -24,12 +49,72 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/available', admin, async (req, res) => {
+  try {
+    const proxies = await Proxy.find({ status: 'available' }).sort({ port: 1 });
+    res.json({ success: true, data: { proxies, count: proxies.length } });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Erro ao buscar proxies', error: err.message });
+  }
+});
+
+router.get('/stats', admin, async (req, res) => {
+  try {
+    const total = await Proxy.countDocuments();
+    const available = await Proxy.countDocuments({ status: 'available' });
+    const active = await Proxy.countDocuments({ status: 'active' });
+    const basic = await Proxy.countDocuments({ tier: 'basic' });
+    const premium = await Proxy.countDocuments({ tier: 'premium' });
+    const master = await Proxy.countDocuments({ tier: 'master' });
+    
+    res.json({ success: true, data: { total, available, active, tier: { basic, premium, master } } });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Erro ao buscar estatísticas', error: err.message });
+  }
+});
+
 router.get('/my', auth, async (req, res) => {
   try {
-    const proxies = await Proxy.find({ userId: req.user._id, status: 'active' }).populate('planId', 'name');
-    res.json({ success: true, data: { proxies } });
+    const proxies = await Proxy.find({ userId: req.user._id, status: 'active' }).sort({ createdAt: -1 });
+    const proxyLines = proxies.map(p => `${p.username}:${p.password}@${p.ip}:${p.port}`);
+    res.json({ success: true, data: { proxies, lines: proxyLines.join('\n'), count: proxies.length } });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Erro ao buscar seus proxies', error: err.message });
+  }
+});
+
+router.post('/allocate', admin, async (req, res) => {
+  try {
+    const { userId, tier, count } = req.body;
+    const quantity = count || 1;
+    const allocated = [];
+    
+    for (let i = 0; i < quantity; i++) {
+      const port = await getNextPort();
+      if (!port) {
+        return res.status(400).json({ success: false, message: 'Sem portas disponíveis' });
+      }
+      
+      const username = generateUsername();
+      const password = generatePassword();
+      
+      const proxy = await Proxy.create({
+        ip: IP_BASE,
+        port,
+        username,
+        password,
+        tier: tier || 'basic',
+        status: 'active',
+        userId,
+        assignedAt: new Date()
+      });
+      
+      allocated.push(proxy);
+    }
+    
+    res.status(201).json({ success: true, data: { proxies: allocated } });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Erro ao alocar proxy', error: err.message });
   }
 });
 
@@ -37,7 +122,13 @@ router.post('/', admin, async (req, res) => {
   try {
     const { ip, port, username, password, tier } = req.body;
 
-    const proxy = await Proxy.create({ ip, port, username, password, tier: tier || 'shared' });
+    const proxy = await Proxy.create({ 
+      ip: ip || IP_BASE, 
+      port, 
+      username, 
+      password, 
+      tier: tier || 'basic' 
+    });
     res.status(201).json({ success: true, data: { proxy } });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Erro ao criar proxy', error: err.message });
@@ -46,13 +137,13 @@ router.post('/', admin, async (req, res) => {
 
 router.post('/bulk', admin, async (req, res) => {
   try {
-    const { proxies } = req.body;
-    const proxiesData = proxies.map(p => ({
-      ip: p.ip,
-      port: p.port,
-      username: p.username,
-      password: p.password,
-      tier: p.tier || 'shared',
+    const { proxies, startPort } = req.body;
+    const proxiesData = proxies.map((p, idx) => ({
+      ip: p.ip || IP_BASE,
+      port: startPort ? startPort + idx : p.port,
+      username: p.username || generateUsername(),
+      password: p.password || generatePassword(),
+      tier: p.tier || 'basic',
       status: 'available'
     }));
 
