@@ -5,8 +5,13 @@ const User = require('../models/User');
 const Proxy = require('../models/Proxy');
 const Order = require('../models/Order');
 
-router.post('/webhook', async (req, res) => {
+router.post('/webhook', express.json(), async (req, res) => {
   try {
+    if (!process.env.CAKTO_CLIENT_ID || !process.env.CAKTO_CLIENT_SECRET || process.env.CAKTO_CLIENT_ID === 'demo') {
+      console.log('Cakto not configured, skipping webhook');
+      return res.json({ received: true, status: 'skipped' });
+    }
+
     const event = req.body;
     console.log('Cakto webhook received:', event);
 
@@ -133,6 +138,10 @@ async function createPendingUser(orderId, email, whatsapp, productName, amount) 
 
 router.get('/create-webhook', async (req, res) => {
   try {
+    if (!process.env.CAKTO_CLIENT_ID || !process.env.CAKTO_CLIENT_SECRET) {
+      return res.status(400).json({ error: 'Cakto not configured in Vercel' });
+    }
+    
     const webhook = await Cakto.createWebhook({
       url: `${process.env.APP_URL}/api/cakto/webhook`,
       events: ['order.completed', 'payment.approved', 'order.refunded', 'order.canceled', 'payment.refused'],
