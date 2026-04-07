@@ -196,33 +196,24 @@
                 <section id="orders" class="mb-16 scroll-mt-32">
                     <div class="flex justify-between items-center mb-8">
                         <div>
-                            <h2 class="text-2xl font-bold">Meus <span class="gradient-text">Pedidos</span></h2>
-                            <p class="text-white/50 mt-1">Acompanhe suas compras e downloads</p>
+                            <h2 class="text-2xl font-bold">Meus <span class="gradient-text">Proxies</span></h2>
+                            <p class="text-white/50 mt-1">Baixe seus proxies no formato user:pass@ip:port</p>
                         </div>
                         <button onclick="loadOrders()" class="text-sm text-purple-400 hover:text-purple-300"><i class="fas fa-sync-alt mr-1"></i> Atualizar</button>
                     </div>
                     <div id="orders-list" class="grid md:grid-cols-2 gap-4"></div>
                 </section>
 
-                <!-- Solicitar Reposição -->
-                <section id="replacements" class="mb-16 scroll-mt-32">
-                    <div class="card rounded-2xl p-8 text-center">
-                        <div class="w-16 h-16 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-sync-alt text-2xl text-white"></i>
+                <!-- Meus Proxies Ativos -->
+                <section id="my-proxies" class="mb-16 scroll-mt-32">
+                    <div class="flex justify-between items-center mb-8">
+                        <div>
+                            <h2 class="text-2xl font-bold">Proxies <span class="gradient-text">Ativos</span></h2>
+                            <p class="text-white/50 mt-1">Seus proxies disponíveis para uso</p>
                         </div>
-                        <h2 class="text-2xl font-bold mb-2">Solicitar <span class="gradient-text">Reposição</span></h2>
-                        <p class="text-white/50 mb-6 max-w-md mx-auto">Se precisar de reposição do seu perfil, solicite abaixo. Após 48h sem análise, será automaticamente aprovada.</p>
-                        <button onclick="requestReplacement()" class="btn-primary px-8 py-3 rounded-xl font-semibold text-white">
-                            <i class="fas fa-plus mr-2"></i>Solicitar Reposição
-                        </button>
-                        <div id="replacement-result" class="mt-4"></div>
+                        <button onclick="loadMyProxies()" class="text-sm text-purple-400 hover:text-purple-300"><i class="fas fa-sync-alt mr-1"></i> Atualizar</button>
                     </div>
-                </section>
-
-                <!-- Histórico de Reposições -->
-                <section id="replacements-history">
-                    <h2 class="text-2xl font-bold mb-6">Histórico de <span class="gradient-text">Reposições</span></h2>
-                    <div id="replacements-list" class="grid md:grid-cols-2 gap-4"></div>
+                    <div id="my-proxies-list" class="grid md:grid-cols-1 gap-4"></div>
                 </section>
             </div>
         </div>
@@ -524,6 +515,51 @@
                 } catch { logout(); }
             }
         })();
+
+        async function loadMyProxies() {
+            try {
+                const data = await api('/api/proxies/my');
+                const list = document.getElementById('my-proxies-list');
+                if (data.success && data.data.proxies.length > 0) {
+                    const proxyLines = data.data.proxies.map(p => `${p.username}:${p.password}@${p.ip}:${p.port}`).join('\n');
+                    list.innerHTML = `
+                        <div class="card rounded-2xl p-6 border border-purple-500/30">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-lg">${data.data.proxies.length} Proxy(s) Ativo(s)</h3>
+                                <span class="px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400">Online</span>
+                            </div>
+                            <div class="bg-black/50 rounded-xl p-4 font-mono text-sm text-green-400 overflow-x-auto whitespace-nowrap mb-4">
+                                ${proxyLines}
+                            </div>
+                            <button onclick="copyProxies()" class="btn-primary py-2 rounded-xl font-semibold text-white w-full">
+                                <i class="fas fa-copy mr-2"></i>Copiar Proxies
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    list.innerHTML = '<div class="card rounded-2xl p-8 text-center text-white/40">Nenhum proxy ativo. Compre um plano para receber seus proxies!</div>';
+                }
+            } catch (err) { console.error('Erro:', err); }
+        }
+
+        function copyProxies() {
+            const list = document.getElementById('my-proxies-list');
+            const text = list.querySelector('.font-mono').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Proxies copiados!', 'success');
+            });
+        }
+
+        function showMain() {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('main-section').classList.remove('hidden');
+            document.getElementById('user-info').classList.remove('hidden');
+            document.getElementById('user-info').classList.add('flex');
+            document.getElementById('user-name').textContent = currentUser?.name || 'Usuário';
+            loadPlans();
+            loadOrders();
+            loadMyProxies();
+        }
     </script>
 </body>
 </html>

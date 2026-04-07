@@ -282,17 +282,24 @@ app.post('/api/proxies/bulk', limiter, authenticate, adminOnly, async (req: any,
     
     const limitedProxies = proxies.slice(0, 100);
     const validTiers = ['shared', 'dedicated', 'premium'];
-    const docs = limitedProxies.map((p: any) => ({
-      ip: sanitize(p.ip || ''),
-      port: parseInt(p.port) || 0,
-      username: sanitize(p.username || ''),
-      password: sanitize(p.password || ''),
-      tier: validTiers.includes(p.tier) ? p.tier : 'shared',
-      status: 'available'
-    })).filter(p => p.ip && p.port && p.username && p.password);
+    const docs = limitedProxies.map((p: any) => {
+      const proxyStr = p.proxy || '';
+      const match = proxyStr.match(/^(.+?):(.+?)@(.+?):(\d+)$/);
+      if (match) {
+        return {
+          username: sanitize(match[1]),
+          password: sanitize(match[2]),
+          ip: sanitize(match[3]),
+          port: parseInt(match[4]) || 0,
+          tier: validTiers.includes(p.tier) ? p.tier : 'shared',
+          status: 'available'
+        };
+      }
+      return null;
+    }).filter(p => p && p.ip && p.port && p.username && p.password);
     
     if (docs.length === 0) {
-      return res.status(400).json({ success: false, message: 'Nenhum proxy válido' });
+      return res.status(400).json({ success: false, message: 'Nenhum proxy válido (formato: user:pass@ip:port)' });
     }
     
     await Proxy.insertMany(docs);
