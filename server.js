@@ -57,14 +57,28 @@ app.get('/', (req, res) => {
   res.json({ message: 'FastProxy API running', status: 'ok' });
 });
 
+let serverStarted = false;
+
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('✅ MongoDB connected');
-    app.listen(process.env.PORT, () => {
-      console.log(`🚀 Server running on port ${process.env.PORT}`);
-    });
+    if (!serverStarted) {
+      serverStarted = true;
+      app.listen(process.env.PORT || 3000, () => {
+        console.log(`🚀 Server running on port ${process.env.PORT || 3000}`);
+      });
+    }
   })
   .catch(err => {
-    console.error('❌ MongoDB connection error:', err);
-    process.exit(1);
+    console.error('❌ MongoDB connection error:', err.message);
+    if (!serverStarted) {
+      serverStarted = true;
+      app.listen(process.env.PORT || 3000, () => {
+        console.log(`🚀 Server running on port ${process.env.PORT || 3000} (without MongoDB)`);
+      });
+    }
   });
+
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled rejection:', err.message);
+});
