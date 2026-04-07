@@ -70,7 +70,7 @@
                     <i class="fas fa-shopping-cart"></i> Pedidos <i class="fas fa-chevron-down text-xs"></i>
                 </button>
                 <button onclick="toggleMenu('perfis')" id="menu-btn-perfis" class="px-4 py-2 rounded-xl text-sm font-medium text-white/50 hover:bg-white/5 flex items-center gap-2">
-                    <i class="fas fa-users"></i> Perfis <i class="fas fa-chevron-down text-xs"></i>
+                    <i class="fas fa-users"></i> Proxies <i class="fas fa-chevron-down text-xs"></i>
                 </button>
                 <button onclick="toggleMenu('reposicoes')" id="menu-btn-reposicoes" class="px-4 py-2 rounded-xl text-sm font-medium text-white/50 hover:bg-white/5 flex items-center gap-2">
                     <i class="fas fa-sync-alt"></i> Reposições <i class="fas fa-chevron-down text-xs"></i>
@@ -102,7 +102,7 @@
             </div>
         </div>
         
-        <!-- Dropdown Perfis -->
+        <!-- Dropdown Proxies -->
         <div id="menu-perfis" class="hidden absolute left-0 right-0 top-full bg-black/95 backdrop-blur-xl border-b border-white/10">
             <div class="max-w-7xl mx-auto px-6 py-4 grid md:grid-cols-2 gap-4">
                 <button onclick="showTab('profiles'); closeMenus()" class="block text-left p-4 rounded-xl hover:bg-white/5 transition">
@@ -144,7 +144,7 @@
         <div id="mobile-menu" class="hidden md:hidden border-t border-white/10">
             <div class="max-w-7xl mx-auto px-6 py-4 space-y-2">
                 <button onclick="showTab('orders'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-white/70">Pedidos</button>
-                <button onclick="showTab('profiles'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-white/70">Perfis</button>
+                <button onclick="showTab('profiles'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-white/70">Proxies</button>
                 <button onclick="showTab('upload'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-white/70">Upload</button>
                 <button onclick="showTab('replacements'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-white/70">Reposições</button>
             </div>
@@ -161,7 +161,7 @@
                         <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                     </div>
                     <h1 class="text-3xl font-bold gradient-text">Painel Administrativo</h1>
-                    <p class="text-white/50 mt-2">Gerencie perfis, pedidos e reposições</p>
+                    <p class="text-white/50 mt-2">Gerencie proxies, pedidos e alterações</p>
                 </div>
                 
                 <form onsubmit="handleLogin(event)" class="card rounded-2xl p-8 space-y-6">
@@ -188,7 +188,7 @@
                         <i class="fas fa-shopping-cart mr-2"></i>Pedidos
                     </button>
                     <button onclick="showTab('profiles')" id="tab-profiles" class="px-5 py-2 rounded-xl text-sm font-medium text-white/50 hover:bg-white/5 transition">
-                        <i class="fas fa-users mr-2"></i>Perfis
+                        <i class="fas fa-users mr-2"></i>Proxies
                     </button>
                     <button onclick="showTab('replacements')" id="tab-replacements" class="px-5 py-2 rounded-xl text-sm font-medium text-white/50 hover:bg-white/5 transition">
                         <i class="fas fa-sync-alt mr-2"></i>Reposições
@@ -249,7 +249,7 @@
                 <!-- PERFIS -->
                 <section id="section-profiles" class="hidden">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold">Perfis em Estoque</h2>
+                        <h2 class="text-2xl font-bold">Proxies em Estoque</h2>
                         <div class="flex gap-3">
                             <select id="filter-tier" onchange="loadProfiles()" class="input-field rounded-lg px-4 py-2 text-sm text-white">
                                 <option value="">Todos Tiers</option>
@@ -326,7 +326,7 @@
 
                 <!-- UPLOAD -->
                 <section id="section-upload" class="hidden">
-                    <h2 class="text-2xl font-bold mb-6">Upload de Perfis</h2>
+                    <h2 class="text-2xl font-bold mb-6">Upload de Proxies</h2>
                     
                     <div id="upload-alert" class="hidden mb-6 p-4 rounded-xl"></div>
                     
@@ -868,43 +868,42 @@
             try {
                 const tier = document.getElementById('filter-tier').value;
                 const status = document.getElementById('filter-status').value;
-                let url = '/api/profiles/all';
+                let url = '/api/proxies';
                 const params = [];
                 if (tier) params.push(`tier=${tier}`);
-                if (status === 'available') params.push('available=true');
-                if (status === 'delivered') params.push('delivered=true');
+                if (status) params.push(`status=${status}`);
                 if (params.length) url += '?' + params.join('&');
                 
                 const data = await api(url);
-                const profiles = data.data?.profiles || [];
+                const proxies = data.data?.proxies || [];
                 
-                document.getElementById('pstat-total').textContent = profiles.length;
-                document.getElementById('pstat-available').textContent = profiles.filter(p => p.isAvailable).length;
-                document.getElementById('pstat-delivered').textContent = profiles.filter(p => !p.isAvailable).length;
-                document.getElementById('pstat-premium').textContent = profiles.filter(p => p.tier === 'premium' || p.tier === 'master').length;
+                document.getElementById('pstat-total').textContent = proxies.length;
+                document.getElementById('pstat-available').textContent = proxies.filter(p => p.status === 'available').length;
+                document.getElementById('pstat-delivered').textContent = proxies.filter(p => p.status === 'active').length;
+                document.getElementById('pstat-premium').textContent = proxies.filter(p => p.tier === 'premium').length;
                 
                 const tbody = document.getElementById('profiles-table');
-                if (profiles.length > 0) {
-                    const tierColors = { junior: 'bg-green-500/20 text-green-400', premium: 'bg-purple-500/20 text-purple-400', master: 'bg-amber-500/20 text-amber-400' };
-                    tbody.innerHTML = profiles.map(p => `<tr class="border-t border-white/5 hover:bg-white/5">
-                        <td class="px-6 py-4 font-mono text-sm">${p.email}</td>
-                        <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium ${tierColors[p.tier]}">${p.tier?.toUpperCase()}</span></td>
-                        <td class="px-6 py-4"><span class="${p.isAvailable ? 'text-green-400' : 'text-blue-400'}">${p.isAvailable ? 'Disponível' : 'Entregue'}</span></td>
+                if (proxies.length > 0) {
+                    const tierColors = { shared: 'bg-green-500/20 text-green-400', dedicated: 'bg-purple-500/20 text-purple-400', premium: 'bg-amber-500/20 text-amber-400' };
+                    tbody.innerHTML = proxies.map(p => `<tr class="border-t border-white/5 hover:bg-white/5">
+                        <td class="px-6 py-4 font-mono text-sm">${p.username}:${p.password}@${p.ip}:${p.port}</td>
+                        <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium ${tierColors[p.tier] || 'bg-gray-500/20 text-gray-400'}">${p.tier?.toUpperCase() || 'SHARED'}</span></td>
+                        <td class="px-6 py-4"><span class="${p.status === 'available' ? 'text-green-400' : 'text-blue-400'}">${p.status === 'available' ? 'Disponível' : 'Ativo'}</span></td>
                         <td class="px-6 py-4 text-sm text-white/60">${p.assignedTo?.name || '-'}</td>
                         <td class="px-6 py-4 text-sm text-white/40">${new Date(p.createdAt).toLocaleDateString('pt-BR')}</td>
                         <td class="px-6 py-4 text-center"><button onclick="deleteProfile('${p._id}')" class="text-red-400 hover:text-red-300"><i class="fas fa-trash"></i></button></td>
                     </tr>`).join('');
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-12 text-center text-white/40">Nenhum perfil encontrado</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-12 text-center text-white/40">Nenhum proxy encontrado</td></tr>';
                 }
             } catch (err) { console.error('Erro:', err); }
         }
 
-        async function deleteProfile(profileId) {
-            if (!confirm('Excluir este perfil?')) return;
+        async function deleteProfile(proxyId) {
+            if (!confirm('Excluir este proxy?')) return;
             try {
-                const data = await api(`/api/profiles/${profileId}`, 'DELETE');
-                if (data.success) { showToast('Perfil excluído!'); loadProfiles(); }
+                const data = await api(`/api/proxies/${proxyId}`, 'DELETE');
+                if (data.success) { showToast('Proxy excluído!'); loadProfiles(); }
                 else { showToast(data.message || 'Erro', 'error'); }
             } catch (err) { showToast('Erro de conexão', 'error'); }
         }
@@ -1017,22 +1016,19 @@
             const alertEl = document.getElementById('upload-alert');
             
             const lines = content.split('\n').filter(l => l.trim().length > 0);
-            if (lines.length === 0) { showToast('Nenhum perfil detectado', 'error'); return; }
+            if (lines.length === 0) { showToast('Nenhum proxy detectado', 'error'); return; }
             
             btn.innerHTML = '<i class="fas fa-spinner spinner mr-2"></i> Importando...';
             btn.disabled = true;
             
-            const profiles = lines.map(line => {
-                const parts = line.split(/[|,]/);
-                const email = parts[0]?.trim();
-                const password = parts[1]?.trim() || line.trim();
-                return email && password ? { email, password, tier } : null;
-            }).filter(p => p);
+            const proxies = lines.map(line => ({ proxy: line.trim(), tier })).filter(p => p.proxy.includes('@'));
+            
+            if (proxies.length === 0) { showToast('Formato inválido. Use: user:pass@ip:port', 'error'); btn.innerHTML = '<i class="fas fa-upload mr-2"></i> Importar Bulk'; btn.disabled = false; return; }
             
             try {
-                const data = await api('/api/profiles/bulk', 'POST', { profiles });
+                const data = await api('/api/proxies/bulk', 'POST', { proxies });
                 if (data.success) {
-                    alertEl.innerHTML = `<div class="bg-green-500/20 border border-green-500/50 rounded-xl p-4"><i class="fas fa-check-circle text-green-400 mr-2"></i>${profiles.length} perfis importados!</div>`;
+                    alertEl.innerHTML = `<div class="bg-green-500/20 border border-green-500/50 rounded-xl p-4"><i class="fas fa-check-circle text-green-400 mr-2"></i>${proxies.length} proxies importados!</div>`;
                     alertEl.classList.remove('hidden');
                     document.getElementById('bulk-profiles').value = '';
                     countBulkLines();
