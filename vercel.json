@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "server/src/api/index.ts",
+      "src": "server.js",
       "use": "@vercel/node"
     },
     {
@@ -11,9 +11,12 @@
     }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "server/src/api/index.ts" },
+    { "src": "/api/(.*)", "dest": "server.js" },
     { "src": "/portal.html", "dest": "public/portal.html" },
     { "src": "/admin.html", "dest": "public/admin.html" },
     { "src": "/(.*)", "dest": "public/index.html" }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
