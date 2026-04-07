@@ -11,8 +11,9 @@
     }
   ],
   "routes": [
-    { "handle": "filesystem" },
-    { "src": "/api/.*", "dest": "server.js" },
+    { "src": "/api/(.*)", "dest": "server.js" },
+    { "src": "/test-cakto", "dest": "server.js" },
+    { "src": "/debug/(.*)", "dest": "server.js" },
     { "src": "/portal.html", "dest": "public/portal.html" },
     { "src": "/admin.html", "dest": "public/admin.html" },
     { "src": "/cancel.html", "dest": "public/cancel.html" },
