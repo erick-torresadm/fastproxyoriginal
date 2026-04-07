@@ -6,7 +6,6 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import validator from 'validator';
-import rateLimit from 'express-rate-limit';
 
 dotenv.config();
 
@@ -15,17 +14,30 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fastproxy_secret_key_2024';
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://ericktorresadm_db_user:FBra8yqPipxOVFSy@clusterfastproxy.tdun6hv.mongodb.net/fastproxy?appName=clusterfastproxy';
 
 let isConnected = false;
+let connectPromise: Promise<void> | null = null;
 
 const connectDB = async () => {
   if (isConnected || mongoose.connection.readyState === 1) return;
-  try {
-    await mongoose.connect(MONGODB_URI, {
-      maxPoolSize: 1,
-    });
-    isConnected = true;
-  } catch (err) {
-    console.error('MongoDB error:', err);
-  }
+  if (connectPromise) return connectPromise;
+  
+  connectPromise = (async () => {
+    try {
+      await mongoose.connect(MONGODB_URI, { 
+        maxPoolSize: 1,
+        serverSelectionTimeoutMS: 30000,
+        socketTimeoutMS: 30000,
+        bufferCommands: false,
+      });
+      isConnected = true;
+      console.log('MongoDB connected');
+    } catch (err: any) {
+      console.error('MongoDB error:', err.message);
+      connectPromise = null;
+      throw err;
+    }
+  })();
+  
+  return connectPromise;
 };
 
 const sanitize = (str: string): string => {
@@ -89,12 +101,9 @@ const adminOnly = (req: any, res: any, next: any) => {
   next();
 };
 
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, message: { success: false, message: 'Muitas requisições. Tente novamente em 15 minutos.' } });
-const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, message: { success: false, message: 'Muitas tentativas de login. Tente novamente em 15 minutos.' } });
-
 app.get('/api/health', (req, res) => res.json({ success: true, message: 'FastProxy API funcionando!', timestamp: new Date().toISOString() }));
 
-app.post('/api/auth/register', limiter, async (req: any, res: any) => {
+app.post('/api/auth/register', async (req: any, res: any) => {
   try {
     await connectDB();
     const { name, email, password, whatsapp } = req.body;
@@ -109,7 +118,7 @@ app.post('/api/auth/register', limiter, async (req: any, res: any) => {
   } catch (error: any) { res.status(500).json({ success: false, message: error.message }); }
 });
 
-app.post('/api/auth/login', authLimiter, async (req: any, res: any) => {
+app.post('/api/auth/login', async (req: any, res: any) => {
   try {
     await connectDB();
     const { email, password } = req.body;
@@ -157,7 +166,7 @@ app.get('/api/proxies/my', authenticate, async (req: any, res: any) => {
   } catch (error: any) { res.status(500).json({ success: false, message: error.message }); }
 });
 
-app.post('/api/proxies/bulk', limiter, authenticate, adminOnly, async (req: any, res: any) => {
+app.post('/api/proxies/bulk', authenticate, adminOnly, async (req: any, res: any) => {
   try {
     await connectDB();
     const { proxies } = req.body;
