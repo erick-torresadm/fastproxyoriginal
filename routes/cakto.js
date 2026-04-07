@@ -1,6 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const Cakto = require('../lib/cakto');
+
+console.log('=== LOADING CAKTO ROUTES ===');
+
+let Cakto;
+try {
+  Cakto = require('../lib/cakto');
+  console.log('✅ Cakto lib loaded');
+} catch (err) {
+  console.error('❌ Error loading Cakto lib:', err.message);
+  Cakto = null;
+}
 
 let cachedOffers = null;
 let offersCacheTime = 0;
