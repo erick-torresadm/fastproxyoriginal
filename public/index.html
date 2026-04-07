@@ -1055,145 +1055,93 @@
         <div class="max-w-5xl mx-auto px-6 relative z-10">
             <div class="text-center mb-12 reveal">
                 <span class="text-brand-400 font-semibold text-sm uppercase tracking-widest">ESCOLHA SEU PLANO</span>
-                <h2 class="font-bold text-3xl md:text-4xl lg:text-5xl mt-4" style="color: var(--text-primary)">Planos</h2>
-            </div>
-            
-            <!-- Plan Type Toggle -->
-            <div class="flex justify-center mb-8">
-                <div class="plan-toggle" id="plan-toggle">
-                    <button class="plan-toggle-btn active" data-plan="subscription">
-                        Assinatura
-                    </button>
-                    <button class="plan-toggle-btn" data-plan="onepurchase">
-                        Compra Única
-                    </button>
-                </div>
+                <h2 class="font-bold text-3xl md:text-4xl lg:text-5xl mt-4" style="color: var(--text-primary)">Proxies IPv6</h2>
+                <p class="text-lg mt-4" style="color: var(--text-zinc)">Proxy IPv6 de Alta Performance ideal para uso em redes sociais e múltiplas contas</p>
             </div>
 
-            <!-- Period Toggle (only for subscription) -->
-            <div class="subscription-plans">
-                <div class="flex justify-center mb-10">
-                    <div class="inline-flex rounded-lg p-1" style="background: var(--bg-card); border: 1px solid var(--border-color)">
-                        <button class="period-btn active px-4 py-2 rounded-md text-sm font-semibold transition-all" data-period="monthly" style="color: var(--text-muted)">Mensal</button>
-                        <button class="period-btn px-4 py-2 rounded-md text-sm font-semibold transition-all" data-period="semiannual" style="color: var(--text-muted)">6 Meses</button>
-                        <button class="period-btn px-4 py-2 rounded-md text-sm font-semibold transition-all" data-period="annual" style="color: var(--text-muted)">Anual</button>
+            <!-- Simple Plan Options -->
+            <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                <!-- Monthly Plan -->
+                <div class="plan-card p-8 rounded-2xl border-2 border-[rgba(34,197,94,0.3)]">
+                    <div class="text-center mb-6">
+                        <span class="inline-block px-3 py-1 rounded-full bg-red-500/20 text-red-400 text-xs font-bold mb-3">-25% OFF</span>
+                        <div class="flex items-baseline justify-center gap-2">
+                            <span class="text-2xl line-through" style="color: var(--text-muted)">R$ 39,90</span>
+                            <span class="text-4xl md:text-5xl font-bold gradient-text">R$ 29,90</span>
+                        </div>
+                        <p class="text-sm mt-2" style="color: var(--text-muted)">por proxy / mês</p>
                     </div>
-                </div>
-
-                <div class="text-center mb-8">
-                    <p class="text-sm" style="color: var(--text-zinc)">
-                        Na assinatura, você recebe proxy, aquecimento, manutenção e reposições durante <strong style="color: var(--text-primary)">30 dias</strong>.
-                    </p>
+                    
+                    <ul class="space-y-3 mb-8 text-sm">
+                        <li class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span style="color: var(--text-primary)">Proxies IPv6 de alta velocidade</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span style="color: var(--text-primary)">Ideal para Facebook e outras redes</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span style="color: var(--text-primary)">Suporte prioritário 24/7</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span style="color: var(--text-primary)">Renovação automática</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span style="color: var(--text-primary)">Conexões estáveis</span>
+                        </li>
+                    </ul>
+                    
+                    <button onclick="openPurchaseModal()" class="btn-primary block w-full py-4 rounded-xl text-center font-bold text-lg">Comprar Agora</button>
                 </div>
                 
-                <!-- Monthly Prices -->
-                <div class="plan-prices" data-period="monthly">
-                    <div class="grid md:grid-cols-3 gap-6 lg:gap-8 mb-8">
-                        <!-- Júnior -->
-                        <div class="plan-card p-6 md:p-8 rounded-2xl">
-                            <div class="mb-6">
-                                <span class="inline-block px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 text-xs font-semibold mb-4">Básico</span>
-                                <h3 class="font-bold text-xl" style="color: var(--text-primary)">Júnior</h3>
-                                <div class="flex items-baseline gap-1 mt-3">
-                                    <span class="text-3xl md:text-4xl font-bold gradient-text">R$ 297</span>
-                                    <span class="text-sm" style="color: var(--text-muted)">/mês</span>
-                                </div>
-                            </div>
-                            
-                            <ul class="space-y-2 mb-6 text-sm">
-                                <li class="flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                    <span style="color: var(--text-zinc)"><strong>1 reposição</strong>/mês</span>
-                                </li>
-                                <li class="flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                    <span style="color: var(--text-zinc)">Proxy dedicado</span>
-                                </li>
-                                <li class="flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                    <span style="color: var(--text-zinc)">Aquecimento</span>
-                                </li>
-                                <li class="flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                    <span style="color: var(--text-zinc)">Suporte 9h-18h</span>
-                                </li>
-                            </ul>
-                            
-                            <button onclick="openPurchaseModal()" class="btn-secondary block w-full py-3 rounded-xl text-center font-semibold text-sm">Selecionar</button>
+                <!-- Annual Plan -->
+                <div class="plan-card plan-featured p-8 rounded-2xl transform md:-translate-y-2">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-brand-500 text-white text-xs font-bold badge-pulse">MAIS VALORIZADO</div>
+                    
+                    <div class="text-center mb-6">
+                        <span class="inline-block px-3 py-1 rounded-full bg-red-500/20 text-red-400 text-xs font-bold mb-3">-50% OFF</span>
+                        <div class="flex items-baseline justify-center gap-2">
+                            <span class="text-2xl line-through" style="color: var(--text-muted)">R$ 478,80</span>
+                            <span class="text-4xl md:text-5xl font-bold gradient-text">R$ 299,00</span>
                         </div>
-                        
-                        <!-- Premium -->
-                        <div class="plan-card plan-featured p-6 md:p-8 rounded-2xl transform md:-translate-y-4">
-                            <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-brand-500 text-white text-xs font-bold badge-pulse">MAIS ESCOLHIDO</div>
-                            
-                            <div class="mb-6">
-                                <span class="inline-block px-3 py-1 rounded-full bg-brand-500/20 text-brand-400 text-xs font-semibold mb-4">Recomendado</span>
-                                <h3 class="font-bold text-xl" style="color: var(--text-primary)">Premium</h3>
-                                <div class="flex items-baseline gap-1 mt-3">
-                                    <span class="text-3xl md:text-4xl font-bold gradient-text">R$ 497</span>
-                                    <span class="text-sm" style="color: var(--text-muted)">/mês</span>
-                                </div>
-                            </div>
-                            
-                            <ul class="space-y-2 mb-6 text-sm">
-                                <li class="flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                    <span style="color: var(--text-primary)"><strong>3 reposições</strong>/mês</span>
-                                </li>
-                                <li class="flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                    <span style="color: var(--text-primary)">Proxy premium</span>
-                                </li>
-                                <li class="flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                    <span style="color: var(--text-primary)">Aquecimento + Backup</span>
-                                </li>
-                                <li class="flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                    <span style="color: var(--text-primary)">Suporte 9h-22h</span>
-                                </li>
-                            </ul>
-                            
-                            <a href="#" class="btn-primary block w-full py-3 rounded-xl text-center font-bold text-sm">Selecionar</a>
-                        </div>
-                        
-                        <!-- Máster -->
-                        <div class="plan-card p-6 md:p-8 rounded-2xl">
-                            <div class="mb-6">
-                                <span class="inline-block px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-semibold mb-4">VIP</span>
-                                <h3 class="font-bold text-xl" style="color: var(--text-primary)">Máster</h3>
-                                <div class="flex items-baseline gap-1 mt-3">
-                                    <span class="text-3xl md:text-4xl font-bold gradient-text">R$ 797</span>
-                                    <span class="text-sm" style="color: var(--text-muted)">/mês</span>
-                                </div>
-                            </div>
-                            
-                            <ul class="space-y-2 mb-6 text-sm">
-                                <li class="flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                    <span style="color: var(--text-primary)"><strong>5 reposições</strong>/mês</span>
-                                </li>
-                                <li class="flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                    <span style="color: var(--text-primary)">Proxy VIP dedicado</span>
-                                </li>
-                                <li class="flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                    <span style="color: var(--text-primary)">2 Proxies backup</span>
-                                </li>
-                                <li class="flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                    <span style="color: var(--text-primary)">Suporte 24h</span>
-                                </li>
-                            </ul>
-                            
-                            <a href="#" class="btn-secondary block w-full py-3 rounded-xl text-center font-semibold text-sm border-2 border-amber-500/30">Selecionar</a>
-                        </div>
+                        <p class="text-sm mt-2" style="color: var(--text-muted)">por proxy / ano</p>
+                        <p class="text-xs font-semibold text-green-400 mt-2">2 meses grátis!</p>
                     </div>
+                    
+                    <ul class="space-y-3 mb-8 text-sm">
+                        <li class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span style="color: var(--text-primary)">Tudo do plano mensal</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span style="color: var(--text-primary)">2 meses gratuitos</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span style="color: var(--text-primary)">Prioridade máxima no suporte</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span style="color: var(--text-primary)">Renovação automática</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-brand-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span style="color: var(--text-primary)">Conexões estáveis</span>
+                        </li>
+                    </ul>
+                    
+                    <button onclick="openPurchaseModal()" class="btn-primary block w-full py-4 rounded-xl text-center font-bold text-lg">Comprar Agora</button>
                 </div>
-
-                <!-- Semiannual Prices -->
-                <div class="plan-prices hidden" data-period="semiannual">
+            </div>
+        </div>
+    </section>
+    
+    <!-- How it Works -->
                     <div class="grid md:grid-cols-3 gap-6 lg:gap-8 mb-8">
                         <div class="plan-card p-6 md:p-8 rounded-2xl">
                             <span class="inline-block px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-semibold mb-4">-16%</span>
@@ -1784,12 +1732,22 @@
                 <div class="mb-6 p-4 rounded-xl bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.2)]">
                     <div class="flex justify-between items-center">
                         <span style="color: var(--text-secondary)">Preço por proxy:</span>
-                        <span class="font-semibold" style="color: var(--text-primary)">R$ 59,90</span>
+                        <span class="font-semibold" style="color: var(--text-primary)">R$ 29,90</span>
                     </div>
                     <div class="flex justify-between items-center mt-2 pt-2 border-t border-[rgba(34,197,94,0.2)]">
                         <span class="font-bold" style="color: var(--text-primary)">Total:</span>
-                        <span class="text-2xl font-bold gradient-text" id="total-price">R$ 59,90</span>
+                        <span class="text-2xl font-bold gradient-text" id="total-price">R$ 29,90</span>
                     </div>
+                </div>
+
+                <div class="mb-4 p-3 rounded-lg bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.2)]">
+                    <ul class="text-xs space-y-1" style="color: var(--text-secondary)">
+                        <li>✅ Proxies IPv6 de alta velocidade</li>
+                        <li>✅ Ideal para Facebook e outras redes</li>
+                        <li>✅ Suporte prioritário 24/7</li>
+                        <li>✅ Renovação automática</li>
+                        <li>✅ Conexões estáveis</li>
+                    </ul>
                 </div>
                 
                 <div class="mb-6">
@@ -1818,7 +1776,9 @@
     </div>
 
     <script>
-        const PRICE_PER_PROXY = 59.90;
+        const PRICE_PER_PROXY = 29.90;
+        
+        const PRICE_PER_PROXY_YEAR = 299.00;
         
         function openPurchaseModal() {
             document.getElementById('purchase-modal').classList.remove('hidden');
