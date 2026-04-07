@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADPRO - Painel Admin</title>
+    <title>FastProxy - Painel Admin</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -167,7 +167,7 @@
                 <form onsubmit="handleLogin(event)" class="card rounded-2xl p-8 space-y-6">
                     <div>
                         <label class="block text-sm text-white/50 mb-2">Email</label>
-                        <input type="email" id="login-email" required value="admin@adpro.com" class="input-field w-full rounded-xl px-4 py-3 text-white" placeholder="admin@adpro.com">
+                        <input type="email" id="login-email" required value="admin@fastproxy.com" class="input-field w-full rounded-xl px-4 py-3 text-white" placeholder="admin@adpro.com">
                     </div>
                     <div>
                         <label class="block text-sm text-white/50 mb-2">Senha</label>
@@ -408,7 +408,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <script>
         const API_URL = '';
-        let token = localStorage.getItem('adpro_admin_token');
+        let token = localStorage.getItem('fastproxy_admin_token');
 
         function showTab(tab) {
             ['orders', 'profiles', 'replacements', 'upload'].forEach(t => {
@@ -468,7 +468,7 @@
                 const data = await api('/api/auth/login', 'POST', { email, password });
                 if (data.success && data.data.user.role === 'admin') {
                     token = data.data.token;
-                    localStorage.setItem('adpro_admin_token', token);
+                    localStorage.setItem('fastproxy_admin_token', token);
                     document.getElementById('admin-user').textContent = data.data.user.name;
                     document.getElementById('login-section').classList.add('hidden');
                     document.getElementById('main-section').classList.remove('hidden');
@@ -490,7 +490,7 @@
 
         function logout() {
             token = null;
-            localStorage.removeItem('adpro_admin_token');
+            localStorage.removeItem('fastproxy_admin_token');
             document.getElementById('login-section').classList.remove('hidden');
             document.getElementById('main-section').classList.add('hidden');
             document.getElementById('nav-info').classList.add('hidden');

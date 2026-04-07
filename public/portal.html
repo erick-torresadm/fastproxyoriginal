@@ -237,7 +237,7 @@
     <script>
         const API_URL = '';
         let currentUser = null;
-        let token = localStorage.getItem('adpro_token');
+        let token = localStorage.getItem('fastproxy_token');
         let allPlans = [];
 
         function showTab(tab) {
@@ -294,7 +294,7 @@
                 if (data.success) {
                     token = data.data.token;
                     currentUser = data.data.user;
-                    localStorage.setItem('adpro_token', token);
+                    localStorage.setItem('fastproxy_token', token);
                     showMain();
                 } else {
                     showError(data.message || 'Erro ao fazer login');
@@ -319,7 +319,7 @@
 
         function logout() {
             token = null; currentUser = null;
-            localStorage.removeItem('adpro_token');
+            localStorage.removeItem('fastproxy_token');
             document.getElementById('auth-section').classList.remove('hidden');
             document.getElementById('main-section').classList.add('hidden');
             document.getElementById('user-info').classList.add('hidden');
@@ -454,7 +454,7 @@
                                     </span>
                                 </div>
                                 ${order.status === 'delivered' && order.downloadUrl ? `
-                                    <a href="data:text/plain;charset=utf-8,${encodeURIComponent(order.downloadUrl)}" download="perfil_adpro.txt" class="btn-primary block text-center py-3 rounded-xl font-semibold text-white">
+                                    <a href="data:text/plain;charset=utf-8,${encodeURIComponent(order.downloadUrl)}" download="perfil_fastproxy.txt" class="btn-primary block text-center py-3 rounded-xl font-semibold text-white">
                                         <i class="fas fa-download mr-2"></i>Baixar Arquivo
                                     </a>
                                 ` : `
@@ -501,7 +501,7 @@
                                 </div>
                                 <p class="text-sm text-white/50 mb-2">${new Date(r.createdAt).toLocaleDateString('pt-BR')}</p>
                                 ${(r.status === 'approved' || r.status === 'auto_approved') && r.downloadUrl ? `
-                                    <a href="data:text/plain;charset=utf-8,${encodeURIComponent(r.downloadUrl)}" download="novo_perfil_adpro.txt" class="btn-primary block text-center py-3 rounded-xl font-semibold text-white">
+                                    <a href="data:text/plain;charset=utf-8,${encodeURIComponent(r.downloadUrl)}" download="novo_perfil_fastproxy.txt" class="btn-primary block text-center py-3 rounded-xl font-semibold text-white">
                                         <i class="fas fa-download mr-2"></i>Baixar Novo Arquivo
                                     </a>
                                 ` : ''}
