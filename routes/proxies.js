@@ -58,7 +58,7 @@ router.get('/available', admin, async (req, res) => {
   }
 });
 
-router.get('/stats', admin, async (req, res) => {
+router.get('/stats', async (req, res) => {
   try {
     const total = await Proxy.countDocuments();
     const available = await Proxy.countDocuments({ status: 'available' });
@@ -123,7 +123,7 @@ router.post('/', admin, async (req, res) => {
     const { ip, port, username, password, tier } = req.body;
 
     const proxy = await Proxy.create({ 
-      ip: ip || IP_BASE, 
+      ip, 
       port, 
       username, 
       password, 
@@ -137,13 +137,15 @@ router.post('/', admin, async (req, res) => {
 
 router.post('/bulk', admin, async (req, res) => {
   try {
-    const { proxies, startPort } = req.body;
-    const proxiesData = proxies.map((p, idx) => ({
+    const { proxies, tier } = req.body;
+    const tierValue = tier || 'basic';
+    
+    const proxiesData = proxies.map(p => ({
       ip: p.ip || IP_BASE,
-      port: startPort ? startPort + idx : p.port,
-      username: p.username || generateUsername(),
-      password: p.password || generatePassword(),
-      tier: p.tier || 'basic',
+      port: p.port,
+      username: p.username,
+      password: p.password,
+      tier: tierValue,
       status: 'available'
     }));
 

@@ -9,14 +9,23 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
                         brand: {
-                            50: '#faf5ff', 100: '#f3e8ff', 200: '#e9d5ff', 300: '#d8b4fe', 400: '#c084fc',
-                            500: '#a855f7', 600: '#9333ea', 700: '#7e22ce', 800: '#6b21a8', 900: '#581c87', 950: '#2e1065',
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
                         }
                     },
                     fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], }
@@ -31,357 +40,196 @@
             --bg-card: rgba(24, 24, 27, 0.9);
             --text-primary: #ffffff;
             --border-color: rgba(255, 255, 255, 0.08);
-            --border-hover: rgba(255, 255, 255, 0.15);
         }
-        * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; }
-        .gradient-text { background: linear-gradient(135deg, #c084fc, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .gradient-bg { background: linear-gradient(135deg, #9333ea, #4f46e5); }
-        .card { background: var(--bg-card); border: 1px solid var(--border-color); backdrop-filter: blur(20px); }
+        * { -webkit-font-smoothing: antialiased; margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', sans-serif; min-height: 100vh; }
+        .gradient-text { background: linear-gradient(135deg, #4ade80, #22c55e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .gradient-bg { background: linear-gradient(135deg, #16a34a, #22c55e); }
+        .card { background: var(--bg-card); border: 1px solid var(--border-color); }
         .input-field { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); transition: all 0.3s; }
-        .input-field:focus { border-color: #9333ea; box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.2); outline: none; }
-        .btn-primary { background: linear-gradient(135deg, #9333ea, #4f46e5); transition: all 0.3s; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(147, 51, 234, 0.3); }
-        .spinner { animation: spin 1s linear infinite; }
+        .input-field:focus { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2); outline: none; }
+        .btn-primary { background: linear-gradient(135deg, #16a34a, #22c55e); transition: all 0.3s; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(34, 197, 94, 0.3); }
+        .spin { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        .menu-dropdown { animation: fadeIn 0.2s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        .glow { box-shadow: 0 0 60px rgba(147, 51, 234, 0.2); }
-        .stat-card { background: linear-gradient(135deg, rgba(147, 51, 234, 0.1), rgba(79, 70, 229, 0.05)); }
     </style>
 </head>
-<body>
+<body class="bg-zinc-950">
     <!-- Navbar -->
-    <nav class="fixed top-0 w-full z-50 bg-black/50 backdrop-blur-xl border-b border-white/10">
+    <nav class="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-xl border-b border-white/10">
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <a href="/" class="flex items-center gap-3 hover:opacity-80 transition">
+                <a href="/" class="flex items-center gap-3">
                     <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                     </div>
                     <span class="text-xl font-bold gradient-text">FastProxy</span>
                 </a>
-                <span class="text-xs px-2 py-1 rounded-full bg-purple-500/20 text-purple-400">Admin</span>
+                <span class="text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400">Admin</span>
             </div>
-            
-            <!-- Desktop Menu -->
-            <div class="hidden md:flex items-center gap-2">
-                <button onclick="toggleMenu('pedidos')" id="menu-btn-pedidos" class="px-4 py-2 rounded-xl text-sm font-medium bg-purple-500/20 text-purple-400 flex items-center gap-2">
-                    <i class="fas fa-shopping-cart"></i> Pedidos <i class="fas fa-chevron-down text-xs"></i>
-                </button>
-                <button onclick="toggleMenu('perfis')" id="menu-btn-perfis" class="px-4 py-2 rounded-xl text-sm font-medium text-white/50 hover:bg-white/5 flex items-center gap-2">
-                    <i class="fas fa-users"></i> Proxies <i class="fas fa-chevron-down text-xs"></i>
-                </button>
-                <button onclick="toggleMenu('reposicoes')" id="menu-btn-reposicoes" class="px-4 py-2 rounded-xl text-sm font-medium text-white/50 hover:bg-white/5 flex items-center gap-2">
-                    <i class="fas fa-sync-alt"></i> Reposições <i class="fas fa-chevron-down text-xs"></i>
-                </button>
-                <button onclick="toggleMenu('criar')" id="menu-btn-criar" class="px-4 py-2 rounded-xl text-sm font-medium text-white/50 hover:bg-white/5 flex items-center gap-2">
-                    <i class="fas fa-plus"></i> Criar <i class="fas fa-chevron-down text-xs"></i>
-                </button>
-            </div>
-            
-            <!-- User Info -->
-            <div id="nav-info" class="hidden items-center gap-4">
-                <span id="admin-user" class="text-white/60"></span>
-                <button onclick="logout()" class="text-sm text-white/40 hover:text-white transition">Sair</button>
-            </div>
-            
-            <!-- Mobile Menu Button -->
-            <button onclick="toggleMobileMenu()" class="md:hidden text-white">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
-        </div>
-        
-        <!-- Dropdown Pedidos -->
-        <div id="menu-pedidos" class="hidden absolute left-0 right-0 top-full bg-black/95 backdrop-blur-xl border-b border-white/10">
-            <div class="max-w-7xl mx-auto px-6 py-4">
-                <button onclick="showTab('orders'); closeMenus()" class="block w-full text-left p-4 rounded-xl hover:bg-white/5 transition">
-                    <h4 class="font-semibold text-purple-400 mb-1"><i class="fas fa-list mr-2"></i>Ver Pedidos</h4>
-                    <p class="text-sm text-white/50">Gerenciar pedidos pendentes e aprovados</p>
-                </button>
-            </div>
-        </div>
-        
-        <!-- Dropdown Proxies -->
-        <div id="menu-perfis" class="hidden absolute left-0 right-0 top-full bg-black/95 backdrop-blur-xl border-b border-white/10">
-            <div class="max-w-7xl mx-auto px-6 py-4 grid md:grid-cols-2 gap-4">
-                <button onclick="showTab('profiles'); closeMenus()" class="block text-left p-4 rounded-xl hover:bg-white/5 transition">
-                    <h4 class="font-semibold text-purple-400 mb-1"><i class="fas fa-boxes mr-2"></i>Estoque</h4>
-                    <p class="text-sm text-white/50">Ver perfis em estoque</p>
-                </button>
-                <button onclick="showTab('upload'); closeMenus()" class="block text-left p-4 rounded-xl hover:bg-white/5 transition">
-                    <h4 class="font-semibold text-purple-400 mb-1"><i class="fas fa-upload mr-2"></i>Upload</h4>
-                    <p class="text-sm text-white/50">Importar novos perfis</p>
-                </button>
-            </div>
-        </div>
-        
-        <!-- Dropdown Reposições -->
-        <div id="menu-reposicoes" class="hidden absolute left-0 right-0 top-full bg-black/95 backdrop-blur-xl border-b border-white/10">
-            <div class="max-w-7xl mx-auto px-6 py-4">
-                <button onclick="showTab('replacements'); closeMenus()" class="block w-full text-left p-4 rounded-xl hover:bg-white/5 transition">
-                    <h4 class="font-semibold text-purple-400 mb-1"><i class="fas fa-sync-alt mr-2"></i>Gerenciar Reposições</h4>
-                    <p class="text-sm text-white/50">Aprovar ou rejeitar solicitações</p>
-                </button>
-            </div>
-        </div>
-        
-        <!-- Dropdown Criar -->
-        <div id="menu-criar" class="hidden absolute left-0 right-0 top-full bg-black/95 backdrop-blur-xl border-b border-white/10">
-            <div class="max-w-7xl mx-auto px-6 py-4 grid md:grid-cols-2 gap-4">
-                <button onclick="openCreateOrderModal(); closeMenus()" class="block text-left p-4 rounded-xl hover:bg-white/5 transition">
-                    <h4 class="font-semibold text-green-400 mb-1"><i class="fas fa-plus-circle mr-2"></i>Criar Pedido</h4>
-                    <p class="text-sm text-white/50">Alocar plano para cliente</p>
-                </button>
-                <button onclick="openCreateUserModal(); closeMenus()" class="block text-left p-4 rounded-xl hover:bg-white/5 transition">
-                    <h4 class="font-semibold text-blue-400 mb-1"><i class="fas fa-user-plus mr-2"></i>Criar Usuário</h4>
-                    <p class="text-sm text-white/50">Cadastrar novo cliente</p>
-                </button>
-            </div>
-        </div>
-        
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden border-t border-white/10">
-            <div class="max-w-7xl mx-auto px-6 py-4 space-y-2">
-                <button onclick="showTab('orders'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-white/70">Pedidos</button>
-                <button onclick="showTab('profiles'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-white/70">Proxies</button>
-                <button onclick="showTab('upload'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-white/70">Upload</button>
-                <button onclick="showTab('replacements'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-white/70">Reposições</button>
+            <div class="flex items-center gap-4">
+                <span id="admin-name" class="text-white/60 text-sm"></span>
+                <button onclick="logout()" class="text-sm text-white/40 hover:text-white">Sair</button>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="pt-24 pb-16 px-6">
         <div class="max-w-7xl mx-auto">
-            <!-- Login Section -->
+            <!-- Login -->
             <div id="login-section" class="max-w-md mx-auto mt-20">
                 <div class="text-center mb-8">
-                    <div class="w-20 h-20 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-4 glow">
+                    <div class="w-20 h-20 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                     </div>
-                    <h1 class="text-3xl font-bold gradient-text">Painel Administrativo</h1>
-                    <p class="text-white/50 mt-2">Gerencie proxies, pedidos e alterações</p>
+                    <h1 class="text-3xl font-bold gradient-text">Painel Admin</h1>
+                    <p class="text-white/50 mt-2">Gerencie seus proxies</p>
                 </div>
-                
                 <form onsubmit="handleLogin(event)" class="card rounded-2xl p-8 space-y-6">
                     <div>
                         <label class="block text-sm text-white/50 mb-2">Email</label>
-                        <input type="email" id="login-email" required value="admin@fastproxy.com" class="input-field w-full rounded-xl px-4 py-3 text-white" placeholder="admin@adpro.com">
+                        <input type="email" id="login-email" required value="admin@fastproxy.com" class="input-field w-full rounded-xl px-4 py-3 text-white">
                     </div>
                     <div>
                         <label class="block text-sm text-white/50 mb-2">Senha</label>
-                        <input type="password" id="login-password" required value="admin123" class="input-field w-full rounded-xl px-4 py-3 text-white" placeholder="••••••••">
+                        <input type="password" id="login-password" required value="admin123" class="input-field w-full rounded-xl px-4 py-3 text-white">
                     </div>
-                    <button type="submit" id="login-btn" class="btn-primary w-full py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-2">
-                        <span>Entrar</span>
-                    </button>
+                    <button type="submit" id="login-btn" class="btn-primary w-full py-3 rounded-xl font-semibold text-white">Entrar</button>
                     <div id="login-error" class="hidden text-red-400 text-sm text-center p-3 rounded-xl bg-red-500/10"></div>
                 </form>
             </div>
 
-            <!-- Main Section -->
-            <div id="main-section" class="hidden">
+            <!-- Dashboard -->
+            <div id="dashboard" class="hidden">
+                <!-- Stats -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="card rounded-xl p-4 border-green-500/20">
+                        <p class="text-white/50 text-sm">Total Proxies</p>
+                        <p class="text-2xl font-bold" id="stat-total">0</p>
+                    </div>
+                    <div class="card rounded-xl p-4 border-green-500/20">
+                        <p class="text-white/50 text-sm">Disponíveis</p>
+                        <p class="text-2xl font-bold text-green-400" id="stat-available">0</p>
+                    </div>
+                    <div class="card rounded-xl p-4 border-blue-500/20">
+                        <p class="text-white/50 text-sm">Ativos</p>
+                        <p class="text-2xl font-bold text-blue-400" id="stat-active">0</p>
+                    </div>
+                    <div class="card rounded-xl p-4 border-amber-500/20">
+                        <p class="text-white/50 text-sm">Usuários</p>
+                        <p class="text-2xl font-bold text-amber-400" id="stat-users">0</p>
+                    </div>
+                </div>
+
                 <!-- Tabs -->
-                <div class="flex gap-2 mb-8 border-b border-white/10 pb-4">
-                    <button onclick="showTab('orders')" id="tab-orders" class="px-5 py-2 rounded-xl text-sm font-medium bg-purple-500/20 text-purple-400 transition">
-                        <i class="fas fa-shopping-cart mr-2"></i>Pedidos
+                <div class="flex gap-2 mb-6 border-b border-white/10 pb-2 overflow-x-auto">
+                    <button onclick="showTab('add')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium bg-green-500/20 text-green-400 whitespace-nowrap">
+                        <i class="fas fa-plus mr-2"></i>Adicionar Proxy
                     </button>
-                    <button onclick="showTab('profiles')" id="tab-profiles" class="px-5 py-2 rounded-xl text-sm font-medium text-white/50 hover:bg-white/5 transition">
-                        <i class="fas fa-users mr-2"></i>Proxies
+                    <button onclick="showTab('stock')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-white/50 whitespace-nowrap">
+                        <i class="fas fa-box mr-2"></i>Estoque
                     </button>
-                    <button onclick="showTab('replacements')" id="tab-replacements" class="px-5 py-2 rounded-xl text-sm font-medium text-white/50 hover:bg-white/5 transition">
-                        <i class="fas fa-sync-alt mr-2"></i>Reposições
-                    </button>
-                    <button onclick="showTab('upload')" id="tab-upload" class="px-5 py-2 rounded-xl text-sm font-medium text-white/50 hover:bg-white/5 transition">
-                        <i class="fas fa-upload mr-2"></i>Upload
+                    <button onclick="showTab('users')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-white/50 whitespace-nowrap">
+                        <i class="fas fa-users mr-2"></i>Usuários
                     </button>
                 </div>
 
-                <!-- PEDIDOS -->
-                <section id="section-orders">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold">Pedidos</h2>
-                        <div class="flex gap-3">
-                            <button onclick="openCreateOrderModal()" class="btn-primary px-4 py-2 rounded-lg text-sm text-white">
-                                <i class="fas fa-plus mr-2"></i>Novo Pedido
+                <!-- Add Single Proxy -->
+                <section id="tab-add">
+                    <div class="card rounded-2xl p-6 mb-6">
+                        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <i class="fas fa-plus text-green-400"></i>Adicionar Proxy Único
+                        </h2>
+                        <form onsubmit="addSingleProxy(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-sm text-white/50 mb-2">Proxy (formato: user:pass@ip:port)</label>
+                                <input type="text" id="single-proxy" placeholder="fastproxy123:fast123@177.54.146.90:11331" class="input-field w-full rounded-xl px-4 py-3 text-white font-mono" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-white/50 mb-2">Tier</label>
+                                <select id="single-tier" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                                    <option value="basic">Básico</option>
+                                    <option value="premium">Premium</option>
+                                    <option value="master">Master</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-primary w-full py-3 rounded-xl font-semibold text-white">
+                                <i class="fas fa-plus mr-2"></i>Adicionar
                             </button>
-                            <button onclick="loadOrders()" class="text-sm text-purple-400 hover:text-purple-300 transition"><i class="fas fa-sync-alt mr-1"></i> Atualizar</button>
-                        </div>
+                        </form>
                     </div>
-                    
-                    <!-- Stats -->
-                    <div class="grid grid-cols-4 gap-4 mb-6">
-                        <div class="stat-card rounded-xl p-4 border border-purple-500/20">
-                            <p class="text-white/50 text-sm">Total</p>
-                            <p class="text-2xl font-bold" id="stat-total">0</p>
-                        </div>
-                        <div class="stat-card rounded-xl p-4 border border-yellow-500/20">
-                            <p class="text-white/50 text-sm">Pendentes</p>
-                            <p class="text-2xl font-bold text-yellow-400" id="stat-pending">0</p>
-                        </div>
-                        <div class="stat-card rounded-xl p-4 border border-green-500/20">
-                            <p class="text-white/50 text-sm">Entregues</p>
-                            <p class="text-2xl font-bold text-green-400" id="stat-delivered">0</p>
-                        </div>
-                        <div class="stat-card rounded-xl p-4 border border-blue-500/20">
-                            <p class="text-white/50 text-sm">Receita</p>
-                            <p class="text-2xl font-bold text-blue-400" id="stat-revenue">R$ 0</p>
-                        </div>
-                    </div>
-                    
-                    <div class="card rounded-2xl overflow-hidden">
-                        <table class="w-full">
-                            <thead class="bg-white/5">
-                                <tr class="text-left text-sm text-white/50">
-                                    <th class="px-6 py-4">Cliente</th>
-                                    <th class="px-6 py-4">Plano</th>
-                                    <th class="px-6 py-4">Status</th>
-                                    <th class="px-6 py-4">Data</th>
-                                    <th class="px-6 py-4 text-center">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="orders-table"></tbody>
-                        </table>
+
+                    <!-- Bulk Upload -->
+                    <div class="card rounded-2xl p-6">
+                        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <i class="fas fa-upload text-green-400"></i>Upload em Massa
+                        </h2>
+                        <form onsubmit="addBulkProxy(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-sm text-white/50 mb-2">Proxies (um por linha)</label>
+                                <textarea id="bulk-proxies" rows="8" placeholder="fastproxy123:fast123@177.54.146.90:11331&#10;fastproxy123:fast123@177.54.146.90:11332&#10;fastproxy123:fast123@177.54.146.90:11333" class="input-field w-full rounded-xl px-4 py-3 text-white font-mono text-sm"></textarea>
+                                <p class="text-xs text-white/40 mt-1"><span id="bulk-count">0</span> proxies detectados</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-white/50 mb-2">Tier</label>
+                                <select id="bulk-tier" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                                    <option value="basic">Básico</option>
+                                    <option value="premium">Premium</option>
+                                    <option value="master">Master</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-primary w-full py-3 rounded-xl font-semibold text-white">
+                                <i class="fas fa-upload mr-2"></i>Importar Proxies
+                            </button>
+                        </form>
                     </div>
                 </section>
 
-                <!-- PERFIS -->
-                <section id="section-profiles" class="hidden">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold">Proxies em Estoque</h2>
-                        <div class="flex gap-3">
-                            <select id="filter-tier" onchange="loadProfiles()" class="input-field rounded-lg px-4 py-2 text-sm text-white">
-                                <option value="">Todos Tiers</option>
-                                <option value="junior">Júnior</option>
-                                <option value="premium">Premium</option>
-                                <option value="master">Master</option>
-                            </select>
-                            <select id="filter-status" onchange="loadProfiles()" class="input-field rounded-lg px-4 py-2 text-sm text-white">
-                                <option value="">Todos Status</option>
-                                <option value="available">Disponível</option>
-                                <option value="delivered">Entregue</option>
-                            </select>
-                            <button onclick="loadProfiles()" class="text-purple-400 hover:text-purple-300"><i class="fas fa-sync-alt"></i></button>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-4 gap-4 mb-6">
-                        <div class="stat-card rounded-xl p-4 border border-purple-500/20">
-                            <p class="text-white/50 text-sm">Total</p>
-                            <p class="text-2xl font-bold" id="pstat-total">0</p>
-                        </div>
-                        <div class="stat-card rounded-xl p-4 border border-green-500/20">
-                            <p class="text-white/50 text-sm">Disponíveis</p>
-                            <p class="text-2xl font-bold text-green-400" id="pstat-available">0</p>
-                        </div>
-                        <div class="stat-card rounded-xl p-4 border border-blue-500/20">
-                            <p class="text-white/50 text-sm">Entregues</p>
-                            <p class="text-2xl font-bold text-blue-400" id="pstat-delivered">0</p>
-                        </div>
-                        <div class="stat-card rounded-xl p-4 border border-amber-500/20">
-                            <p class="text-white/50 text-sm">Premium/Master</p>
-                            <p class="text-2xl font-bold text-amber-400" id="pstat-premium">0</p>
-                        </div>
-                    </div>
-
+                <!-- Stock -->
+                <section id="tab-stock" class="hidden">
                     <div class="card rounded-2xl overflow-hidden">
-                        <table class="w-full">
-                            <thead class="bg-white/5">
-                                <tr class="text-left text-sm text-white/50">
-                                    <th class="px-6 py-4">Email</th>
-                                    <th class="px-6 py-4">Tier</th>
-                                    <th class="px-6 py-4">Status</th>
-                                    <th class="px-6 py-4">Cliente</th>
-                                    <th class="px-6 py-4">Data</th>
-                                    <th class="px-6 py-4 text-center">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="profiles-table"></tbody>
-                        </table>
+                        <div class="p-4 border-b border-white/10 flex justify-between items-center">
+                            <h2 class="font-bold">Proxies em Estoque</h2>
+                            <button onclick="loadProxies()" class="text-green-400 hover:text-green-300"><i class="fas fa-sync"></i></button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-white/5">
+                                    <tr class="text-left text-sm text-white/50">
+                                        <th class="px-4 py-3">Proxy</th>
+                                        <th class="px-4 py-3">Tier</th>
+                                        <th class="px-4 py-3">Status</th>
+                                        <th class="px-4 py-3">Criado</th>
+                                        <th class="px-4 py-3 text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="proxies-table"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </section>
 
-                <!-- REPOSIÇÕES -->
-                <section id="section-replacements" class="hidden">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold">Solicitações de Reposição</h2>
-                        <button onclick="loadReplacements()" class="text-sm text-purple-400 hover:text-purple-300"><i class="fas fa-sync-alt mr-1"></i> Atualizar</button>
-                    </div>
+                <!-- Users -->
+                <section id="tab-users" class="hidden">
                     <div class="card rounded-2xl overflow-hidden">
-                        <table class="w-full">
-                            <thead class="bg-white/5">
-                                <tr class="text-left text-sm text-white/50">
-                                    <th class="px-6 py-4">Cliente</th>
-                                    <th class="px-6 py-4">Pedido</th>
-                                    <th class="px-6 py-4">Status</th>
-                                    <th class="px-6 py-4">Data</th>
-                                    <th class="px-6 py-4 text-center">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="replacements-table"></tbody>
-                        </table>
-                    </div>
-                </section>
-
-                <!-- UPLOAD -->
-                <section id="section-upload" class="hidden">
-                    <h2 class="text-2xl font-bold mb-6">Upload de Proxies</h2>
-                    
-                    <div id="upload-alert" class="hidden mb-6 p-4 rounded-xl"></div>
-                    
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="card rounded-2xl p-6">
-                            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                                <i class="fas fa-file-alt text-purple-400"></i> Upload de Arquivo TXT
-                            </h3>
-                            <form onsubmit="handleUpload(event)" class="space-y-4">
-                                <div>
-                                    <label class="block text-sm text-white/50 mb-2">Tier do Perfil</label>
-                                    <select id="upload-tier" required class="input-field w-full rounded-xl px-4 py-3 text-white">
-                                        <option value="junior">Júnior</option>
-                                        <option value="premium">Premium</option>
-                                        <option value="master">Master</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm text-white/50 mb-2">Arquivo</label>
-                                    <div class="border-2 border-dashed border-white/10 rounded-xl p-8 text-center hover:border-purple-500/50 transition cursor-pointer" onclick="document.getElementById('upload-file').click()">
-                                        <i class="fas fa-cloud-upload-alt text-4xl text-white/30 mb-3"></i>
-                                        <p class="text-white/50">Clique ou arraste o arquivo</p>
-                                        <p class="text-xs text-white/30 mt-1">email|senha</p>
-                                    </div>
-                                    <input type="file" id="upload-file" accept=".txt" class="hidden" onchange="handleFileSelect(this)">
-                                    <p id="file-name" class="text-sm text-purple-400 mt-2 hidden"></p>
-                                </div>
-                                <button type="submit" id="upload-btn" class="btn-primary w-full py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-2">
-                                    <i class="fas fa-upload"></i> Importar
-                                </button>
-                            </form>
+                        <div class="p-4 border-b border-white/10 flex justify-between items-center">
+                            <h2 class="font-bold">Usuários e Proxies</h2>
+                            <button onclick="loadUsers()" class="text-green-400 hover:text-green-300"><i class="fas fa-sync"></i></button>
                         </div>
-
-                        <div class="card rounded-2xl p-6">
-                            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                                <i class="fas fa-paste text-purple-400"></i> Upload Bulk
-                            </h3>
-                            <form onsubmit="handleBulkUpload(event)" class="space-y-4">
-                                <div>
-                                    <label class="block text-sm text-white/50 mb-2">Tier</label>
-                                    <select id="bulk-tier" required class="input-field w-full rounded-xl px-4 py-3 text-white">
-                                        <option value="junior">Júlio</option>
-                                        <option value="premium">Premium</option>
-                                        <option value="master">Master</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm text-white/50 mb-2">Cole os perfis (um por linha)</label>
-                                    <textarea id="bulk-profiles" rows="6" placeholder="email@exemplo.com|senha&#10;email2@exemplo.com|senha2" class="input-field w-full rounded-xl px-4 py-3 text-white font-mono text-sm" oninput="countBulkLines()"></textarea>
-                                    <p id="bulk-count" class="text-sm text-white/40 mt-2">0 perfis detectados</p>
-                                </div>
-                                <button type="submit" id="bulk-btn" class="btn-primary w-full py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-2">
-                                    <i class="fas fa-upload"></i> Importar Bulk
-                                </button>
-                            </form>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-white/5">
+                                    <tr class="text-left text-sm text-white/50">
+                                        <th class="px-4 py-3">Usuário</th>
+                                        <th class="px-4 py-3">Plano</th>
+                                        <th class="px-4 py-3">Proxies</th>
+                                        <th class="px-4 py-3">Status</th>
+                                        <th class="px-4 py-3">Expira</th>
+                                        <th class="px-4 py-3 text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-table"></tbody>
+                            </table>
                         </div>
                     </div>
                 </section>
@@ -389,54 +237,30 @@
         </div>
     </main>
 
-    <!-- Modal -->
-    <div id="modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="card rounded-2xl p-6 w-full max-w-lg">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold gradient-text" id="modal-title"></h3>
-                <button onclick="closeModal()" class="text-white/40 hover:text-white"><i class="fas fa-times"></i></button>
-            </div>
-            <div id="modal-content"></div>
-        </div>
-    </div>
-
     <!-- Toast -->
-    <div id="toast" class="fixed bottom-6 right-6 card rounded-xl p-4 hidden z-50">
-        <p id="toast-message" class="text-sm"></p>
+    <div id="toast" class="fixed bottom-6 right-6 card rounded-xl p-4 hidden">
+        <p id="toast-msg" class="text-sm"></p>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <script>
         const API_URL = '';
         let token = localStorage.getItem('fastproxy_admin_token');
 
         function showTab(tab) {
-            ['orders', 'profiles', 'replacements', 'upload'].forEach(t => {
-                document.getElementById(`tab-${t}`).classList.remove('bg-purple-500/20', 'text-purple-400');
-                document.getElementById(`tab-${t}`).classList.add('text-white/50', 'hover:bg-white/5');
-                document.getElementById(`section-${t}`).classList.add('hidden');
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-green-500/20', 'text-green-400');
+                btn.classList.add('text-white/50');
             });
-            document.getElementById(`tab-${tab}`).classList.remove('text-white/50', 'hover:bg-white/5');
-            document.getElementById(`tab-${tab}`).classList.add('bg-purple-500/20', 'text-purple-400');
-            document.getElementById(`section-${tab}`).classList.remove('hidden');
-
-            if (tab === 'orders') loadOrders();
-            if (tab === 'profiles') loadProfiles();
-            if (tab === 'replacements') loadReplacements();
-        }
-
-        function toggleMenu(menu) {
-            const menus = ['pedidos', 'perfis', 'reposicoes', 'criar'];
-            menus.forEach(m => document.getElementById(`menu-${m}`).classList.add('hidden'));
-            document.getElementById(`menu-${menu}`).classList.remove('hidden');
-        }
-
-        function closeMenus() {
-            ['pedidos', 'perfis', 'reposicoes', 'criar'].forEach(m => document.getElementById(`menu-${m}`).classList.add('hidden'));
-        }
-
-        function toggleMobileMenu() {
-            document.getElementById('mobile-menu').classList.toggle('hidden');
+            event.target.closest('.tab-btn')?.classList.add('bg-green-500/20', 'text-green-400');
+            event.target.closest('.tab-btn')?.classList.remove('text-white/50');
+            
+            ['add', 'stock', 'users'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+            });
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            
+            if (tab === 'stock') loadProxies();
+            if (tab === 'users') loadUsers();
         }
 
         async function api(endpoint, method = 'GET', body = null) {
@@ -446,35 +270,31 @@
             return res.json();
         }
 
-        function showToast(message, type = 'info') {
-            const toast = document.getElementById('toast');
-            const msg = document.getElementById('toast-message');
-            msg.textContent = message;
-            toast.className = `fixed bottom-6 right-6 card rounded-xl p-4 z-50 ${type === 'success' ? 'border-green-500/50' : type === 'error' ? 'border-red-500/50' : 'border-white/10'}`;
-            toast.classList.remove('hidden');
-            setTimeout(() => toast.classList.add('hidden'), 3000);
+        function showToast(msg, type = 'success') {
+            const div = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = msg;
+            div.className = `fixed bottom-6 right-6 card rounded-xl p-4 border-${type === 'success' ? 'green' : 'red'}-500/50`;
+            div.classList.remove('hidden');
+            setTimeout(() => div.classList.add('hidden'), 3000);
         }
 
         async function handleLogin(e) {
             e.preventDefault();
             const btn = document.getElementById('login-btn');
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            
-            btn.innerHTML = '<i class="fas fa-spinner spinner mr-2"></i> Entrando...';
-            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner spin mr-2"></i>Entrando...';
             
             try {
-                const data = await api('/api/auth/login', 'POST', { email, password });
+                const data = await api('/api/auth/login', 'POST', {
+                    email: document.getElementById('login-email').value,
+                    password: document.getElementById('login-password').value
+                });
                 if (data.success && data.data.user.role === 'admin') {
                     token = data.data.token;
                     localStorage.setItem('fastproxy_admin_token', token);
-                    document.getElementById('admin-user').textContent = data.data.user.name;
                     document.getElementById('login-section').classList.add('hidden');
-                    document.getElementById('main-section').classList.remove('hidden');
-                    document.getElementById('nav-info').classList.remove('hidden');
-                    document.getElementById('nav-info').classList.add('flex');
-                    loadOrders();
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    document.getElementById('admin-name').textContent = data.data.user.name;
+                    loadStats();
                 } else {
                     document.getElementById('login-error').textContent = data.message || 'Credenciais inválidas';
                     document.getElementById('login-error').classList.remove('hidden');
@@ -482,577 +302,168 @@
             } catch (err) {
                 document.getElementById('login-error').textContent = 'Erro de conexão';
                 document.getElementById('login-error').classList.remove('hidden');
-            } finally {
-                btn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Entrar';
-                btn.disabled = false;
             }
+            btn.innerHTML = 'Entrar';
         }
 
         function logout() {
             token = null;
             localStorage.removeItem('fastproxy_admin_token');
             document.getElementById('login-section').classList.remove('hidden');
-            document.getElementById('main-section').classList.add('hidden');
-            document.getElementById('nav-info').classList.add('hidden');
-            document.getElementById('nav-info').classList.remove('flex');
+            document.getElementById('dashboard').classList.add('hidden');
         }
 
-        function openCreateOrderModal() {
-            document.getElementById('modal').classList.remove('hidden');
-            document.getElementById('modal').classList.add('flex');
-            document.getElementById('modal-title').textContent = 'Criar/Alocar Pedido';
-            document.getElementById('modal-content').innerHTML = `
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm text-white/50 mb-2">Email do Cliente</label>
-                        <div class="flex gap-2">
-                            <input type="email" id="order-user-email" placeholder="cliente@email.com" class="input-field flex-1 rounded-xl px-4 py-3 text-white" onkeyup="searchUserByEmail()">
-                            <button onclick="searchUserByEmail()" class="btn-primary px-4 rounded-xl text-white"><i class="fas fa-search"></i></button>
-                        </div>
-                    </div>
-                    
-                    <div id="user-info-box" class="hidden p-4 rounded-xl bg-green-500/10 border border-green-500/30">
-                        <p class="text-green-400 font-medium" id="user-name-display"></p>
-                        <p class="text-white/60 text-sm" id="user-email-display"></p>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm text-white/50 mb-2">Selecione o Plano</label>
-                        <select id="order-plan-select" class="input-field w-full rounded-xl px-4 py-3 text-white">
-                            <option value="">Selecione...</option>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm text-white/50 mb-2">Conteúdo do Arquivo (email|senha)</label>
-                        <textarea id="order-file-content" rows="3" placeholder="Cole aqui as credenciais do perfil..." class="input-field w-full rounded-xl px-4 py-3 text-white font-mono text-sm"></textarea>
-                    </div>
-                    
-                    <div class="flex gap-3">
-                        <button onclick="createOrderDirect()" class="btn-primary flex-1 py-3 rounded-xl font-semibold text-white">
-                            <i class="fas fa-paper-plane mr-2"></i>Criar e Entregar
-                        </button>
-                        <button onclick="createOrderPending()" class="bg-green-500/20 text-green-400 flex-1 py-3 rounded-xl font-semibold hover:bg-green-500/30 transition">
-                            <i class="fas fa-clock mr-2"></i>Criar Pendente
-                        </button>
-                    </div>
-                    
-                    <button onclick="closeModal()" class="w-full py-2 text-white/50 hover:text-white text-sm">Cancelar</button>
-                </div>
-            `;
-            loadPlansForModal();
+        async function loadStats() {
+            try {
+                const [pData, uData] = await Promise.all([
+                    api('/api/proxies/stats'),
+                    api('/api/auth/users')
+                ]);
+                document.getElementById('stat-total').textContent = pData.data?.total || 0;
+                document.getElementById('stat-available').textContent = pData.data?.available || 0;
+                document.getElementById('stat-active').textContent = pData.data?.active || 0;
+                document.getElementById('stat-users').textContent = uData.data?.users?.length || 0;
+            } catch (err) { console.error(err); }
         }
 
-        let upgradeProfiles = [];
-
-        async function openUpgradeModal(orderId, userEmail, currentPlanId) {
-            document.getElementById('modal').classList.remove('hidden');
-            document.getElementById('modal').classList.add('flex');
-            document.getElementById('modal-title').textContent = 'Upgrade de Plano';
-            
-            const profilesData = await api('/api/profiles/all?available=true');
-            upgradeProfiles = profilesData.data?.profiles || [];
-            
-            const tierColors = { junior: '🟢', premium: '🟣', master: '🟡' };
-            const profilesOptions = upgradeProfiles.map(p => 
-                `<option value="${p._id}">${tierColors[p.tier]} ${p.email} (${p.tier})</option>`
-            ).join('');
-            
-            document.getElementById('modal-content').innerHTML = `
-                <div class="space-y-4">
-                    <p class="text-white/50">Upgrade para: <span class="text-white font-medium">${userEmail}</span></p>
-                    
-                    <div>
-                        <label class="block text-sm text-white/50 mb-2">Selecione o Novo Plano</label>
-                        <select id="upgrade-plan-select" class="input-field w-full rounded-xl px-4 py-3 text-white" style="background: rgba(255,255,255,0.1);">
-                            <option value="">Carregando...</option>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm text-white/50 mb-2">
-                            Selecionar do Estoque
-                            <span class="text-green-400 text-xs ml-2">${upgradeProfiles.length} disponíveis</span>
-                        </label>
-                        <select id="upgrade-profile-select" onchange="toggleUpgradeManual()" class="input-field w-full rounded-xl px-4 py-3 text-white" style="background: rgba(255,255,255,0.1);">
-                            <option value="">Selecione um perfil...</option>
-                            ${profilesOptions}
-                        </select>
-                    </div>
-                    
-                    <div id="upgrade-manual-section" class="hidden">
-                        <label class="block text-sm text-white/50 mb-2">Ou cole manualmente (email|senha)</label>
-                        <textarea id="upgrade-file-content" rows="2" placeholder="email@exemplo.com|senha" class="input-field w-full rounded-xl px-4 py-3 text-white font-mono text-sm" style="background: rgba(255,255,255,0.05);"></textarea>
-                    </div>
-                    
-                    <button onclick="performUpgrade('${orderId}')" class="btn-primary w-full py-3 rounded-xl font-semibold text-white">
-                        <i class="fas fa-arrow-up mr-2"></i>Efetuar Upgrade
-                    </button>
-                    <button onclick="closeModal()" class="w-full py-2 text-white/50 hover:text-white text-sm">Cancelar</button>
-                </div>
-            `;
-            
-            api('/api/plans').then(data => {
-                if (data.success) {
-                    const select = document.getElementById('upgrade-plan-select');
-                    select.innerHTML = data.data.plans.map(p => 
-                        `<option value="${p._id}" ${p._id === currentPlanId ? 'disabled' : ''}>${p.name} - R$ ${p.price}</option>`
-                    ).join('');
-                }
-            });
+        function parseProxy(proxyStr) {
+            const match = proxyStr.match(/^([^:]+):([^@]+)@(.+):(\d+)$/);
+            if (!match) return null;
+            return { username: match[1], password: match[2], ip: match[3], port: parseInt(match[4]) };
         }
 
-        function toggleUpgradeManual() {
-            const profileSelect = document.getElementById('upgrade-profile-select');
-            const manualSection = document.getElementById('upgrade-manual-section');
-            if (profileSelect.value) {
-                manualSection.classList.add('hidden');
-            } else {
-                manualSection.classList.remove('hidden');
-            }
-        }
-
-        async function performUpgrade(orderId) {
-            const newPlanId = document.getElementById('upgrade-plan-select').value;
-            const profileId = document.getElementById('upgrade-profile-select').value;
-            const fileContent = document.getElementById('upgrade-file-content').value.trim();
+        async function addSingleProxy(e) {
+            e.preventDefault();
+            const proxyStr = document.getElementById('single-proxy').value.trim();
+            const tier = document.getElementById('single-tier').value;
+            const proxy = parseProxy(proxyStr);
             
-            if (!newPlanId) { showToast('Selecione um plano', 'error'); return; }
-            
-            let downloadUrl = '';
-            let selectedProfileId = '';
-            
-            if (profileId) {
-                const selectedProfile = upgradeProfiles.find(p => p._id === profileId);
-                if (selectedProfile) {
-                    downloadUrl = selectedProfile.email + '|' + selectedProfile.password;
-                    selectedProfileId = profileId;
-                }
-            } else if (fileContent) {
-                downloadUrl = fileContent;
-            } else {
-                showToast('Selecione um perfil do estoque ou cole manualmente', 'error');
+            if (!proxy) {
+                showToast('Formato inválido. Use: user:pass@ip:port', 'error');
                 return;
             }
             
             try {
-                const data = await api(`/api/orders/${orderId}/upgrade`, 'POST', { 
-                    newPlanId, 
-                    downloadUrl,
-                    profileId: selectedProfileId || undefined 
-                });
+                const data = await api('/api/proxies', 'POST', { ...proxy, tier });
                 if (data.success) {
-                    showToast('Upgrade realizado com sucesso!');
-                    closeModal();
-                    loadOrders();
-                    loadProfiles();
+                    showToast('Proxy adicionado!');
+                    document.getElementById('single-proxy').value = '';
+                    loadStats();
                 } else {
                     showToast(data.message || 'Erro', 'error');
                 }
             } catch (err) { showToast('Erro de conexão', 'error'); }
         }
 
-        async function searchUserByEmail() {
-            const email = document.getElementById('order-user-email').value.trim();
-            const infoBox = document.getElementById('user-info-box');
+        async function addBulkProxy(e) {
+            e.preventDefault();
+            const lines = document.getElementById('bulk-proxies').value.trim().split('\n').filter(l => l.trim());
+            const tier = document.getElementById('bulk-tier').value;
+            const proxies = lines.map(l => parseProxy(l.trim())).filter(p => p);
             
-            if (!email || !email.includes('@')) {
-                infoBox.classList.add('hidden');
+            if (proxies.length === 0) {
+                showToast('Nenhum proxy válido encontrado', 'error');
                 return;
             }
             
             try {
-                const data = await api(`/api/admin/user/${encodeURIComponent(email)}`);
-                if (data.success && data.data?.user) {
-                    document.getElementById('user-name-display').textContent = data.data.user.name;
-                    document.getElementById('user-email-display').textContent = data.data.user.email;
-                    infoBox.classList.remove('hidden');
-                    infoBox.classList.remove('bg-red-500/10', 'border-red-500/30');
-                    infoBox.classList.add('bg-green-500/10', 'border-green-500/30');
-                } else {
-                    document.getElementById('user-name-display').textContent = 'Usuário não encontrado';
-                    document.getElementById('user-email-display').textContent = 'Um novo usuário será criado';
-                    infoBox.classList.remove('hidden');
-                    infoBox.classList.remove('bg-green-500/10', 'border-green-500/30');
-                    infoBox.classList.add('bg-yellow-500/10', 'border-yellow-500/30');
-                }
-            } catch (err) { console.error('Erro:', err); }
-        }
-
-        async function loadPlansForModal() {
-            try {
-                const data = await api('/api/plans');
-                const select = document.getElementById('order-plan-select');
+                const data = await api('/api/proxies/bulk', 'POST', { proxies, tier });
                 if (data.success) {
-                    select.innerHTML = '<option value="">Selecione...</option>' + data.data.plans.map(p => 
-                        `<option value="${p._id}">${p.name} - R$ ${p.price}</option>`
-                    ).join('');
-                }
-            } catch (err) { console.error('Erro:', err); }
-        }
-
-        async function createOrderDirect() {
-            await createOrder(true);
-        }
-
-        async function createOrderPending() {
-            await createOrder(false);
-        }
-
-        async function createOrder(deliverDirect = false) {
-            const email = document.getElementById('order-user-email').value.trim();
-            const planId = document.getElementById('order-plan-select').value;
-            const fileContent = document.getElementById('order-file-content').value.trim();
-            
-            if (!email) { showToast('Informe o email do cliente', 'error'); return; }
-            if (!planId) { showToast('Selecione um plano', 'error'); return; }
-            
-            try {
-                let userData = await api(`/api/admin/user/${encodeURIComponent(email)}`);
-                let userId;
-                
-                if (!userData.success || !userData.data?.user) {
-                    const name = email.split('@')[0];
-                    const createRes = await api('/api/auth/register', 'POST', { name, email, password: 'cliente123' });
-                    if (!createRes.success) {
-                        showToast('Erro ao criar/buscar usuário', 'error');
-                        return;
-                    }
-                    userId = createRes.data.user.id;
+                    showToast(`${data.data?.count || proxies.length} proxies importados!`);
+                    document.getElementById('bulk-proxies').value = '';
+                    document.getElementById('bulk-count').textContent = '0';
+                    loadStats();
                 } else {
-                    userId = userData.data.user._id;
+                    showToast(data.message || 'Erro', 'error');
                 }
-                
-                const orderData = await api('/api/admin/orders', 'POST', { userId, planId });
-                if (!orderData.success) {
-                    showToast(orderData.message || 'Erro', 'error');
-                    return;
-                }
-                
-                if (deliverDirect && fileContent) {
-                    await api(`/api/orders/${orderData.data.order._id}/approve`, 'POST', { downloadUrl: fileContent });
-                    await api(`/api/orders/${orderData.data.order._id}/deliver`, 'POST', {});
-                    showToast('Pedido criado e entregue!');
-                } else if (fileContent) {
-                    await api(`/api/orders/${orderData.data.order._id}/approve`, 'POST', { downloadUrl: fileContent });
-                    showToast('Pedido criado e aprovado!');
-                } else {
-                    showToast('Pedido criado com sucesso!');
-                }
-                
-                closeModal();
-                loadOrders();
             } catch (err) { showToast('Erro de conexão', 'error'); }
         }
 
-        async function openCreateUserModal() {
-            document.getElementById('modal').classList.remove('hidden');
-            document.getElementById('modal').classList.add('flex');
-            document.getElementById('modal-title').textContent = 'Criar Usuário';
-            document.getElementById('modal-content').innerHTML = `
-                <p class="text-white/50 mb-4">Cadastre um novo cliente:</p>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm text-white/50 mb-2">Nome</label>
-                        <input type="text" id="new-user-name" placeholder="Nome completo" class="input-field w-full rounded-xl px-4 py-3 text-white">
-                    </div>
-                    <div>
-                        <label class="block text-sm text-white/50 mb-2">Email</label>
-                        <input type="email" id="new-user-email" placeholder="email@exemplo.com" class="input-field w-full rounded-xl px-4 py-3 text-white">
-                    </div>
-                    <div>
-                        <label class="block text-sm text-white/50 mb-2">WhatsApp</label>
-                        <input type="tel" id="new-user-whatsapp" placeholder="11999999999" class="input-field w-full rounded-xl px-4 py-3 text-white">
-                    </div>
-                    <div class="flex gap-3">
-                        <button onclick="createUser()" class="btn-primary flex-1 py-3 rounded-xl font-semibold text-white">Criar Usuário</button>
-                        <button onclick="closeModal()" class="flex-1 py-3 rounded-xl font-semibold text-white/50 bg-white/5">Cancelar</button>
-                    </div>
-                </div>
-            `;
-        }
-
-        async function createUser() {
-            const name = document.getElementById('new-user-name').value.trim();
-            const email = document.getElementById('new-user-email').value.trim();
-            const whatsapp = document.getElementById('new-user-whatsapp').value.trim();
-            
-            if (!name || !email) { showToast('Nome e email são obrigatórios', 'error'); return; }
-            
+        async function loadProxies() {
             try {
-                const data = await api('/api/auth/register', 'POST', { name, email, password: 'cliente123', whatsapp });
-                if (data.success) {
-                    showToast('Usuário criado com sucesso!');
-                    closeModal();
-                } else { showToast(data.message || 'Erro', 'error'); }
-            } catch (err) { showToast('Erro de conexão', 'error'); }
-        }
-
-        function closeModal() {
-            document.getElementById('modal').classList.add('hidden');
-            document.getElementById('modal').classList.remove('flex');
-        }
-
-        async function loadOrders() {
-            try {
-                const data = await api('/api/orders');
-                const orders = data.data?.orders || [];
-                
-                document.getElementById('stat-total').textContent = orders.length;
-                document.getElementById('stat-pending').textContent = orders.filter(o => o.status === 'pending').length;
-                document.getElementById('stat-delivered').textContent = orders.filter(o => o.status === 'delivered').length;
-                
-                const tbody = document.getElementById('orders-table');
-                if (orders.length > 0) {
-                    const statusColors = { pending: 'bg-yellow-500/20 text-yellow-400', approved: 'bg-green-500/20 text-green-400', rejected: 'bg-red-500/20 text-red-400', delivered: 'bg-blue-500/20 text-blue-400' };
-                    const statusText = { pending: 'Pendente', approved: 'Aprovado', rejected: 'Rejeitado', delivered: 'Entregue' };
-                    tbody.innerHTML = orders.map(order => `<tr class="border-t border-white/5 hover:bg-white/5">
-                        <td class="px-6 py-4"><div class="font-medium">${order.userId?.name || 'N/A'}</div><div class="text-xs text-white/40">${order.userId?.email || ''}</div></td>
-                        <td class="px-6 py-4">
-                            <div>${order.planId?.name || 'Plano deletado'}</div>
-                            <button onclick="openUpgradeModal('${order._id}', '${order.userId?.email || ''}', '${order.planId?._id || ''}')" class="text-xs text-purple-400 hover:text-purple-300 mt-1">
-                                <i class="fas fa-arrow-up mr-1"></i>Upgrade
-                            </button>
-                        </td>
-                        <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium ${statusColors[order.status]}">${statusText[order.status]}</span></td>
-                        <td class="px-6 py-4 text-sm text-white/40">${new Date(order.createdAt).toLocaleDateString('pt-BR')}</td>
-                        <td class="px-6 py-4 text-center">
-                            ${order.status === 'pending' ? `<button onclick="openApproveModal('${order._id}')" class="text-green-400 hover:text-green-300 mr-3"><i class="fas fa-check"></i></button><button onclick="rejectOrder('${order._id}')" class="text-red-400 hover:text-red-300"><i class="fas fa-times"></i></button>` : order.status === 'approved' ? `<button onclick="deliverOrder('${order._id}')" class="text-blue-400 hover:text-blue-300"><i class="fas fa-paper-plane"></i></button>` : '-'}
-                        </td>
-                    </tr>`).join('');
-                } else {
-                    tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-12 text-center text-white/40">Nenhum pedido encontrado</td></tr>';
-                }
-            } catch (err) { console.error('Erro:', err); }
-        }
-
-        function openApproveModal(orderId) {
-            document.getElementById('modal').classList.remove('hidden');
-            document.getElementById('modal').classList.add('flex');
-            document.getElementById('modal-title').textContent = 'Aprovar Pedido';
-            document.getElementById('modal-content').innerHTML = `
-                <p class="text-white/50 mb-4">Cole o conteúdo do arquivo (email|senha):</p>
-                <textarea id="download-content" rows="4" placeholder="email@exemplo.com|senha123" class="input-field w-full rounded-xl px-4 py-3 text-white font-mono text-sm mb-4"></textarea>
-                <div class="flex gap-3">
-                    <button onclick="approveOrder('${orderId}')" class="btn-primary flex-1 py-2 rounded-xl font-semibold text-white">Aprovar</button>
-                    <button onclick="closeModal()" class="flex-1 py-2 rounded-xl font-semibold text-white/50 bg-white/5">Cancelar</button>
-                </div>
-            `;
-        }
-
-        async function approveOrder(orderId) {
-            const downloadUrl = document.getElementById('download-content').value.trim();
-            if (!downloadUrl) { showToast('Cole o conteúdo do arquivo', 'error'); return; }
-            try {
-                const data = await api(`/api/orders/${orderId}/approve`, 'POST', { downloadUrl });
-                if (data.success) { showToast('Pedido aprovado!'); closeModal(); loadOrders(); }
-                else { showToast(data.message || 'Erro', 'error'); }
-            } catch (err) { showToast('Erro de conexão', 'error'); }
-        }
-
-        async function rejectOrder(orderId) {
-            if (!confirm('Rejeitar este pedido?')) return;
-            try { await api(`/api/orders/${orderId}/reject`, 'POST', {}); showToast('Pedido rejeitado'); loadOrders(); }
-            catch (err) { showToast('Erro de conexão', 'error'); }
-        }
-
-        async function deliverOrder(orderId) {
-            try {
-                const data = await api(`/api/orders/${orderId}/deliver`, 'POST', {});
-                if (data.success) { showToast('Pedido entregue!'); loadOrders(); }
-                else { showToast(data.message || 'Erro', 'error'); }
-            } catch (err) { showToast('Erro de conexão', 'error'); }
-        }
-
-        async function loadProfiles() {
-            try {
-                const tier = document.getElementById('filter-tier').value;
-                const status = document.getElementById('filter-status').value;
-                let url = '/api/proxies';
-                const params = [];
-                if (tier) params.push(`tier=${tier}`);
-                if (status) params.push(`status=${status}`);
-                if (params.length) url += '?' + params.join('&');
-                
-                const data = await api(url);
+                const data = await api('/api/proxies');
                 const proxies = data.data?.proxies || [];
+                const tbody = document.getElementById('proxies-table');
+                const tierColors = { basic: 'bg-green-500/20 text-green-400', premium: 'bg-purple-500/20 text-purple-400', master: 'bg-amber-500/20 text-amber-400' };
                 
-                document.getElementById('pstat-total').textContent = proxies.length;
-                document.getElementById('pstat-available').textContent = proxies.filter(p => p.status === 'available').length;
-                document.getElementById('pstat-delivered').textContent = proxies.filter(p => p.status === 'active').length;
-                document.getElementById('pstat-premium').textContent = proxies.filter(p => p.tier === 'premium').length;
-                
-                const tbody = document.getElementById('profiles-table');
                 if (proxies.length > 0) {
-                    const tierColors = { shared: 'bg-green-500/20 text-green-400', dedicated: 'bg-purple-500/20 text-purple-400', premium: 'bg-amber-500/20 text-amber-400' };
                     tbody.innerHTML = proxies.map(p => `<tr class="border-t border-white/5 hover:bg-white/5">
-                        <td class="px-6 py-4 font-mono text-sm">${p.username}:${p.password}@${p.ip}:${p.port}</td>
-                        <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium ${tierColors[p.tier] || 'bg-gray-500/20 text-gray-400'}">${p.tier?.toUpperCase() || 'SHARED'}</span></td>
-                        <td class="px-6 py-4"><span class="${p.status === 'available' ? 'text-green-400' : 'text-blue-400'}">${p.status === 'available' ? 'Disponível' : 'Ativo'}</span></td>
-                        <td class="px-6 py-4 text-sm text-white/60">${p.assignedTo?.name || '-'}</td>
-                        <td class="px-6 py-4 text-sm text-white/40">${new Date(p.createdAt).toLocaleDateString('pt-BR')}</td>
-                        <td class="px-6 py-4 text-center"><button onclick="deleteProfile('${p._id}')" class="text-red-400 hover:text-red-300"><i class="fas fa-trash"></i></button></td>
+                        <td class="px-4 py-3 font-mono text-sm">${p.username}:${p.password}@${p.ip}:${p.port}</td>
+                        <td class="px-4 py-3"><span class="px-2 py-1 rounded text-xs ${tierColors[p.tier] || 'bg-gray-500/20 text-gray-400'}">${p.tier || 'basic'}</span></td>
+                        <td class="px-4 py-3 text-sm ${p.status === 'available' ? 'text-green-400' : 'text-blue-400'}">${p.status === 'available' ? 'Disponível' : 'Ativo'}</td>
+                        <td class="px-4 py-3 text-sm text-white/50">${new Date(p.createdAt).toLocaleDateString('pt-BR')}</td>
+                        <td class="px-4 py-3 text-center">
+                            <button onclick="deleteProxy('${p._id}')" class="text-red-400 hover:text-red-300"><i class="fas fa-trash"></i></button>
+                        </td>
                     </tr>`).join('');
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-12 text-center text-white/40">Nenhum proxy encontrado</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-white/40">Nenhum proxy</td></tr>';
                 }
-            } catch (err) { console.error('Erro:', err); }
+            } catch (err) { console.error(err); }
         }
 
-        async function deleteProfile(proxyId) {
-            if (!confirm('Excluir este proxy?')) return;
+        async function deleteProxy(id) {
+            if (!confirm('Excluir proxy?')) return;
             try {
-                const data = await api(`/api/proxies/${proxyId}`, 'DELETE');
-                if (data.success) { showToast('Proxy excluído!'); loadProfiles(); }
-                else { showToast(data.message || 'Erro', 'error'); }
-            } catch (err) { showToast('Erro de conexão', 'error'); }
-        }
-
-        async function loadReplacements() {
-            try {
-                const data = await api('/api/replacements');
-                const tbody = document.getElementById('replacements-table');
-                if (data.success && data.data.replacements.length > 0) {
-                    const statusColors = { pending: 'bg-yellow-500/20 text-yellow-400', approved: 'bg-green-500/20 text-green-400', auto_approved: 'bg-blue-500/20 text-blue-400', rejected: 'bg-red-500/20 text-red-400' };
-                    const statusText = { pending: 'Pendente', approved: 'Aprovado', auto_approved: 'Auto (48h)', rejected: 'Rejeitado' };
-                    tbody.innerHTML = data.data.replacements.map(r => `<tr class="border-t border-white/5 hover:bg-white/5">
-                        <td class="px-6 py-4"><div class="font-medium">${r.userId?.name || 'N/A'}</div><div class="text-xs text-white/40">${r.userId?.email || ''}</div></td>
-                        <td class="px-6 py-4">Pedido #${r.orderId?._id?.slice(-6) || 'N/A'}</td>
-                        <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium ${statusColors[r.status]}">${statusText[r.status]}</span></td>
-                        <td class="px-6 py-4 text-sm text-white/40">${new Date(r.createdAt).toLocaleDateString('pt-BR')}</td>
-                        <td class="px-6 py-4 text-center">${r.status === 'pending' ? `<button onclick="openReplacementModal('${r._id}')" class="text-green-400 hover:text-green-300 mr-3"><i class="fas fa-check"></i></button><button onclick="rejectReplacement('${r._id}')" class="text-red-400 hover:text-red-300"><i class="fas fa-times"></i></button>` : '-'}</td>
-                    </tr>`).join('');
-                } else {
-                    tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-12 text-center text-white/40">Nenhuma reposição pendente</td></tr>';
-                }
-            } catch (err) { console.error('Erro:', err); }
-        }
-
-        function openReplacementModal(replacementId) {
-            document.getElementById('modal').classList.remove('hidden');
-            document.getElementById('modal').classList.add('flex');
-            document.getElementById('modal-title').textContent = 'Aprovar Reposição';
-            document.getElementById('modal-content').innerHTML = `
-                <p class="text-white/50 mb-4">Cole o novo arquivo (email|senha):</p>
-                <textarea id="replacement-content" rows="4" placeholder="novo_email@exemplo.com|nova_senha" class="input-field w-full rounded-xl px-4 py-3 text-white font-mono text-sm mb-4"></textarea>
-                <div class="flex gap-3">
-                    <button onclick="approveReplacement('${replacementId}')" class="btn-primary flex-1 py-2 rounded-xl font-semibold text-white">Aprovar</button>
-                    <button onclick="closeModal()" class="flex-1 py-2 rounded-xl font-semibold text-white/50 bg-white/5">Cancelar</button>
-                </div>
-            `;
-        }
-
-        async function approveReplacement(replacementId) {
-            const downloadUrl = document.getElementById('replacement-content').value.trim();
-            if (!downloadUrl) { showToast('Cole o conteúdo do arquivo', 'error'); return; }
-            try {
-                const data = await api(`/api/replacements/${replacementId}/approve`, 'POST', { downloadUrl });
-                if (data.success) { showToast('Reposição aprovada!'); closeModal(); loadReplacements(); }
-                else { showToast(data.message || 'Erro', 'error'); }
-            } catch (err) { showToast('Erro de conexão', 'error'); }
-        }
-
-        async function rejectReplacement(replacementId) {
-            if (!confirm('Rejeitar esta reposição?')) return;
-            try { await api(`/api/replacements/${replacementId}/reject`, 'POST', {}); showToast('Reposição rejeitada'); loadReplacements(); }
-            catch (err) { showToast('Erro de conexão', 'error'); }
-        }
-
-        function handleFileSelect(input) {
-            const file = input.files[0];
-            if (file) {
-                document.getElementById('file-name').textContent = file.name;
-                document.getElementById('file-name').classList.remove('hidden');
-            }
-        }
-
-        function countBulkLines() {
-            const content = document.getElementById('bulk-profiles').value;
-            const lines = content.split('\n').filter(l => l.trim().length > 0);
-            document.getElementById('bulk-count').textContent = `${lines.length} perfis detectados`;
-        }
-
-        async function handleUpload(e) {
-            e.preventDefault();
-            const file = document.getElementById('upload-file').files[0];
-            const tier = document.getElementById('upload-tier').value;
-            const btn = document.getElementById('upload-btn');
-            const alertEl = document.getElementById('upload-alert');
-            
-            if (!file) { showToast('Selecione um arquivo', 'error'); return; }
-            
-            btn.innerHTML = '<i class="fas fa-spinner spinner mr-2"></i> Importando...';
-            btn.disabled = true;
-            
-            const reader = new FileReader();
-            reader.onload = async (event) => {
-                const content = event.target.result?.trim();
-                if (!content) { showToast('Arquivo vazio', 'error'); btn.innerHTML = '<i class="fas fa-upload mr-2"></i> Importar'; btn.disabled = false; return; }
-                
-                const parts = content.split(/[|\n]/);
-                const email = parts[0]?.trim();
-                const password = parts[1]?.trim() || content;
-                
-                if (!email) { showToast('Arquivo sem email válido', 'error'); btn.innerHTML = '<i class="fas fa-upload mr-2"></i> Importar'; btn.disabled = false; return; }
-                
-                try {
-                    const data = await api('/api/profiles/bulk', 'POST', { profiles: [{ email, password, tier }] });
-                    alertEl.innerHTML = `<div class="bg-green-500/20 border border-green-500/50 rounded-xl p-4"><i class="fas fa-check-circle text-green-400 mr-2"></i>1 perfil importado!</div>`;
-                    alertEl.classList.remove('hidden');
-                    document.getElementById('upload-file').value = '';
-                    document.getElementById('file-name').classList.add('hidden');
-                    setTimeout(() => alertEl.classList.add('hidden'), 5000);
-                } catch (err) { alertEl.innerHTML = `<div class="bg-red-500/20 border border-red-500/50 rounded-xl p-4"><i class="fas fa-times-circle text-red-400 mr-2"></i>Erro ao importar</div>`; alertEl.classList.remove('hidden'); }
-                finally { btn.innerHTML = '<i class="fas fa-upload mr-2"></i> Importar'; btn.disabled = false; }
-            };
-            reader.readAsText(file);
-        }
-
-        async function handleBulkUpload(e) {
-            e.preventDefault();
-            const content = document.getElementById('bulk-profiles').value;
-            const tier = document.getElementById('bulk-tier').value;
-            const btn = document.getElementById('bulk-btn');
-            const alertEl = document.getElementById('upload-alert');
-            
-            const lines = content.split('\n').filter(l => l.trim().length > 0);
-            if (lines.length === 0) { showToast('Nenhum proxy detectado', 'error'); return; }
-            
-            btn.innerHTML = '<i class="fas fa-spinner spinner mr-2"></i> Importando...';
-            btn.disabled = true;
-            
-            const proxies = lines.map(line => ({ proxy: line.trim(), tier })).filter(p => p.proxy.includes('@'));
-            
-            if (proxies.length === 0) { showToast('Formato inválido. Use: user:pass@ip:port', 'error'); btn.innerHTML = '<i class="fas fa-upload mr-2"></i> Importar Bulk'; btn.disabled = false; return; }
-            
-            try {
-                const data = await api('/api/proxies/bulk', 'POST', { proxies });
+                const data = await api(`/api/proxies/${id}`, 'DELETE');
                 if (data.success) {
-                    alertEl.innerHTML = `<div class="bg-green-500/20 border border-green-500/50 rounded-xl p-4"><i class="fas fa-check-circle text-green-400 mr-2"></i>${proxies.length} proxies importados!</div>`;
-                    alertEl.classList.remove('hidden');
-                    document.getElementById('bulk-profiles').value = '';
-                    countBulkLines();
-                } else { alertEl.innerHTML = `<div class="bg-red-500/20 border border-red-500/50 rounded-xl p-4"><i class="fas fa-times-circle text-red-400 mr-2"></i>${data.message || 'Erro'}</div>`; alertEl.classList.remove('hidden'); }
-            } catch (err) { alertEl.innerHTML = `<div class="bg-red-500/20 border border-red-500/50 rounded-xl p-4"><i class="fas fa-times-circle text-red-400 mr-2"></i>Erro de conexão</div>`; alertEl.classList.remove('hidden'); }
-            finally { btn.innerHTML = '<i class="fas fa-upload mr-2"></i> Importar Bulk'; btn.disabled = false; }
+                    showToast('Proxy excluído');
+                    loadProxies();
+                    loadStats();
+                }
+            } catch (err) { showToast('Erro', 'error'); }
         }
 
-        // Init
-        (async () => {
-            if (token) {
-                try {
-                    const data = await api('/api/auth/me');
-                    if (data.success && data.data.user.role === 'admin') {
-                        document.getElementById('admin-user').textContent = data.data.user.name;
-                        document.getElementById('login-section').classList.add('hidden');
-                        document.getElementById('main-section').classList.remove('hidden');
-                        document.getElementById('nav-info').classList.remove('hidden');
-                        document.getElementById('nav-info').classList.add('flex');
-                        loadOrders();
-                    } else { logout(); }
-                } catch { logout(); }
-            }
-        })();
+        async function loadUsers() {
+            try {
+                const data = await api('/api/auth/users');
+                const users = data.data?.users || [];
+                const tbody = document.getElementById('users-table');
+                
+                if (users.length > 0) {
+                    tbody.innerHTML = users.map(u => `<tr class="border-t border-white/5 hover:bg-white/5">
+                        <td class="px-4 py-3">
+                            <div class="font-medium">${u.name}</div>
+                            <div class="text-xs text-white/50">${u.email}</div>
+                        </td>
+                        <td class="px-4 py-3 text-sm">-</td>
+                        <td class="px-4 py-3 text-sm">${u.proxyCount || 0}</td>
+                        <td class="px-4 py-3"><span class="px-2 py-1 rounded text-xs ${u.isActive ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}">${u.isActive ? 'Ativo' : 'Inativo'}</span></td>
+                        <td class="px-4 py-3 text-sm text-white/50">-</td>
+                        <td class="px-4 py-3 text-center">
+                            <button onclick="viewUserProxies('${u._id}')" class="text-green-400 hover:text-green-300 mr-2"><i class="fas fa-eye"></i></button>
+                            <button onclick="allocateProxy('${u._id}')" class="text-blue-400 hover:text-blue-300"><i class="fas fa-plus"></i></button>
+                        </td>
+                    </tr>`).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-white/40">Nenhum usuário</td></tr>';
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        function viewUserProxies(userId) {
+            showToast('Funcionalidade em desenvolvimento');
+        }
+
+        function allocateProxy(userId) {
+            showToast('Funcionalidade em desenvolvimento - vinculada à API de pagamentos');
+        }
+
+        document.getElementById('bulk-proxies').addEventListener('input', function() {
+            const count = this.value.trim().split('\n').filter(l => l.trim()).length;
+            document.getElementById('bulk-count').textContent = count;
+        });
+
+        if (token) {
+            api('/api/auth/me').then(data => {
+                if (data.success && data.data.user.role === 'admin') {
+                    document.getElementById('login-section').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    document.getElementById('admin-name').textContent = data.data.user.name;
+                    loadStats();
+                }
+            });
+        }
     </script>
 </body>
 </html>
