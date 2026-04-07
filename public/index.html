@@ -550,9 +550,6 @@
             <a href="#inicio" class="mobile-nav-link text-lg font-medium py-4 px-4 rounded-xl transition-all" style="color: var(--text-secondary)">
                 Início
             </a>
-            <a href="#solucao" class="mobile-nav-link text-lg font-medium py-4 px-4 rounded-xl transition-all" style="color: var(--text-secondary)">
-                Solução
-            </a>
             <a href="#beneficios" class="mobile-nav-link text-lg font-medium py-4 px-4 rounded-xl transition-all" style="color: var(--text-secondary)">
                 Benefícios
             </a>
@@ -562,14 +559,27 @@
             <a href="#planos" class="mobile-nav-link text-lg font-medium py-4 px-4 rounded-xl transition-all" style="color: var(--text-secondary)">
                 Planos
             </a>
-            <a href="#depoimentos" class="mobile-nav-link text-lg font-medium py-4 px-4 rounded-xl transition-all" style="color: var(--text-secondary)">
-                Depoimentos
-            </a>
-            <a href="#faq" class="mobile-nav-link text-lg font-medium py-4 px-4 rounded-xl transition-all" style="color: var(--text-secondary)">
-                FAQ
-            </a>
         </div>
         
+        <div class="mt-8 pt-8" style="border-top: 1px solid var(--border-color)">
+            <a href="portal.html" class="btn-secondary flex items-center justify-center gap-2 w-full py-4 rounded-xl mb-4">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                Área do Cliente
+            </a>
+            <a href="admin.html" class="btn-secondary flex items-center justify-center gap-2 w-full py-4 rounded-xl mb-4">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Painel Admin
+            </a>
+            <a href="#planos" class="btn-primary block w-full text-center py-4 rounded-xl font-semibold">
+                COMEÇAR AGORA
+            </a>
+        </div>
+    </div>
         <div class="mt-8 pt-8" style="border-top: 1px solid var(--border-color)">
             <a href="#planos" class="btn-primary block w-full text-center py-4 rounded-xl font-semibold mb-4">
                 COMEÇAR AGORA
@@ -595,16 +605,21 @@
             </a>
             
             <!-- Desktop Navigation -->
-            <div class="hidden lg:flex items-center gap-8">
+            <div class="hidden lg:flex items-center gap-6">
                 <a href="#inicio" class="nav-link text-sm font-medium">Início</a>
                 <a href="#beneficios" class="nav-link text-sm font-medium">Benefícios</a>
                 <a href="#como-funciona" class="nav-link text-sm font-medium">Como Funciona</a>
                 <a href="#planos" class="nav-link text-sm font-medium">Planos</a>
-                <a href="#faq" class="nav-link text-sm font-medium">FAQ</a>
             </div>
             
             <!-- Right Side -->
             <div class="flex items-center gap-3">
+                <a href="portal.html" class="text-sm font-medium px-4 py-2 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition">
+                    Área do Cliente
+                </a>
+                <a href="admin.html" class="text-sm font-medium px-4 py-2 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition">
+                    Admin
+                </a>
                 <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme"></button>
                 <a href="#planos" class="btn-primary text-sm font-semibold hidden md:block">
                     COMEÇAR AGORA
@@ -646,8 +661,8 @@
                     <a href="#planos" class="btn-primary text-base px-8 py-4 w-full sm:w-auto">
                         Ver Planos
                     </a>
-                    <a href="#como-funciona" class="btn-secondary text-base px-8 py-4 w-full sm:w-auto">
-                        Como Funciona
+                    <a href="portal.html" class="btn-secondary text-base px-8 py-4 w-full sm:w-auto">
+                        Área do Cliente
                     </a>
                 </div>
                 
@@ -656,19 +671,19 @@
                         <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                         </svg>
-                        <span>Reposições</span>
+                        <span>IPs Brasileiros</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                         </svg>
-                        <span>Ativação Rápida</span>
+                        <span>Entrega Imediata</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                         </svg>
-                        <span>Suporte</span>
+                        <span>Suporte 24/7</span>
                     </div>
                 </div>
             </div>
@@ -686,20 +701,20 @@
         <div class="max-w-7xl mx-auto px-6">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
                 <div class="reveal">
-                    <div class="text-4xl md:text-5xl font-bold gradient-text stat-number">100MM+</div>
-                    <p class="text-sm mt-2" style="color: var(--text-muted)">Investidos sem bloqueios</p>
+                    <div class="text-4xl md:text-5xl font-bold gradient-text stat-number">50K+</div>
+                    <p class="text-sm mt-2" style="color: var(--text-muted)">Proxies entregues</p>
                 </div>
                 <div class="reveal reveal-delay-1">
-                    <div class="text-4xl md:text-5xl font-bold gradient-text stat-number">220+</div>
-                    <p class="text-sm mt-2" style="color: var(--text-muted)">Anunciantes ativos</p>
+                    <div class="text-4xl md:text-5xl font-bold gradient-text stat-number">500+</div>
+                    <p class="text-sm mt-2" style="color: var(--text-muted)">Clientes ativos</p>
                 </div>
                 <div class="reveal reveal-delay-2">
-                    <div class="text-4xl md:text-5xl font-bold gradient-text stat-number">1.000+</div>
-                    <p class="text-sm mt-2" style="color: var(--text-muted)">Contas entregues</p>
+                    <div class="text-4xl md:text-5xl font-bold gradient-text stat-number">99.9%</div>
+                    <p class="text-sm mt-2" style="color: var(--text-muted)">Uptime dos proxies</p>
                 </div>
                 <div class="reveal reveal-delay-3">
-                    <div class="text-4xl md:text-5xl font-bold gradient-text stat-number">99%</div>
-                    <p class="text-sm mt-2" style="color: var(--text-muted)">Taxa de satisfação</p>
+                    <div class="text-4xl md:text-5xl font-bold gradient-text stat-number">24/7</div>
+                    <p class="text-sm mt-2" style="color: var(--text-muted)">Suporte online</p>
                 </div>
             </div>
         </div>
