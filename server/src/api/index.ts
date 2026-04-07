@@ -13,33 +13,6 @@ const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || 'fastproxy_secret_key_2024';
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://ericktorresadm_db_user:FBra8yqPipxOVFSy@clusterfastproxy.tdun6hv.mongodb.net/fastproxy?appName=clusterfastproxy';
 
-let isConnected = false;
-let connectPromise: Promise<void> | null = null;
-
-const connectDB = async () => {
-  if (isConnected || mongoose.connection.readyState === 1) return;
-  if (connectPromise) return connectPromise;
-  
-  connectPromise = (async () => {
-    try {
-      await mongoose.connect(MONGODB_URI, { 
-        maxPoolSize: 1,
-        serverSelectionTimeoutMS: 30000,
-        socketTimeoutMS: 30000,
-        bufferCommands: false,
-      });
-      isConnected = true;
-      console.log('MongoDB connected');
-    } catch (err: any) {
-      console.error('MongoDB error:', err.message);
-      connectPromise = null;
-      throw err;
-    }
-  })();
-  
-  return connectPromise;
-};
-
 const sanitize = (str: string): string => {
   if (typeof str !== 'string') return '';
   return str.trim().slice(0, 500).replace(/[<>]/g, '');
@@ -49,6 +22,27 @@ app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json({ limit: '50kb' }));
 
+// mongoose promise config
+mongoose.promise = Promise;
+
+const connectDB = async () => {
+  if (mongoose.connection.readyState >= 1) return;
+  
+  try {
+    if (mongoose.connection.readyState === 0) {
+      await mongoose.connect(MONGODB_URI, {
+        maxPoolSize: 1,
+        serverSelectionTimeoutMS: 15000,
+        socketTimeoutMS: 15000,
+        connectTimeoutMS: 15000,
+      });
+    }
+  } catch (err: any) {
+    console.error('MongoDB connect error:', err.message);
+  }
+};
+
+// Models
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true },
@@ -82,6 +76,7 @@ const Order = mongoose.models.Order || mongoose.model('Order', new mongoose.Sche
   status: { type: String, default: 'pending' }, expiresAt: Date
 }, { timestamps: true }));
 
+// Auth middleware
 const authenticate = async (req: any, res: any, next: any) => {
   try {
     const authHeader = req.headers.authorization;
@@ -101,6 +96,7 @@ const adminOnly = (req: any, res: any, next: any) => {
   next();
 };
 
+// Routes
 app.get('/api/health', (req, res) => res.json({ success: true, message: 'FastProxy API funcionando!', timestamp: new Date().toISOString() }));
 
 app.post('/api/auth/register', async (req: any, res: any) => {
