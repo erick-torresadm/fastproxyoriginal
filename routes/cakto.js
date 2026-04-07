@@ -39,6 +39,7 @@ async function getOrCreateOffer(productId, period, quantity, pricePerUnit) {
     const offerName = `${quantity}x Proxy IPv6 - FastProxy (${period === 'annual' ? 'Anual' : 'Mensal'})`;
     
     console.log(`Creating offer: ${offerName} - R$ ${totalPrice.toFixed(2)}`);
+    console.log('Product ID:', productId);
     
     const offerData = {
       name: offerName,
@@ -59,8 +60,12 @@ async function getOrCreateOffer(productId, period, quantity, pricePerUnit) {
     console.log('Created offer:', offer.id, offer.name, offer.price);
     return offer;
   } catch (err) {
-    console.error('Error creating offer:', err.response?.data || err.message);
-    throw err;
+    console.error('Error creating offer:', err.message);
+    console.error('Response data:', err.response?.data);
+    console.error('Status:', err.response?.status);
+    
+    const errorDetail = err.response?.data?.detail || err.response?.data?.message || err.message;
+    throw new Error(`Erro ao criar oferta: ${errorDetail}`);
   }
 }
 
@@ -91,8 +96,12 @@ async function createCheckoutForOffer(offerId, email, whatsapp, extraData) {
     
     return { checkout, checkoutUrl };
   } catch (err) {
-    console.error('Error creating checkout:', err.response?.data || err.message);
-    throw err;
+    console.error('Error creating checkout:', err.message);
+    console.error('Response data:', err.response?.data);
+    console.error('Status:', err.response?.status);
+    
+    const errorDetail = err.response?.data?.detail || err.response?.data?.message || err.message;
+    throw new Error(`Erro ao criar checkout: ${errorDetail}`);
   }
 }
 
@@ -202,6 +211,41 @@ router.get('/test-api', async (req, res) => {
     res.status(500).json({ 
       success: false,
       error: err.message 
+    });
+  }
+});
+
+router.get('/test-create-offer', async (req, res) => {
+  try {
+    const productId = PRODUCT_IDS.monthly;
+    console.log('Testing offer creation...');
+    console.log('Product ID:', productId);
+    
+    const testOffer = await Cakto.createOffer({
+      name: 'TESTE - 1 Proxy (Debug)',
+      price: 29.90,
+      product: productId,
+      type: 'unique',
+      status: 'active',
+      default: true
+    });
+    
+    console.log('Test offer created:', testOffer);
+    
+    res.json({
+      success: true,
+      offer: testOffer
+    });
+  } catch (err) {
+    console.error('Test offer error:', err.message);
+    console.error('Response:', err.response?.data);
+    console.error('Status:', err.response?.status);
+    
+    res.status(500).json({
+      success: false,
+      error: err.message,
+      details: err.response?.data,
+      status: err.response?.status
     });
   }
 });
