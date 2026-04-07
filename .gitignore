@@ -4,4 +4,5 @@ node_modules/
 *.log
 .DS_Store
 adfast/
-.vercel
+server/node_modules/
+server/dist/

@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server/src/api/index.ts",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "server/src/api/index.ts" },
+    { "src": "/portal.html", "dest": "public/portal.html" },
+    { "src": "/admin.html", "dest": "public/admin.html" },
+    { "src": "/(.*)", "dest": "public/index.html" }
+  ]
+}

@@ -4,12 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FastProxy - Portal do Cliente</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
             theme: {
@@ -43,38 +42,91 @@
         .input-field:focus { border-color: #9333ea; box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.2); outline: none; }
         .btn-primary { background: linear-gradient(135deg, #9333ea, #4f46e5); transition: all 0.3s; }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(147, 51, 234, 0.3); }
+        .plan-card { transition: all 0.3s; }
+        .plan-card:hover { transform: translateY(-8px); box-shadow: 0 20px 60px rgba(147, 51, 234, 0.25); }
         .glow { box-shadow: 0 0 60px rgba(147, 51, 234, 0.2); }
         .spinner { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+        .menu-dropdown { animation: fadeIn 0.2s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .plan-featured { position: relative; overflow: hidden; }
+        .plan-featured::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(147, 51, 234, 0.1), transparent); animation: shimmer 3s infinite; }
+        @keyframes shimmer { 0% { transform: translateX(-100%) rotate(45deg); } 100% { transform: translateX(100%) rotate(45deg); } }
     </style>
 </head>
 <body>
     <!-- Navbar -->
     <nav class="fixed top-0 w-full z-50 bg-black/50 backdrop-blur-xl border-b border-white/10">
         <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="index.html" class="flex items-center gap-3 hover:opacity-80 transition">
-                <img src="img/LOGO FAST PROXY.png" alt="FastProxy" class="h-10 w-auto object-contain">
+            <a href="/" class="flex items-center gap-3 hover:opacity-80 transition">
+                <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                </div>
                 <span class="text-xl font-bold gradient-text">FastProxy</span>
             </a>
+            
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex items-center gap-6">
+                <button onclick="toggleMenu('plans')" class="text-white/70 hover:text-white transition flex items-center gap-1">
+                    Planos <i class="fas fa-chevron-down text-xs"></i>
+                </button>
+                <button onclick="toggleMenu('account')" class="text-white/70 hover:text-white transition flex items-center gap-1">
+                    Minha Conta <i class="fas fa-chevron-down text-xs"></i>
+                </button>
+            </div>
             
             <!-- User Info -->
             <div id="user-info" class="hidden items-center gap-4">
                 <span id="user-name" class="text-white/60"></span>
                 <button onclick="logout()" class="text-sm text-white/40 hover:text-white transition">Sair</button>
             </div>
+            
+            <!-- Mobile Menu Button -->
+            <button onclick="toggleMobileMenu()" class="md:hidden text-white">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+        
+        <!-- Planos Dropdown -->
+        <div id="menu-plans" class="hidden absolute left-0 right-0 top-full bg-black/95 backdrop-blur-xl border-b border-white/10">
+            <div class="max-w-6xl mx-auto px-6 py-6">
+                <div class="grid md:grid-cols-3 gap-4">
+                    <a href="#plans" onclick="scrollToSection('plans')" class="p-4 rounded-xl hover:bg-white/5 transition">
+                        <h4 class="font-semibold text-purple-400 mb-1">Planos</h4>
+                        <p class="text-sm text-white/50">Escolha o plano ideal para você</p>
+                    </a>
+                    <a href="#orders" onclick="scrollToSection('orders')" class="p-4 rounded-xl hover:bg-white/5 transition">
+                        <h4 class="font-semibold text-purple-400 mb-1">Meus Pedidos</h4>
+                        <p class="text-sm text-white/50">Acompanhe suas compras</p>
+                    </a>
+                    <a href="#replacements" onclick="scrollToSection('replacements')" class="p-4 rounded-xl hover:bg-white/5 transition">
+                        <h4 class="font-semibold text-purple-400 mb-1">Reposições</h4>
+                        <p class="text-sm text-white/50">Solicite reposições</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden border-t border-white/10">
+            <div class="max-w-6xl mx-auto px-6 py-4 space-y-4">
+                <a href="#plans" onclick="scrollToSection('plans')" class="block text-white/70 hover:text-white">Planos</a>
+                <a href="#orders" onclick="scrollToSection('orders')" class="block text-white/70 hover:text-white">Meus Pedidos</a>
+                <a href="#replacements" onclick="scrollToSection('replacements')" class="block text-white/70 hover:text-white">Reposições</a>
+            </div>
         </div>
     </nav>
 
     <main class="pt-24 pb-16 px-6">
         <div class="max-w-6xl mx-auto">
-            <!-- Login Section -->
+            <!-- Login/Cadastro -->
             <div id="auth-section" class="max-w-md mx-auto mt-20">
                 <div class="text-center mb-8">
                     <div class="w-20 h-20 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-4 glow">
                         <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                     </div>
                     <h1 class="text-3xl font-bold gradient-text">Portal do Cliente</h1>
-                    <p class="text-white/50 mt-2">Acesse sua conta para gerenciar seus proxies</p>
+                    <p class="text-white/50 mt-2">Acesse sua conta para gerenciar seus perfis</p>
                 </div>
 
                 <div class="card rounded-2xl p-8">
@@ -92,9 +144,7 @@
                             <label class="block text-sm text-white/50 mb-2">Senha</label>
                             <input type="password" id="login-password" required class="input-field w-full rounded-xl px-4 py-3 text-white" placeholder="••••••••">
                         </div>
-                        <button type="submit" id="login-btn" class="btn-primary w-full py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-2">
-                            <span>Entrar</span>
-                        </button>
+                        <button type="submit" class="btn-primary w-full py-3 rounded-xl font-semibold text-white">Entrar</button>
                     </form>
 
                     <form id="register-form" class="space-y-4 hidden" onsubmit="handleRegister(event)">
@@ -124,79 +174,55 @@
 
             <!-- Main Section -->
             <div id="main-section" class="hidden">
-                <!-- My Proxies -->
-                <section class="mb-12">
-                    <div class="flex justify-between items-center mb-8">
-                        <div>
-                            <h2 class="text-2xl font-bold">Meus <span class="gradient-text">Proxies</span></h2>
-                            <p class="text-white/50 mt-1">Gerencie seus proxies adquiridos</p>
-                        </div>
-                        <div class="flex gap-3">
-                            <button onclick="loadProxies()" class="text-sm text-purple-400 hover:text-purple-300"><i class="fas fa-sync-alt mr-1"></i> Atualizar</button>
-                        </div>
+                <!-- Planos -->
+                <section id="plans" class="mb-16 scroll-mt-32">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl md:text-4xl font-bold mb-4">Escolha seu <span class="gradient-text">Plano</span></h2>
+                        <p class="text-white/60 max-w-xl mx-auto">Perfis profissionais para Facebook Ads com reposições garantidas. Escolha o plano ideal para suas necessidades.</p>
                     </div>
-
-                    <!-- Stats -->
-                    <div class="grid grid-cols-3 gap-4 mb-8">
-                        <div class="card rounded-xl p-4 border border-purple-500/20">
-                            <p class="text-white/50 text-sm">Total</p>
-                            <p class="text-2xl font-bold gradient-text" id="stat-total">0</p>
-                        </div>
-                        <div class="card rounded-xl p-4 border border-green-500/20">
-                            <p class="text-white/50 text-sm">Ativos</p>
-                            <p class="text-2xl font-bold text-green-400" id="stat-active">0</p>
-                        </div>
-                        <div class="card rounded-xl p-4 border border-blue-500/20">
-                            <p class="text-white/50 text-sm">Plano</p>
-                            <p class="text-lg font-bold" id="stat-plan">-</p>
-                        </div>
+                    
+                    <!-- Tier Filter -->
+                    <div class="flex justify-center gap-4 mb-8">
+                        <button onclick="filterPlans('all')" id="filter-all" class="px-6 py-2 rounded-full text-sm font-medium gradient-bg text-white">Todos</button>
+                        <button onclick="filterPlans('junior')" id="filter-junior" class="px-6 py-2 rounded-full text-sm font-medium bg-green-500/20 text-green-400 hover:bg-green-500/30 transition">Júnior</button>
+                        <button onclick="filterPlans('premium')" id="filter-premium" class="px-6 py-2 rounded-full text-sm font-medium bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 transition">Premium</button>
+                        <button onclick="filterPlans('master')" id="filter-master" class="px-6 py-2 rounded-full text-sm font-medium bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 transition">Master</button>
                     </div>
-
-                    <!-- Proxies Display -->
-                    <div id="proxies-section" class="card rounded-2xl overflow-hidden">
-                        <div class="p-4 border-b border-white/10 flex justify-between items-center">
-                            <h3 class="font-semibold">Seus Proxies</h3>
-                            <div class="flex gap-2">
-                                <button onclick="copyAllProxies()" class="text-sm bg-green-500/20 text-green-400 px-3 py-1 rounded-lg hover:bg-green-500/30">
-                                    <i class="fas fa-copy mr-1"></i> Copiar Todos
-                                </button>
-                                <button onclick="downloadProxies()" class="text-sm bg-blue-500/20 text-blue-400 px-3 py-1 rounded-lg hover:bg-blue-500/30">
-                                    <i class="fas fa-download mr-1"></i> Baixar TXT
-                                </button>
-                            </div>
-                        </div>
-                        <div class="p-4 bg-black/30">
-                            <textarea id="proxies-display" readonly class="w-full h-64 bg-transparent text-green-400 font-mono text-sm resize-none focus:outline-none" placeholder="Seus proxies aparecerão aqui..."></textarea>
-                        </div>
-                    </div>
-
-                    <div id="no-proxies" class="hidden card rounded-2xl p-12 text-center">
-                        <div class="w-16 h-16 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-shield-alt text-2xl text-white"></i>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2">Nenhum proxy encontrado</h3>
-                        <p class="text-white/50 mb-6">Adquira um plano para receber seus proxies</p>
-                        <a href="index.html#planos" class="btn-primary px-8 py-3 rounded-xl font-semibold text-white inline-block">
-                            Ver Planos
-                        </a>
-                    </div>
-                </section>
-
-                <!-- Planos Disponíveis -->
-                <section id="plans-section">
-                    <div class="flex justify-between items-center mb-8">
-                        <div>
-                            <h2 class="text-2xl font-bold">Planos <span class="gradient-text">Disponíveis</span></h2>
-                            <p class="text-white/50 mt-1">Adquira mais proxies</p>
-                        </div>
-                    </div>
+                    
                     <div id="plans-grid" class="grid md:grid-cols-3 gap-6"></div>
                 </section>
 
-                <!-- Histórico -->
-                <section class="mt-12">
-                    <h2 class="text-2xl font-bold mb-6">Histórico de <span class="gradient-text">Assinaturas</span></h2>
-                    <div id="history-list" class="space-y-4"></div>
+                <!-- Meus Pedidos -->
+                <section id="orders" class="mb-16 scroll-mt-32">
+                    <div class="flex justify-between items-center mb-8">
+                        <div>
+                            <h2 class="text-2xl font-bold">Meus <span class="gradient-text">Pedidos</span></h2>
+                            <p class="text-white/50 mt-1">Acompanhe suas compras e downloads</p>
+                        </div>
+                        <button onclick="loadOrders()" class="text-sm text-purple-400 hover:text-purple-300"><i class="fas fa-sync-alt mr-1"></i> Atualizar</button>
+                    </div>
+                    <div id="orders-list" class="grid md:grid-cols-2 gap-4"></div>
+                </section>
+
+                <!-- Solicitar Reposição -->
+                <section id="replacements" class="mb-16 scroll-mt-32">
+                    <div class="card rounded-2xl p-8 text-center">
+                        <div class="w-16 h-16 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-sync-alt text-2xl text-white"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold mb-2">Solicitar <span class="gradient-text">Reposição</span></h2>
+                        <p class="text-white/50 mb-6 max-w-md mx-auto">Se precisar de reposição do seu perfil, solicite abaixo. Após 48h sem análise, será automaticamente aprovada.</p>
+                        <button onclick="requestReplacement()" class="btn-primary px-8 py-3 rounded-xl font-semibold text-white">
+                            <i class="fas fa-plus mr-2"></i>Solicitar Reposição
+                        </button>
+                        <div id="replacement-result" class="mt-4"></div>
+                    </div>
+                </section>
+
+                <!-- Histórico de Reposições -->
+                <section id="replacements-history">
+                    <h2 class="text-2xl font-bold mb-6">Histórico de <span class="gradient-text">Reposições</span></h2>
+                    <div id="replacements-list" class="grid md:grid-cols-2 gap-4"></div>
                 </section>
             </div>
         </div>
@@ -207,12 +233,12 @@
         <p id="toast-message" class="text-sm"></p>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <script>
         const API_URL = '';
         let currentUser = null;
-        let token = localStorage.getItem('fastproxy_token');
+        let token = localStorage.getItem('adpro_token');
         let allPlans = [];
-        let userProxies = [];
 
         function showTab(tab) {
             document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
@@ -225,6 +251,22 @@
             document.getElementById('tab-register').classList.toggle('border-purple-400', tab === 'register');
             document.getElementById('tab-register').classList.toggle('text-white/50', tab !== 'register');
             document.getElementById('tab-register').classList.toggle('border-transparent', tab !== 'register');
+        }
+
+        function toggleMenu(menu) {
+            const el = document.getElementById(`menu-${menu}`);
+            const isHidden = el.classList.contains('hidden');
+            document.querySelectorAll('[id^="menu-"]').forEach(m => m.classList.add('hidden'));
+            if (isHidden) el.classList.remove('hidden');
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+            document.querySelectorAll('[id^="menu-"]').forEach(m => m.classList.add('hidden'));
         }
 
         async function api(endpoint, method = 'GET', body = null) {
@@ -245,27 +287,19 @@
 
         async function handleLogin(e) {
             e.preventDefault();
-            const btn = document.getElementById('login-btn');
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
-            
-            btn.innerHTML = '<i class="fas fa-spinner spinner mr-2"></i> Entrando...';
-            btn.disabled = true;
-            
             try {
                 const data = await api('/api/auth/login', 'POST', { email, password });
                 if (data.success) {
                     token = data.data.token;
                     currentUser = data.data.user;
-                    localStorage.setItem('fastproxy_token', token);
+                    localStorage.setItem('adpro_token', token);
                     showMain();
                 } else {
                     showError(data.message || 'Erro ao fazer login');
                 }
             } catch (err) { showError('Erro de conexão'); }
-            
-            btn.innerHTML = 'Entrar';
-            btn.disabled = false;
         }
 
         async function handleRegister(e) {
@@ -274,7 +308,6 @@
             const email = document.getElementById('register-email').value;
             const password = document.getElementById('register-password').value;
             const whatsapp = document.getElementById('register-whatsapp').value;
-            
             try {
                 const data = await api('/api/auth/register', 'POST', { name, email, password, whatsapp });
                 if (data.success) {
@@ -286,7 +319,7 @@
 
         function logout() {
             token = null; currentUser = null;
-            localStorage.removeItem('fastproxy_token');
+            localStorage.removeItem('adpro_token');
             document.getElementById('auth-section').classList.remove('hidden');
             document.getElementById('main-section').classList.add('hidden');
             document.getElementById('user-info').classList.add('hidden');
@@ -312,8 +345,19 @@
             document.getElementById('user-info').classList.add('flex');
             document.getElementById('user-name').textContent = currentUser?.name || 'Usuário';
             loadPlans();
-            loadProxies();
-            loadHistory();
+            loadOrders();
+            loadReplacements();
+        }
+
+        function filterPlans(tier) {
+            ['all', 'junior', 'premium', 'master'].forEach(t => {
+                document.getElementById(`filter-${t}`).classList.remove('gradient-bg', 'text-white');
+                document.getElementById(`filter-${t}`).classList.add(t === 'junior' ? 'bg-green-500/20' : t === 'premium' ? 'bg-purple-500/20' : t === 'master' ? 'bg-amber-500/20' : 'bg-white/10');
+            });
+            document.getElementById(`filter-${tier}`).classList.remove('bg-green-500/20', 'bg-purple-500/20', 'bg-amber-500/20', 'bg-white/10');
+            document.getElementById(`filter-${tier}`).classList.add('gradient-bg', 'text-white');
+            
+            renderPlans(tier === 'all' ? allPlans : allPlans.filter(p => p.tier === tier));
         }
 
         function renderPlans(plans) {
@@ -325,34 +369,35 @@
             
             grid.innerHTML = plans.map((plan, idx) => {
                 const tierColors = {
-                    starter: { border: 'border-green-500/30', badge: 'bg-green-500/20 text-green-400', accent: 'from-green-500/10 to-green-500/5' },
-                    business: { border: 'border-purple-500/30', badge: 'bg-purple-500/20 text-purple-400', accent: 'from-purple-500/10 to-purple-500/5' },
-                    enterprise: { border: 'border-amber-500/30', badge: 'bg-amber-500/20 text-amber-400', accent: 'from-amber-500/10 to-amber-500/5' }
+                    junior: { border: 'border-green-500/30', badge: 'bg-green-500/20 text-green-400', accent: 'from-green-500/10 to-green-500/5' },
+                    premium: { border: 'border-purple-500/30', badge: 'bg-purple-500/20 text-purple-400', accent: 'from-purple-500/10 to-purple-500/5' },
+                    master: { border: 'border-amber-500/30', badge: 'bg-amber-500/20 text-amber-400', accent: 'from-amber-500/10 to-amber-500/5' }
                 };
-                const c = tierColors[plan.tier] || tierColors.starter;
-                const isFeatured = plan.tier === 'business';
+                const c = tierColors[plan.tier] || tierColors.junior;
+                const isFeatured = plan.tier === 'premium';
                 
                 return `
-                    <div class="card rounded-2xl p-6 border ${c.border} bg-gradient-to-br ${c.accent} relative">
+                    <div class="plan-card ${isFeatured ? 'plan-featured' : ''} card rounded-2xl p-6 border ${c.border} bg-gradient-to-br ${c.accent} relative">
                         ${isFeatured ? '<span class="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-medium bg-purple-500 text-white">Mais Popular</span>' : ''}
                         
                         <div class="flex justify-between items-start mb-4">
                             <span class="px-3 py-1 rounded-full text-xs font-medium ${c.badge}">${plan.tier?.toUpperCase()}</span>
+                            <span class="text-xs text-white/40">${plan.type === 'subscription' ? 'Assinatura' : 'Compra Única'}</span>
                         </div>
                         
                         <h3 class="text-xl font-bold mb-1">${plan.name}</h3>
-                        <p class="text-sm text-white/50 mb-4">${plan.proxyCount} proxy${plan.proxyCount > 1 ? 's' : ''}</p>
+                        <p class="text-sm text-white/50 mb-4">${plan.replacements} reposição${plan.replacements > 1 ? 's' : ''}</p>
                         
                         <div class="mb-6">
                             <span class="text-4xl font-bold gradient-text">R$ ${plan.price}</span>
-                            <span class="text-sm text-white/40 ml-2">/mês</span>
+                            ${plan.originalPrice ? `<span class="text-sm text-white/40 line-through ml-2">R$ ${plan.originalPrice}</span>` : ''}
                         </div>
                         
-                        <ul class="text-sm text-white/70 space-y-2 mb-6">
-                            <li class="flex items-center gap-2"><i class="fas fa-check text-green-400"></i> ${plan.proxyCount} proxy${plan.proxyCount > 1 ? 's' : ''}</li>
-                            <li class="flex items-center gap-2"><i class="fas fa-check text-green-400"></i> IPs dedicados</li>
-                            <li class="flex items-center gap-2"><i class="fas fa-check text-green-400"></i> Troca ilimitada</li>
-                            <li class="flex items-center gap-2"><i class="fas fa-check text-green-400"></i> Suporte 24/7</li>
+                        <ul class="text-sm text-white/70 space-y-3 mb-6">
+                            ${plan.proxy ? '<li class="flex items-center gap-2"><i class="fas fa-check text-green-400"></i> Proxy dedicado</li>' : ''}
+                            ${plan.warming ? '<li class="flex items-center gap-2"><i class="fas fa-check text-green-400"></i> Aquecimento</li>' : ''}
+                            ${plan.backup ? '<li class="flex items-center gap-2"><i class="fas fa-check text-green-400"></i> Backup</li>' : ''}
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-green-400"></i> Suporte ${plan.supportHours || '24h'}</li>
                         </ul>
                         
                         <button onclick="subscribePlan('${plan._id}')" class="${isFeatured ? 'gradient-bg' : 'bg-white/10 hover:bg-white/20'} w-full py-3 rounded-xl font-semibold text-white transition">
@@ -377,111 +422,96 @@
             try {
                 const data = await api('/api/orders', 'POST', { planId });
                 if (data.success) {
-                    showToast('Pedido criado! Aguarde aprovação.');
-                    loadHistory();
+                    showToast('Pedido criado com sucesso! Aguarde aprovação.');
+                    loadOrders();
+                    document.getElementById('orders').scrollIntoView({ behavior: 'smooth' });
                 } else { showToast(data.message || 'Erro', 'error'); }
             } catch (err) { showToast('Erro de conexão', 'error'); }
         }
 
-        function formatProxy(proxy) {
-            return `${proxy.username}:${proxy.password}@${proxy.ip}:${proxy.port}`;
-        }
-
-        function renderProxies(proxies) {
-            const display = document.getElementById('proxies-display');
-            if (proxies.length === 0) {
-                display.value = '';
-                return;
-            }
-            
-            const proxyStrings = proxies.map(p => formatProxy(p));
-            display.value = proxyStrings.join('\n');
-            
-            document.getElementById('stat-total').textContent = proxies.length;
-            document.getElementById('stat-active').textContent = proxies.filter(p => p.status === 'active').length;
-        }
-
-        async function loadProxies() {
-            try {
-                const data = await api('/api/proxies/my');
-                userProxies = data.data?.proxies || [];
-                
-                if (userProxies.length === 0) {
-                    document.getElementById('proxies-section').classList.add('hidden');
-                    document.getElementById('no-proxies').classList.remove('hidden');
-                } else {
-                    document.getElementById('proxies-section').classList.remove('hidden');
-                    document.getElementById('no-proxies').classList.add('hidden');
-                    renderProxies(userProxies);
-                    
-                    if (userProxies[0]?.planId) {
-                        document.getElementById('stat-plan').textContent = userProxies[0].planId.name || '-';
-                    }
-                }
-            } catch (err) { console.error('Erro:', err); }
-        }
-
-        async function loadHistory() {
+        async function loadOrders() {
             try {
                 const data = await api('/api/orders/my');
-                const list = document.getElementById('history-list');
-                
+                const list = document.getElementById('orders-list');
                 if (data.success && data.data.orders.length > 0) {
                     const statusConfig = {
-                        pending: { color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30', icon: 'fa-clock', label: 'Pendente' },
+                        pending: { color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30', icon: 'fa-clock', label: 'Aguardando' },
                         approved: { color: 'bg-green-500/20 text-green-400 border-green-500/30', icon: 'fa-check', label: 'Aprovado' },
                         rejected: { color: 'bg-red-500/20 text-red-400 border-red-500/30', icon: 'fa-times', label: 'Rejeitado' },
-                        active: { color: 'bg-blue-500/20 text-blue-400 border-blue-500/30', icon: 'fa-play', label: 'Ativo' },
-                        expired: { color: 'bg-gray-500/20 text-gray-400 border-gray-500/30', icon: 'fa-stop', label: 'Expirado' }
+                        delivered: { color: 'bg-blue-500/20 text-blue-400 border-blue-500/30', icon: 'fa-download', label: 'Entregue' }
                     };
-                    
                     list.innerHTML = data.data.orders.map(order => {
                         const s = statusConfig[order.status] || statusConfig.pending;
                         return `
-                            <div class="card rounded-xl p-4 border ${s.color}">
-                                <div class="flex justify-between items-center">
+                            <div class="card rounded-2xl p-6 border ${s.color}">
+                                <div class="flex justify-between items-start mb-4">
                                     <div>
-                                        <h4 class="font-semibold">${order.planId?.name || 'Plano'}</h4>
-                                        <p class="text-xs text-white/40">${new Date(order.createdAt).toLocaleDateString('pt-BR')}</p>
+                                        <h3 class="font-bold text-lg">${order.planId?.name || 'Plano'}</h3>
+                                        <p class="text-xs text-white/40">#${order._id.slice(-6)}</p>
                                     </div>
-                                    <span class="flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${s.color}">
+                                    <span class="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${s.color}">
                                         <i class="fas ${s.icon}"></i> ${s.label}
                                     </span>
                                 </div>
+                                ${order.status === 'delivered' && order.downloadUrl ? `
+                                    <a href="data:text/plain;charset=utf-8,${encodeURIComponent(order.downloadUrl)}" download="perfil_adpro.txt" class="btn-primary block text-center py-3 rounded-xl font-semibold text-white">
+                                        <i class="fas fa-download mr-2"></i>Baixar Arquivo
+                                    </a>
+                                ` : `
+                                    <p class="text-sm text-white/50">${order.status === 'pending' ? 'Aguardando aprovação do administrador...' : order.status === 'approved' ? 'Aguarde a entrega...' : ''}</p>
+                                `}
                             </div>
                         `;
                     }).join('');
                 } else {
-                    list.innerHTML = '<p class="text-white/40">Nenhum histórico ainda</p>';
+                    list.innerHTML = '<div class="col-span-2 card rounded-2xl p-8 text-center text-white/40">Você ainda não tem pedidos. Escolha um plano acima!</div>';
                 }
             } catch (err) { console.error('Erro:', err); }
         }
 
-        function copyAllProxies() {
-            const text = document.getElementById('proxies-display').value;
-            if (!text) { showToast('Nenhum proxy para copiar', 'error'); return; }
-            
-            navigator.clipboard.writeText(text).then(() => {
-                showToast('Proxies copiados!', 'success');
-            }).catch(() => {
-                showToast('Erro ao copiar', 'error');
-            });
+        async function requestReplacement() {
+            try {
+                const data = await api('/api/replacements', 'POST', {});
+                const result = document.getElementById('replacement-result');
+                if (data.success) {
+                    result.innerHTML = '<p class="text-green-400"><i class="fas fa-check mr-2"></i>Solicitação enviada! Após 48h será automaticamente aprovada.</p>';
+                    loadReplacements();
+                } else { result.innerHTML = `<p class="text-red-400"><i class="fas fa-times mr-2"></i>${data.message}</p>`; }
+            } catch (err) { document.getElementById('replacement-result').innerHTML = '<p class="text-red-400">Erro de conexão</p>'; }
         }
 
-        function downloadProxies() {
-            const text = document.getElementById('proxies-display').value;
-            if (!text) { showToast('Nenhum proxy para baixar', 'error'); return; }
-            
-            const blob = new Blob([text], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'proxies_fastproxy.txt';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showToast('Download iniciado!', 'success');
+        async function loadReplacements() {
+            try {
+                const data = await api('/api/replacements/my');
+                const list = document.getElementById('replacements-list');
+                if (data.success && data.data.replacements.length > 0) {
+                    const statusConfig = {
+                        pending: { color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30', label: 'Aguardando' },
+                        approved: { color: 'bg-green-500/20 text-green-400 border-green-500/30', label: 'Aprovado' },
+                        auto_approved: { color: 'bg-blue-500/20 text-blue-400 border-blue-500/30', label: 'Auto (48h)' },
+                        rejected: { color: 'bg-red-500/20 text-red-400 border-red-500/30', label: 'Rejeitado' }
+                    };
+                    list.innerHTML = data.data.replacements.map(r => {
+                        const s = statusConfig[r.status] || statusConfig.pending;
+                        return `
+                            <div class="card rounded-2xl p-6 border ${s.color}">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="font-bold">Reposição #${r._id.slice(-6)}</h3>
+                                    <span class="px-3 py-1 rounded-full text-xs font-medium ${s.color}">${s.label}</span>
+                                </div>
+                                <p class="text-sm text-white/50 mb-2">${new Date(r.createdAt).toLocaleDateString('pt-BR')}</p>
+                                ${(r.status === 'approved' || r.status === 'auto_approved') && r.downloadUrl ? `
+                                    <a href="data:text/plain;charset=utf-8,${encodeURIComponent(r.downloadUrl)}" download="novo_perfil_adpro.txt" class="btn-primary block text-center py-3 rounded-xl font-semibold text-white">
+                                        <i class="fas fa-download mr-2"></i>Baixar Novo Arquivo
+                                    </a>
+                                ` : ''}
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    list.innerHTML = '<div class="col-span-2 card rounded-2xl p-8 text-center text-white/40">Nenhuma reposição solicitada ainda.</div>';
+                }
+            } catch (err) { console.error('Erro:', err); }
         }
 
         // Init
