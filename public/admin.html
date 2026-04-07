@@ -251,8 +251,12 @@
                 btn.classList.remove('bg-green-500/20', 'text-green-400');
                 btn.classList.add('text-white/50');
             });
-            event.target.closest('.tab-btn')?.classList.add('bg-green-500/20', 'text-green-400');
-            event.target.closest('.tab-btn')?.classList.remove('text-white/50');
+            
+            const clickedBtn = document.querySelector(`.tab-btn[onclick="showTab('${tab}')"]`);
+            if (clickedBtn) {
+                clickedBtn.classList.remove('text-white/50');
+                clickedBtn.classList.add('bg-green-500/20', 'text-green-400');
+            }
             
             ['add', 'stock', 'users'].forEach(t => {
                 document.getElementById(`tab-${t}`).classList.add('hidden');

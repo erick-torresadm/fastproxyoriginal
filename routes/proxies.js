@@ -28,7 +28,7 @@ function generatePassword() {
   return password;
 }
 
-router.get('/', auth, admin, async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const { tier, status, search } = req.query;
     const query = {};
@@ -49,7 +49,7 @@ router.get('/', auth, admin, async (req, res) => {
   }
 });
 
-router.get('/available', auth, admin, async (req, res) => {
+router.get('/available', async (req, res) => {
   try {
     const proxies = await Proxy.find({ status: 'available' }).sort({ port: 1 });
     res.json({ success: true, data: { proxies, count: proxies.length } });
@@ -58,7 +58,7 @@ router.get('/available', auth, admin, async (req, res) => {
   }
 });
 
-router.get('/stats', async (req, res) => {
+router.get('/stats', admin, async (req, res) => {
   try {
     const total = await Proxy.countDocuments();
     const available = await Proxy.countDocuments({ status: 'available' });
