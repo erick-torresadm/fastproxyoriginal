@@ -31,10 +31,5 @@
       "src": "/(.*)",
       "dest": "public/index.html"
     }
-  ],
-  "env": {
-    "MONGODB_URI": "@mongodb_uri",
-    "JWT_SECRET": "@jwt_secret",
-    "JWT_EXPIRE": "7d"
-  }
+  ]
 }
