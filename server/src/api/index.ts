@@ -12,7 +12,7 @@ dotenv.config();
 
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || 'fastproxy_secret_key_2024';
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://ericktorresadm_db_user:FBra8yqPipxOVFSy@clusterfastproxy.tdun6hv.mongodb.net/fastproxy?appName=clusterfastproxy&directConnection=true';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://ericktorresadm_db_user:FBra8yqPipxOVFSy@clusterfastproxy.tdun6hv.mongodb.net/fastproxy?appName=clusterfastproxy';
 
 let isConnected = false;
 
