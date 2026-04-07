@@ -176,94 +176,78 @@ router.post('/test', express.json(), async (req, res) => {
   }
 });
 
+router.get('/test-api', async (req, res) => {
+  try {
+    console.log('=== TESTING CAKTO API ===');
+    
+    // Test authentication
+    const token = await getAccessToken();
+    console.log('Token obtained:', token ? 'YES' : 'NO');
+    
+    // Test list products
+    const products = await Cakto.getProducts();
+    console.log('Products:', JSON.stringify(products));
+    
+    res.json({
+      success: true,
+      hasToken: !!token,
+      products: products
+    });
+  } catch (err) {
+    console.error('Test API error:', err.response?.data || err.message);
+    res.status(500).json({ 
+      error: err.message, 
+      details: err.response?.data,
+      status: err.response?.status 
+    });
+  }
+});
+
+router.post('/simple-checkout', express.json(), async (req, res) => {
+  try {
+    console.log('=== SIMPLE CHECKOUT ===');
+    console.log('Body:', req.body);
+    
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ error: 'Email é obrigatório' });
+    }
+    
+    res.json({ 
+      success: true, 
+      message: 'Endpoint funcionando!',
+      receivedEmail: email 
+    });
+  } catch (err) {
+    console.error('Simple checkout error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.post('/create-checkout', express.json(), async (req, res) => {
   try {
     const { proxyCount, email, whatsapp, period } = req.body;
+    
+    console.log('=== CREATE CHECKOUT REQUEST ===');
+    console.log('Body:', req.body);
     
     if (!proxyCount || proxyCount < 1) {
       return res.status(400).json({ error: 'Quantidade de proxies inválida' });
     }
 
-    console.log('=== CRIANDO CHECKOUT ===');
-    console.log('Proxy count:', proxyCount);
-    console.log('Email:', email);
-    console.log('Period:', period || 'monthly');
-
-    // First, get or create product
-    let products = await Cakto.getProducts({ name: 'Proxy IPv6' });
-    let productId;
-    
-    if (products.results && products.results.length > 0) {
-      productId = products.results[0].id;
-      console.log('Product found:', productId);
-    } else {
-      // Create product
-      const newProduct = await Cakto.createProduct({
-        name: 'Proxy IPv6',
-        description: 'Proxies IPv6 de alta performance para redes sociais',
-        price: 29.90,
-        type: 'subscription',
-        paymentMethods: ['pix', 'credit_card', 'boleto']
-      });
-      productId = newProduct.id;
-      console.log('Product created:', productId);
-    }
-
-    // Now get or create offer based on period
     const isAnnual = period === 'annual';
     const offerPrice = isAnnual ? 299.00 : 29.90;
-    const offerName = isAnnual ? 'Proxy IPv6 Anual' : 'Proxy IPv6 Mensal';
     
-    let offers = await Cakto.getOffers({ product: productId });
-    let offer;
-    
-    if (offers.results && offers.results.length > 0) {
-      // Use first active offer
-      offer = offers.results.find(o => o.status === 'active') || offers.results[0];
-    } else {
-      // Create offer
-      offer = await Cakto.createOffer({
-        name: offerName,
-        price: offerPrice,
-        product: productId,
-        units: 1,
-        status: 'active',
-        type: isAnnual ? 'subscription' : 'subscription',
-        intervalType: isAnnual ? 'year' : 'month',
-        interval: 1,
-        recurrence_period: isAnnual ? 365 : 30,
-        quantity_recurrences: -1
-      });
-      console.log('Offer created:', offer.id);
-    }
-
-    // Now create checkout with offer
-    const checkoutData = {
-      offer: offer.id,
-      customer: {
-        email: email || '',
-        phone: whatsapp || ''
-      },
-      configs: {
-        redirect_after_payment: true,
-        redirect_url: `${process.env.APP_URL || 'https://fastproxyoriginal-3yul.vercel.app'}/portal.html`,
-        notification_url: `${process.env.APP_URL || 'https://fastproxyoriginal-3yul.vercel.app'}/api/cakto/webhook`
-      }
-    };
-
-    console.log('Checkout data:', JSON.stringify(checkoutData, null, 2));
-    
-    const checkout = await Cakto.createCheckout(checkoutData);
-    
-    console.log('Checkout created:', checkout.id, checkout.url);
-    
+    // For now, return a test checkout URL to verify the flow
     res.json({ 
       success: true, 
-      checkoutUrl: checkout.url,
-      checkoutId: checkout.id 
+      checkoutUrl: `https://pay.cakto.com.br/checkout/test?email=${encodeURIComponent(email)}&amount=${offerPrice}`,
+      message: 'Test checkout - API will be configured soon',
+      testMode: true
     });
   } catch (err) {
-    console.error('Create checkout error:', err.response?.data || err.message);
+    console.error('Create checkout error:', err);
     res.status(500).json({ error: err.message, details: err.response?.data });
   }
 });
