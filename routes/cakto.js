@@ -283,27 +283,68 @@ router.post('/create-product', express.json(), async (req, res) => {
   }
 });
 
-router.get('/create-default-offers', async (req, res) => {
+router.post('/create-default-offers', async (req, res) => {
   try {
     console.log('=== CREATING DEFAULT OFFERS ===');
     
-    let productId = null;
-    
     const products = await Cakto.getProducts();
-    console.log('Products response:', JSON.stringify(products, null, 2));
+    const productId = products?.results?.[0]?.id;
     
-    if (products?.results?.length > 0) {
-      productId = products.results[0].id;
-      console.log('Using existing product:', productId);
-    } else {
-      console.log('No products found, creating new product...');
-      const product = await Cakto.createProduct({
-        name: 'Proxy IPv6 FastProxy',
-        description: 'Proxy IPv6 de alta performance para redes sociais e múltiplas contas',
-        price: 29.90,
+    if (!productId) {
+      return res.status(400).json({ error: 'Nenhum produto encontrado na Cakto' });
+    }
+    
+    console.log('Using product:', productId);
+    
+    const offerConfigs = [
+      { name: 'Proxy Mensal - FastProxy', price: 29.90 },
+      { name: 'Proxy Anual - FastProxy', price: 299.00 }
+    ];
+    
+    const createdOffers = [];
+    
+    for (const config of offerConfigs) {
+      const offerData = {
+        name: config.name,
+        price: config.price,
         currency: 'BRL',
-        status: 'active'
-      });
+        product: productId,
+        type: 'unique',
+        intervalType: 'lifetime',
+        interval: 1,
+        units: 1,
+        default: true,
+        status: 'active',
+        trial_days: 0,
+        max_retries: 3,
+        retry_interval: 1,
+        quantity_recurrences: -1,
+        recurrence_period: 30
+      };
+      
+      try {
+        const offer = await Cakto.createOffer(offerData);
+        createdOffers.push(offer);
+        console.log('Created offer:', offer.name, offer.price);
+      } catch (offerErr) {
+        console.error('Error creating offer:', offerErr.response?.data || offerErr.message);
+        createdOffers.push({ error: offerErr.response?.data?.message || offerErr.message, config: config });
+      }
+    }
+    
+    cachedOffers = null;
+    offersCacheTime = 0;
+    
+    res.json({
+      success: true,
+      message: 'Ofertas criadas',
+      offers: createdOffers
+    });
+  } catch (err) {
+    console.error('Create default offers error:', err.message);
+    res.status(500).json({ error: err.message, details: err.response?.data });
+  }
+});
       productId = product.id;
       console.log('Created new product:', JSON.stringify(product, null, 2));
     }
