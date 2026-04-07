@@ -143,6 +143,35 @@ app.get('/api/health', async (req, res) => {
   res.json({ success: true, message: 'FastProxy API funcionando!', timestamp: new Date().toISOString() });
 });
 
+app.get('/api/setup', async (req: any, res: any) => {
+  try {
+    await connectDB();
+    const plans = [
+      { name: 'Starter', tier: 'starter', price: 47, proxyCount: 5 },
+      { name: 'Business', tier: 'business', price: 97, proxyCount: 20 },
+      { name: 'Enterprise', tier: 'enterprise', price: 197, proxyCount: 50 }
+    ];
+    await Plan.deleteMany({});
+    await Plan.insertMany(plans);
+    
+    const adminExists = await User.findOne({ email: 'admin@fastproxy.com' });
+    if (!adminExists) {
+      await User.create({
+        name: 'Admin',
+        email: 'admin@fastproxy.com',
+        password: 'admin123',
+        role: 'admin'
+      });
+      res.json({ success: true, message: 'Admin e planos criados!', admin: 'admin@fastproxy.com', password: 'admin123' });
+    } else {
+      res.json({ success: true, message: 'Admin e planos já existem!' });
+    }
+  } catch (error: any) {
+    console.error('Setup error:', error.message);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 app.post('/api/auth/register', limiter, async (req: any, res: any) => {
   try {
     const name = sanitize(req.body.name);
