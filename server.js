@@ -4,37 +4,31 @@ const cors = require('cors');
 const path = require('path');
 
 console.log('=== LOADING SERVER ===');
-console.log('CAKTO_CLIENT_ID:', process.env.CAKTO_CLIENT_ID ? 'set' : 'missing');
-console.log('CAKTO_CLIENT_SECRET:', process.env.CAKTO_CLIENT_SECRET ? 'set' : 'missing');
+console.log('STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY ? 'set' : 'missing');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-let caktoRoutes;
+let stripeRoutes;
 try {
-  caktoRoutes = require('./routes/cakto');
-  console.log('CaktoRoutes type:', typeof caktoRoutes);
-  console.log('CaktoRoutes:', caktoRoutes);
-  app.use('/api/cakto', caktoRoutes);
-  console.log('✅ Cakto routes registered');
-  console.log('Routes after:', app._router ? app._router.stack.length : 0);
+  stripeRoutes = require('./routes/stripe');
+  app.use('/api/stripe', stripeRoutes);
+  console.log('✅ Stripe routes registered');
 } catch (err) {
-  console.error('❌ Error loading Cakto routes:', err.message);
-  console.error('Stack:', err.stack);
-  console.error('Err:', err);
+  console.error('❌ Error loading Stripe routes:', err.message);
 }
 
 app.get('/test', (req, res) => {
-  res.json({ message: 'Server is working' });
+  res.json({ message: 'Server is working', provider: 'Stripe' });
 });
 
 app.get('/debug/env', (req, res) => {
   res.json({
-    CAKTO_CLIENT_ID: process.env.CAKTO_CLIENT_ID ? 'set' : 'missing',
-    CAKTO_CLIENT_SECRET: process.env.CAKTO_CLIENT_SECRET ? 'set' : 'missing',
-    CAKTO_BASE_URL: process.env.CAKTO_BASE_URL,
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ? 'set' : 'missing',
+    STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY ? 'set' : 'missing',
+    APP_URL: process.env.APP_URL,
     NODE_ENV: process.env.NODE_ENV
   });
 });
