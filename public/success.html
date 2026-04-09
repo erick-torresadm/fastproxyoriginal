@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pagamento Cancelado - FastProxy</title>
-    <meta name="description" content="Pagamento cancelado - FastProxy">
+    <title>Pagamento Aprovado - FastProxy</title>
+    <meta name="description" content="Pagamento aprovado - FastProxy">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -63,7 +63,7 @@
             justify-content: center;
         }
 
-        .cancel-card {
+        .success-card {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 24px;
@@ -79,10 +79,10 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .cancel-icon {
+        .check-icon {
             width: 80px;
             height: 80px;
-            background: linear-gradient(135deg, #ef4444, #dc2626);
+            background: linear-gradient(135deg, #22c55e, #16a34a);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -98,24 +98,44 @@
     </style>
 </head>
 <body>
-    <div class="cancel-card">
-        <div class="cancel-icon">
+    <div class="success-card">
+        <div class="check-icon">
             <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
             </svg>
         </div>
         
-        <h1 class="text-3xl font-bold mb-4" style="color: var(--text-primary)">Pagamento Cancelado</h1>
-        <p class="text-lg mb-6" style="color: var(--text-secondary)">Seu pagamento foi cancelado. Você pode tentar novamente quando quiser.</p>
+        <h1 class="text-3xl font-bold mb-4" style="color: var(--text-primary)">Pagamento Aprovado!</h1>
+        <p class="text-lg mb-6" style="color: var(--text-secondary)">Obrigado pela sua compra. Em breve você receberá os detalhes do seu proxy por email.</p>
         
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="/" class="inline-block px-8 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-600 transition-colors">
-                Voltar para Home
-            </a>
-            <a href="#planos" onclick="window.location.reload()" class="inline-block px-8 py-3 rounded-xl border border-brand-500 text-brand-400 font-semibold hover:bg-brand-500/10 transition-colors">
-                Tentar Novamente
-            </a>
+        <div id="order-details" class="mb-8 p-4 rounded-xl" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2)">
+            <p class="text-sm" style="color: var(--text-secondary)">Aguarde a confirmação por email com os dados de acesso.</p>
         </div>
+        
+        <a href="/" class="inline-block px-8 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-600 transition-colors">
+            Voltar para Home
+        </a>
     </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
+        
+        if (sessionId) {
+            fetch(`/api/stripe/verify/${sessionId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.paymentStatus === 'paid') {
+                        document.getElementById('order-details').innerHTML = `
+                            <p class="font-semibold text-brand-400 mb-2">Pedido Confirmado!</p>
+                            <p class="text-sm" style="color: var(--text-secondary)">Valor: R$ ${data.amountTotal}</p>
+                            <p class="text-sm" style="color: var(--text-secondary)">Email: ${data.customerEmail}</p>
+                            <p class="text-sm" style="color: var(--text-secondary)">Proxies: ${data.metadata?.proxy_count || 'N/A'}</p>
+                        `;
+                    }
+                })
+                .catch(err => console.log('Erro ao verificar:', err));
+        }
+    </script>
 </body>
 </html>

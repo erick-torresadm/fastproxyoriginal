@@ -12,11 +12,10 @@
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "server.js" },
-    { "src": "/test-cakto", "dest": "server.js" },
-    { "src": "/debug/(.*)", "dest": "server.js" },
+    { "src": "/success.html", "dest": "public/success.html" },
+    { "src": "/cancel.html", "dest": "public/cancel.html" },
     { "src": "/portal.html", "dest": "public/portal.html" },
     { "src": "/admin.html", "dest": "public/admin.html" },
-    { "src": "/cancel.html", "dest": "public/cancel.html" },
     { "src": "/(.*)", "dest": "public/index.html" }
   ],
   "env": {
