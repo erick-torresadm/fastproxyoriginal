@@ -9,29 +9,28 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
                         brand: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            200: '#bbf7d0',
-                            300: '#86efac',
-                            400: '#4ade80',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            800: '#166534',
-                            900: '#14532d',
-                            950: '#052e16',
+                            50: '#faf5ff',
+                            100: '#f3e8ff',
+                            200: '#e9d5ff',
+                            300: '#d8b4fe',
+                            400: '#c084fc',
+                            500: '#a855f7',
+                            600: '#9333ea',
+                            700: '#7e22ce',
+                            800: '#6b21a8',
+                            900: '#581c87',
+                            950: '#2e1065',
                         }
                     },
                     fontFamily: {
-                        sans: ['Outfit', 'system-ui', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
                     }
                 }
             }
@@ -40,43 +39,43 @@
     <style>
 /* Updated CSS - Dark Theme */
 :root {
-            --bg-primary: #0a0f0a;
-            --bg-secondary: rgba(15, 25, 15, 0.7);
-            --bg-card: rgba(20, 30, 20, 0.95);
-            --text-primary: #d4e8d4;
-            --text-secondary: rgba(180, 210, 180, 0.75);
-            --text-muted: rgba(150, 190, 150, 0.5);
-            --text-zinc: #7cb87c;
-            --border-color: rgba(50, 90, 40, 0.15);
-            --border-hover: rgba(50, 90, 40, 0.3);
-            --nav-bg: rgba(10, 15, 10, 0.9);
-            --orb-1: rgba(40, 80, 30, 0.4);
-            --orb-2: rgba(30, 70, 25, 0.3);
-            --orb-3: rgba(25, 60, 20, 0.25);
-            --card-glow: rgba(40, 80, 30, 0.3);
-            --grain-opacity: 0.02;
-            --section-bg: rgba(15, 25, 15, 0.4);
-            --scrollbar-bg: #0a0f0a;
+            --bg-primary: #09090b;
+            --bg-secondary: rgba(24, 24, 27, 0.5);
+            --bg-card: rgba(24, 24, 27, 0.9);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.5);
+            --text-zinc: #a1a1aa;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.15);
+            --nav-bg: rgba(9, 9, 11, 0.7);
+            --orb-1: rgba(147, 51, 234, 0.4);
+            --orb-2: rgba(99, 102, 241, 0.3);
+            --orb-3: rgba(59, 130, 246, 0.25);
+            --card-glow: rgba(147, 51, 234, 0.3);
+            --grain-opacity: 0.03;
+            --section-bg: rgba(24, 24, 27, 0.3);
+            --scrollbar-bg: #09090b;
         }
 
         html.light {
-            --bg-primary: #f8faf8;
-            --bg-secondary: rgba(255, 255, 255, 0.85);
-            --bg-card: rgba(255, 255, 255, 0.98);
-            --text-primary: #1a201a;
-            --text-secondary: rgba(40, 60, 40, 0.85);
-            --text-muted: rgba(40, 80, 40, 0.6);
-            --text-zinc: #3d5a3d;
-            --border-color: rgba(40, 80, 40, 0.15);
-            --border-hover: rgba(40, 80, 40, 0.25);
-            --nav-bg: rgba(255, 255, 255, 0.98);
-            --orb-1: rgba(50, 100, 50, 0.15);
-            --orb-2: rgba(40, 80, 40, 0.12);
-            --orb-3: rgba(30, 60, 30, 0.1);
-            --card-glow: rgba(40, 80, 40, 0.15);
-            --grain-opacity: 0.008;
-            --section-bg: rgba(245, 250, 245, 0.3);
-            --scrollbar-bg: #f8faf8;
+            --bg-primary: #fafafa;
+            --bg-secondary: rgba(255, 255, 255, 0.5);
+            --bg-card: rgba(255, 255, 255, 0.95);
+            --text-primary: #18181b;
+            --text-secondary: rgba(0, 0, 0, 0.6);
+            --text-muted: rgba(0, 0, 0, 0.5);
+            --text-zinc: #52525b;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --border-hover: rgba(0, 0, 0, 0.15);
+            --nav-bg: rgba(255, 255, 255, 0.8);
+            --orb-1: rgba(124, 58, 237, 0.3);
+            --orb-2: rgba(79, 70, 229, 0.2);
+            --orb-3: rgba(37, 99, 235, 0.15);
+            --card-glow: rgba(124, 58, 237, 0.2);
+            --grain-opacity: 0.02;
+            --section-bg: rgba(0, 0, 0, 0.02);
+            --scrollbar-bg: #fafafa;
         }
 
         /* Logo visibility fix for light mode */
@@ -116,14 +115,14 @@
 
         /* Gradient Text */
         .gradient-text {
-            background: linear-gradient(135deg, #22c55e 0%, #4ade80 50%, #16a34a 100%);
+            background: linear-gradient(135deg, #a855f7 0%, #6366f1 50%, #3b82f6 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
         html.light .gradient-text {
-            background: linear-gradient(135deg, #15803d 0%, #22c55e 50%, #4ade80 100%);
+            background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 50%, #2563eb 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -238,7 +237,7 @@
         }
         .feature-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(50, 125, 38, 0.15);
+            box-shadow: 0 20px 40px rgba(124, 58, 237, 0.15);
         }
 
         * {
@@ -313,8 +312,12 @@
 
         .nav-link {
             position: relative;
-            color: var(--text-secondary);
+            color: #9ca3af;
             transition: color 0.3s ease;
+        }
+
+        html.light .nav-link {
+            color: #52525b;
         }
 
         .nav-link::after {
@@ -324,12 +327,16 @@
             left: 0;
             width: 0;
             height: 2px;
-            background: linear-gradient(90deg, #22c55e, #16a34a);
+            background: linear-gradient(90deg, #a855f7, #6366f1);
             transition: width 0.3s ease;
         }
 
         .nav-link:hover {
-            color: var(--text-primary);
+            color: #ffffff;
+        }
+
+        html.light .nav-link:hover {
+            color: #18181b;
         }
 
         .nav-link:hover::after {
@@ -375,20 +382,37 @@
 
         /* Buttons */
         .btn-primary {
-            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-            color: #fff;
+            background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+            color: white;
             border-radius: 0.75rem;
             font-weight: 600;
             padding: 0.75rem 1.5rem;
-            box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4);
+            box-shadow: 0 4px 15px rgba(147, 51, 234, 0.3);
             transition: all 0.3s ease;
             border: none;
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
         }
 
         .btn-primary:hover {
             transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(34, 197, 94, 0.5);
+            box-shadow: 0 15px 40px rgba(147, 51, 234, 0.4);
         }
 
         .btn-secondary {
@@ -501,12 +525,12 @@
         }
 
         .plan-featured {
-            background: linear-gradient(180deg, rgba(34, 197, 94, 0.15) 0%, var(--bg-card) 100%);
-            border: 2px solid rgba(34, 197, 94, 0.4);
+            background: linear-gradient(180deg, rgba(124, 58, 237, 0.15) 0%, var(--bg-card) 100%);
+            border: 2px solid rgba(124, 58, 237, 0.4);
         }
 
         .plan-featured:hover {
-            box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.5), 0 0 80px -20px rgba(34, 197, 94, 0.4);
+            box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.5), 0 0 80px -20px rgba(124, 58, 237, 0.4);
         }
 
         /* Plan Toggle */
@@ -1094,8 +1118,8 @@
                 </div>
                 
                 <!-- Annual Plan -->
-                <div class="plan-card plan-featured p-8 rounded-2xl transform md:-translate-y-2" style="background: linear-gradient(135deg, #15803d 0%, #166534 100%); border: none">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-white text-green-700 text-xs font-bold badge-pulse shadow-lg">MAIS VALORIZADO</div>
+                <div class="plan-card plan-featured p-8 rounded-2xl transform md:-translate-y-2" style="background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); border: none">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-white text-purple-700 text-xs font-bold badge-pulse shadow-lg">MAIS VALORIZADO</div>
                     
                     <div class="text-center mb-6">
                         <span class="inline-block px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold mb-3">ANUAL</span>
