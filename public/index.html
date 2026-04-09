@@ -1540,218 +1540,6 @@
     
     <!-- Purchase Modal -->
     <div id="purchase-modal" class="fixed inset-0 z-[100] hidden">
-                btn.addEventListener('click', () => {
-                    planButtons.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    
-                    if (btn.dataset.plan === 'onepurchase') {
-                        html.classList.add('show-onepurchase');
-                    } else {
-                        html.classList.remove('show-onepurchase');
-                    }
-                });
-            });
-        }
-
-        // Period Toggle (Monthly vs Semiannual vs Annual) - only if exists
-        const periodButtons = document.querySelectorAll('.period-btn');
-        const planPrices = document.querySelectorAll('.plan-prices');
-        
-        if (periodButtons.length > 0) {
-            periodButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    periodButtons.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    
-                    const period = btn.dataset.period;
-                    planPrices.forEach(prices => {
-                        if (prices.dataset.period === period) {
-                            prices.classList.remove('hidden');
-                        } else {
-                            prices.classList.add('hidden');
-                        }
-                    });
-                });
-            });
-        }
-
-        // Mobile Menu
-        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-        const mobileMenuClose = document.getElementById('mobile-menu-close');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const mobileOverlay = document.getElementById('mobile-overlay');
-        
-        function openMobileMenu() {
-            mobileMenu.classList.add('active');
-            mobileOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-        
-        function closeMobileMenu() {
-            mobileMenu.classList.remove('active');
-            mobileOverlay.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-        
-        mobileMenuBtn.addEventListener('click', openMobileMenu);
-        mobileMenuClose.addEventListener('click', closeMobileMenu);
-        mobileOverlay.addEventListener('click', closeMobileMenu);
-        
-        // Close mobile menu when clicking a link
-        mobileMenu.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', closeMobileMenu);
-        });
-
-        // Smooth scroll
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const href = this.getAttribute('href');
-                if (href && href !== '#') {
-                    const target = document.querySelector(href);
-                    if (target) {
-                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                }
-            });
-        });
-
-        // Reveal on scroll
-        const revealElements = document.querySelectorAll('.reveal');
-        const revealObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                }
-            });
-        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-        
-        revealElements.forEach(el => revealObserver.observe(el));
-
-        // Navbar scroll effect
-        const navbar = document.getElementById('navbar');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 100) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
-            }
-        });
-
-        // Ensure purchase modal functions are available
-        var selectedPeriod = 'monthly';
-        const PRICE_PER_PROXY = 29.90;
-        const PRICE_PER_PROXY_ANNUAL = 299.00;
-        
-        window.openPurchaseModal = function(period = 'monthly') {
-            selectedPeriod = period;
-            const modal = document.getElementById('purchase-modal');
-            if (modal) {
-                modal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            }
-            
-            const badge = document.getElementById('plan-period-badge');
-            if (badge) {
-                badge.querySelector('span').textContent = period === 'annual' ? 'Plano Anual' : 'Plano Mensal';
-            }
-            
-            updatePrice();
-        };
-
-        window.closePurchaseModal = function() {
-            const modal = document.getElementById('purchase-modal');
-            if (modal) {
-                modal.classList.add('hidden');
-            }
-            document.body.style.overflow = '';
-        };
-
-        window.updateQuantity = function(delta) {
-            const input = document.getElementById('proxy-quantity');
-            if (input) {
-                let value = parseInt(input.value) + delta;
-                if (value < 1) value = 1;
-                if (value > 100) value = 100;
-                input.value = value;
-                updatePrice();
-            }
-        };
-
-        window.updatePrice = function() {
-            const quantity = parseInt(document.getElementById('proxy-quantity').value) || 1;
-            const unitPrice = selectedPeriod === 'annual' ? PRICE_PER_PROXY_ANNUAL : PRICE_PER_PROXY;
-            const total = (quantity * unitPrice).toFixed(2).replace('.', ',');
-            const display = quantity === 1 ? '1 proxy' : quantity + ' proxies';
-            
-            const totalEl = document.getElementById('total-price');
-            if (totalEl) {
-                totalEl.textContent = 'R$ ' + total;
-            }
-            
-            const displayEl = document.getElementById('proxy-quantity-display');
-            if (displayEl) {
-                displayEl.textContent = display + (selectedPeriod === 'annual' ? ' (anual)' : ' (mensal)');
-            }
-        };
-
-        window.createCheckout = async function() {
-            console.log('=== createCheckout called ===');
-            const btn = document.getElementById('buy-btn');
-            if (!btn) {
-                console.error('Button not found!');
-                alert('Erro: Botão não encontrado');
-                return;
-            }
-            
-            const quantity = parseInt(document.getElementById('proxy-quantity').value);
-            const email = document.getElementById('customer-email').value;
-            const whatsapp = document.getElementById('customer-whatsapp').value;
-            
-            console.log('Quantity:', quantity, 'Email:', email, 'Period:', selectedPeriod);
-            
-            if (!email) {
-                alert('Por favor, insira seu email');
-                return;
-            }
-            
-            btn.disabled = true;
-            btn.textContent = 'Processando...';
-            
-            try {
-                console.log('Sending request to /api/stripe/create-checkout...');
-                const response = await fetch('/api/stripe/create-checkout', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        proxyCount: quantity,
-                        email: email,
-                        whatsapp: whatsapp,
-                        period: selectedPeriod
-                    })
-                });
-                
-                const data = await response.json();
-                console.log('Checkout response:', data);
-                
-                if (data.success && data.checkoutUrl) {
-                    window.location.href = data.checkoutUrl;
-                } else {
-                    alert('Erro: ' + (data.error || data.message || 'Tente novamente'));
-                    btn.disabled = false;
-                    btn.textContent = 'Comprar Agora';
-                }
-            } catch (err) {
-                console.error('Checkout error:', err);
-                alert('Erro de conexão. Tente novamente.');
-                btn.disabled = false;
-                btn.textContent = 'Comprar Agora';
-            }
-        };
-    </script>
-    
-    <!-- Purchase Modal -->
-    <div id="purchase-modal" class="fixed inset-0 z-[100] hidden">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closePurchaseModal()"></div>
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md mx-4">
             <div class="p-6 md:p-8 rounded-2xl" style="background: var(--bg-card); border: 1px solid var(--border-color)">
@@ -1841,66 +1629,63 @@
         const PRICE_PER_PROXY = 29.90;
         const PRICE_PER_PROXY_ANNUAL = 299.00;
         
-        let selectedPeriod = 'monthly';
+        var selectedPeriod = 'monthly';
         
-        function openPurchaseModal(period = 'monthly') {
-            selectedPeriod = period;
-            document.getElementById('purchase-modal').classList.remove('hidden');
+        window.openPurchaseModal = function(period) {
+            selectedPeriod = period || 'monthly';
+            var modal = document.getElementById('purchase-modal');
+            if (modal) modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
             
-            const badge = document.getElementById('plan-period-badge');
-            if (badge) {
-                badge.querySelector('span').textContent = period === 'annual' ? 'Plano Anual' : 'Plano Mensal';
+            var badge = document.getElementById('plan-period-badge');
+            if (badge && badge.querySelector('span')) {
+                badge.querySelector('span').textContent = selectedPeriod === 'annual' ? 'Plano Anual' : 'Plano Mensal';
             }
             
-            updatePrice();
-        }
+            window.updatePrice();
+        };
         
-        function closePurchaseModal() {
-            document.getElementById('purchase-modal').classList.add('hidden');
+        window.closePurchaseModal = function() {
+            var modal = document.getElementById('purchase-modal');
+            if (modal) modal.classList.add('hidden');
             document.body.style.overflow = '';
-        }
+        };
         
-        function updateQuantity(delta) {
-            const input = document.getElementById('proxy-quantity');
-            let value = parseInt(input.value) + delta;
-            if (value < 1) value = 1;
-            if (value > 100) value = 100;
-            input.value = value;
-            updatePrice();
-        }
-        
-        function updatePrice() {
-            const quantity = parseInt(document.getElementById('proxy-quantity').value) || 1;
-            const unitPrice = selectedPeriod === 'annual' ? PRICE_PER_PROXY_ANNUAL : PRICE_PER_PROXY;
-            const total = (quantity * unitPrice).toFixed(2).replace('.', ',');
-            const display = quantity === 1 ? '1 proxy' : quantity + ' proxies';
-            const periodLabel = selectedPeriod === 'annual' ? '/ano' : '/mês';
-            
-            document.getElementById('total-price').textContent = 'R$ ' + total;
-            
-            const displayEl = document.getElementById('proxy-quantity-display');
-            if (displayEl) {
-                displayEl.textContent = display + (selectedPeriod === 'annual' ? ' (anual)' : ' (mensal)');
+        window.updateQuantity = function(delta) {
+            var input = document.getElementById('proxy-quantity');
+            if (input) {
+                var value = parseInt(input.value) + delta;
+                if (value < 1) value = 1;
+                if (value > 100) value = 100;
+                input.value = value;
+                window.updatePrice();
             }
-        }
+        };
         
-        async function createCheckout() {
-            console.log('=== createCheckout called ===');
-            const btn = document.getElementById('buy-btn');
+        window.updatePrice = function() {
+            var quantity = parseInt(document.getElementById('proxy-quantity').value) || 1;
+            var unitPrice = selectedPeriod === 'annual' ? PRICE_PER_PROXY_ANNUAL : PRICE_PER_PROXY;
+            var total = (quantity * unitPrice).toFixed(2).replace('.', ',');
+            
+            var totalEl = document.getElementById('total-price');
+            if (totalEl) totalEl.textContent = 'R$ ' + total;
+            
+            var displayEl = document.getElementById('proxy-quantity-display');
+            if (displayEl) {
+                displayEl.textContent = (quantity === 1 ? '1 proxy' : quantity + ' proxies') + (selectedPeriod === 'annual' ? ' (anual)' : ' (mensal)');
+            }
+        };
+        
+        window.createCheckout = function() {
+            var btn = document.getElementById('buy-btn');
             if (!btn) {
-                console.error('Button not found!');
                 alert('Erro: Botão não encontrado');
                 return;
             }
             
-            const quantity = parseInt(document.getElementById('proxy-quantity').value);
-            const email = document.getElementById('customer-email').value;
-            const whatsapp = document.getElementById('customer-whatsapp').value;
-            
-            console.log('Quantity:', quantity);
-            console.log('Email:', email);
-            console.log('Period:', selectedPeriod);
+            var quantity = parseInt(document.getElementById('proxy-quantity').value);
+            var email = document.getElementById('customer-email').value;
+            var whatsapp = document.getElementById('customer-whatsapp').value;
             
             if (!email) {
                 alert('Por favor, insira seu email');
@@ -1910,59 +1695,42 @@
             btn.disabled = true;
             btn.textContent = 'Processando...';
             
-            try {
-                console.log('Sending request to /api/stripe/create-checkout...');
-                const response = await fetch('/api/stripe/create-checkout', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        proxyCount: quantity,
-                        email: email,
-                        whatsapp: whatsapp,
-                        period: selectedPeriod
-                    })
-                });
-                
-                const data = await response.json();
-                console.log('Checkout response:', data);
-                
+            fetch('/api/stripe/create-checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    proxyCount: quantity,
+                    email: email,
+                    whatsapp: whatsapp,
+                    period: selectedPeriod
+                })
+            })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
                 if (data.success && data.checkoutUrl) {
                     window.location.href = data.checkoutUrl;
                 } else {
-                    alert('Erro: ' + (data.error || data.message || 'Tente novamente'));
+                    alert('Erro: ' + (data.error || 'Tente novamente'));
                     btn.disabled = false;
                     btn.textContent = 'Comprar Agora';
                 }
-            } catch (err) {
-                console.error('Checkout error:', err);
+            })
+            .catch(function(err) {
                 alert('Erro de conexão. Tente novamente.');
                 btn.disabled = false;
                 btn.textContent = 'Comprar Agora';
-            }
-        }
+            });
+        };
 
-        // Ensure all buttons work after DOM loads
+        // Fix all "Comprar Agora" buttons to open modal after DOM loads
         document.addEventListener('DOMContentLoaded', function() {
-            // Fix all "Comprar Agora" buttons to open modal
-            document.querySelectorAll('button, a').forEach(el => {
-                const text = (el.textContent || '').trim();
-                const classes = el.className || '';
-                
-                // Buttons that should open the modal
+            document.querySelectorAll('button, a').forEach(function(el) {
+                var text = (el.textContent || '').trim();
                 if (text === 'Comprar Agora' || text.includes('Comprar Agora')) {
                     el.onclick = function(e) {
                         e.preventDefault();
-                        openPurchaseModal();
+                        window.openPurchaseModal();
                     };
-                }
-                
-                // Links that should scroll to plans
-                if (el.getAttribute('href') === '#planos' && !el.onclick) {
-                    el.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        const target = document.getElementById('planos');
-                        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    });
                 }
             });
         });
