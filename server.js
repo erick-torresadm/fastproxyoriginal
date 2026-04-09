@@ -11,6 +11,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// API Routes
 let stripeRoutes;
 try {
   stripeRoutes = require('./routes/stripe');
@@ -52,7 +56,12 @@ app.get('/debug/routes', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.json({ message: 'FastProxy API running', status: 'ok' });
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Serve index.html for all other routes (SPA support)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
