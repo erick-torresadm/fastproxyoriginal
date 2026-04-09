@@ -1579,10 +1579,21 @@
         }
         
         async function createCheckout() {
+            console.log('=== createCheckout called ===');
             const btn = document.getElementById('buy-btn');
+            if (!btn) {
+                console.error('Button not found!');
+                alert('Erro: Botão não encontrado');
+                return;
+            }
+            
             const quantity = parseInt(document.getElementById('proxy-quantity').value);
             const email = document.getElementById('customer-email').value;
             const whatsapp = document.getElementById('customer-whatsapp').value;
+            
+            console.log('Quantity:', quantity);
+            console.log('Email:', email);
+            console.log('Period:', selectedPeriod);
             
             if (!email) {
                 alert('Por favor, insira seu email');
@@ -1593,6 +1604,7 @@
             btn.textContent = 'Processando...';
             
             try {
+                console.log('Sending request to /api/stripe/create-checkout...');
                 const response = await fetch('/api/stripe/create-checkout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
