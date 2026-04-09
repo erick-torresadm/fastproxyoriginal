@@ -769,8 +769,7 @@
     <div id="mobile-menu" class="mobile-menu">
         <div class="flex items-center justify-between mb-8">
             <div class="flex items-center gap-3">
-                <img src="img/LOGO%20FAST%20PROXY.png" alt="FastProxy" class="logo-img h-9 hidden dark:block">
-                <img src="https://i.ibb.co/ymxkPNS0/LOGO-FAST-PROXY-black.png" alt="FastProxy" class="logo-img h-9 dark:hidden">
+                <img src="img/LOGO%20FAST%20PROXY.png" alt="FastProxy" class="logo-img h-9">
             </div>
             <button id="mobile-menu-close" class="p-2 rounded-lg" style="color: var(--text-muted)">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -809,8 +808,7 @@
         <div class="flex items-center justify-between">
             <!-- Logo -->
             <a href="#">
-                <img src="img/LOGO%20FAST%20PROXY.png" alt="FastProxy" class="logo-img h-9 hidden dark:block">
-                <img src="https://i.ibb.co/ymxkPNS0/LOGO-FAST-PROXY-black.png" alt="FastProxy" class="logo-img h-9 dark:hidden">
+                <img src="img/LOGO%20FAST%20PROXY.png" alt="FastProxy" class="logo-img h-9">
             </a>
             
             <!-- Desktop Navigation -->
@@ -1466,8 +1464,9 @@
         
         function updateLogos() {
             const logos = document.querySelectorAll('.logo-img');
+            const isDark = html.classList.contains('dark');
             logos.forEach(logo => {
-                logo.src = html.classList.contains('dark') ? logoDark : logoLight;
+                logo.src = isDark ? logoDark : logoLight;
             });
         }
         
