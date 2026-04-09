@@ -15,13 +15,21 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // API Routes
-let stripeRoutes;
+let stripeRoutes, authRoutes;
 try {
   stripeRoutes = require('./routes/stripe');
   app.use('/api/stripe', stripeRoutes);
   console.log('✅ Stripe routes registered');
 } catch (err) {
   console.error('❌ Error loading Stripe routes:', err.message);
+}
+
+try {
+  authRoutes = require('./routes/auth');
+  app.use('/api/auth', authRoutes);
+  console.log('✅ Auth routes registered');
+} catch (err) {
+  console.error('❌ Error loading Auth routes:', err.message);
 }
 
 app.get('/test', (req, res) => {

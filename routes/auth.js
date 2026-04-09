@@ -7,35 +7,49 @@ const { auth, admin } = require('../middleware/auth');
 
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, whatsapp } = req.body;
+    const { email, password, proxyCount, period } = req.body;
 
-    const existingUser = await User.findOne({ email });
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Email e senha são obrigatórios' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ success: false, message: 'A senha deve ter pelo menos 6 caracteres' });
+    }
+
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
-      return res.status(400).json({ success: false, message: 'Email já cadastrado' });
+      return res.status(400).json({ success: false, message: 'Este email já está cadastrado. Tente fazer login.' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
-      name,
-      email,
+      email: email.toLowerCase(),
       password: hashedPassword,
-      whatsapp,
-      role: email === 'admin@fastproxy.com' ? 'admin' : 'user'
+      subscription: {
+        period: period || 'monthly',
+        proxyCount: proxyCount || 1,
+        status: 'active',
+        startDate: new Date()
+      }
     });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRE
+      expiresIn: process.env.JWT_EXPIRE || '7d'
     });
 
     res.status(201).json({
       success: true,
-      data: {
-        user: { id: user._id, name: user.name, email: user.email, role: user.role },
-        token
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        subscription: user.subscription
       }
     });
   } catch (err) {
+    console.error('Register error:', err.message);
     res.status(500).json({ success: false, message: 'Erro ao criar usuário', error: err.message });
   }
 });
@@ -44,7 +58,11 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Email e senha são obrigatórios' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       return res.status(400).json({ success: false, message: 'Credenciais inválidas' });
     }
@@ -55,17 +73,20 @@ router.post('/login', async (req, res) => {
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRE
+      expiresIn: process.env.JWT_EXPIRE || '7d'
     });
 
     res.json({
       success: true,
-      data: {
-        user: { id: user._id, name: user.name, email: user.email, role: user.role },
-        token
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        subscription: user.subscription
       }
     });
   } catch (err) {
+    console.error('Login error:', err.message);
     res.status(500).json({ success: false, message: 'Erro no login', error: err.message });
   }
 });
@@ -97,14 +118,18 @@ router.post('/setup', async (req, res) => {
 router.get('/me', auth, async (req, res) => {
   res.json({
     success: true,
-    data: { user: req.user }
+    user: {
+      id: req.user._id,
+      email: req.user.email,
+      subscription: req.user.subscription
+    }
   });
 });
 
 router.get('/users', auth, admin, async (req, res) => {
   try {
     const users = await User.find().select('-password').sort({ createdAt: -1 });
-    res.json({ success: true, data: { users } });
+    res.json({ success: true, users });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Erro ao buscar usuários', error: err.message });
   }
