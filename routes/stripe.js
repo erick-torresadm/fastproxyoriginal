@@ -58,7 +58,7 @@ router.post('/create-checkout', express.json(), async (req, res) => {
     console.log('  - Unit price:', priceCalculation.unitAmount / 100);
     console.log('  - Total:', priceCalculation.total / 100);
     
-    const appUrl = process.env.APP_URL || 'https://fastproxyv3.vercel.app';
+    const appUrl = process.env.APP_URL || 'https://fastproxyoriginal.vercel.app';
     
     const session = await Stripe.createCheckoutSession({
       email: email,
