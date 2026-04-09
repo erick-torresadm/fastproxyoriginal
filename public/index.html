@@ -1323,7 +1323,6 @@
         if (savedTheme === 'light') {
             html.classList.add('light');
         } else if (savedTheme !== 'dark') {
-            // Default to light mode
             html.classList.add('light');
             localStorage.setItem('theme', 'light');
         }
@@ -1338,12 +1337,209 @@
             }
         });
 
-        // Plan Toggle (Assinatura vs Compra Única) - only if exists
-        const planToggle = document.getElementById('plan-toggle');
-        if (planToggle) {
-            const planButtons = planToggle.querySelectorAll('.plan-toggle-btn');
+        // Purchase Modal Functions
+        var selectedPeriod = 'monthly';
+        const PRICE_PER_PROXY = 29.90;
+        const PRICE_PER_PROXY_ANNUAL = 299.00;
+        
+        window.openPurchaseModal = function(period) {
+            selectedPeriod = period || 'monthly';
+            var modal = document.getElementById('purchase-modal');
+            if (modal) modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
             
-            planButtons.forEach(btn => {
+            var badge = document.getElementById('plan-period-badge');
+            if (badge && badge.querySelector('span')) {
+                badge.querySelector('span').textContent = selectedPeriod === 'annual' ? 'Plano Anual' : 'Plano Mensal';
+            }
+            
+            window.updatePrice();
+        };
+
+        window.closePurchaseModal = function() {
+            var modal = document.getElementById('purchase-modal');
+            if (modal) modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        };
+
+        window.updateQuantity = function(delta) {
+            var input = document.getElementById('proxy-quantity');
+            if (input) {
+                var value = parseInt(input.value) + delta;
+                if (value < 1) value = 1;
+                if (value > 100) value = 100;
+                input.value = value;
+                window.updatePrice();
+            }
+        };
+
+        window.updatePrice = function() {
+            var quantity = parseInt(document.getElementById('proxy-quantity').value) || 1;
+            var unitPrice = selectedPeriod === 'annual' ? PRICE_PER_PROXY_ANNUAL : PRICE_PER_PROXY;
+            var total = (quantity * unitPrice).toFixed(2).replace('.', ',');
+            
+            var totalEl = document.getElementById('total-price');
+            if (totalEl) totalEl.textContent = 'R$ ' + total;
+            
+            var displayEl = document.getElementById('proxy-quantity-display');
+            if (displayEl) {
+                displayEl.textContent = (quantity === 1 ? '1 proxy' : quantity + ' proxies') + (selectedPeriod === 'annual' ? ' (anual)' : ' (mensal)');
+            }
+        };
+
+        window.createCheckout = function() {
+            var btn = document.getElementById('buy-btn');
+            if (!btn) {
+                alert('Erro: Botão não encontrado');
+                return;
+            }
+            
+            var quantity = parseInt(document.getElementById('proxy-quantity').value);
+            var email = document.getElementById('customer-email').value;
+            var whatsapp = document.getElementById('customer-whatsapp').value;
+            
+            if (!email) {
+                alert('Por favor, insira seu email');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = 'Processando...';
+            
+            fetch('/api/stripe/create-checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    proxyCount: quantity,
+                    email: email,
+                    whatsapp: whatsapp,
+                    period: selectedPeriod
+                })
+            })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                if (data.success && data.checkoutUrl) {
+                    window.location.href = data.checkoutUrl;
+                } else {
+                    alert('Erro: ' + (data.error || 'Tente novamente'));
+                    btn.disabled = false;
+                    btn.textContent = 'Comprar Agora';
+                }
+            })
+            .catch(function(err) {
+                alert('Erro de conexão. Tente novamente.');
+                btn.disabled = false;
+                btn.textContent = 'Comprar Agora';
+            });
+        };
+
+        // Plan Toggle
+        var planToggle = document.getElementById('plan-toggle');
+        if (planToggle) {
+            var planButtons = planToggle.querySelectorAll('.plan-toggle-btn');
+            planButtons.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    planButtons.forEach(function(b) { b.classList.remove('active'); });
+                    btn.classList.add('active');
+                    
+                    if (btn.dataset.plan === 'onepurchase') {
+                        html.classList.add('show-onepurchase');
+                    } else {
+                        html.classList.remove('show-onepurchase');
+                    }
+                });
+            });
+        }
+
+        // Period Toggle
+        var periodButtons = document.querySelectorAll('.period-btn');
+        var planPrices = document.querySelectorAll('.plan-prices');
+        
+        periodButtons.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                periodButtons.forEach(function(b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+                
+                var period = btn.dataset.period;
+                planPrices.forEach(function(prices) {
+                    if (prices.dataset.period === period) {
+                        prices.classList.remove('hidden');
+                    } else {
+                        prices.classList.add('hidden');
+                    }
+                });
+            });
+        });
+
+        // Mobile Menu
+        var mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        var mobileMenuClose = document.getElementById('mobile-menu-close');
+        var mobileMenu = document.getElementById('mobile-menu');
+        var mobileOverlay = document.getElementById('mobile-overlay');
+        
+        function openMobileMenu() {
+            mobileMenu.classList.add('active');
+            mobileOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('active');
+            mobileOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', openMobileMenu);
+        if (mobileMenuClose) mobileMenuClose.addEventListener('click', closeMobileMenu);
+        if (mobileOverlay) mobileOverlay.addEventListener('click', closeMobileMenu);
+        
+        if (mobileMenu) {
+            mobileMenu.querySelectorAll('a').forEach(function(link) {
+                link.addEventListener('click', closeMobileMenu);
+            });
+        }
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+            anchor.addEventListener('click', function(e) {
+                var href = this.getAttribute('href');
+                if (href && href !== '#') {
+                    var target = document.querySelector(href);
+                    if (target) {
+                        e.preventDefault();
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
+            });
+        });
+
+        // Reveal on scroll
+        var revealElements = document.querySelectorAll('.reveal');
+        var revealObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+        
+        revealElements.forEach(function(el) { revealObserver.observe(el); });
+
+        // Navbar scroll effect
+        var navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', function() {
+            if (navbar) {
+                if (window.scrollY > 100) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            }
+        });
+    </script>
+    
+    <!-- Purchase Modal -->
+    <div id="purchase-modal" class="fixed inset-0 z-[100] hidden">
                 btn.addEventListener('click', () => {
                     planButtons.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
@@ -1441,6 +1637,117 @@
                 navbar.classList.remove('scrolled');
             }
         });
+
+        // Ensure purchase modal functions are available
+        var selectedPeriod = 'monthly';
+        const PRICE_PER_PROXY = 29.90;
+        const PRICE_PER_PROXY_ANNUAL = 299.00;
+        
+        window.openPurchaseModal = function(period = 'monthly') {
+            selectedPeriod = period;
+            const modal = document.getElementById('purchase-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+            
+            const badge = document.getElementById('plan-period-badge');
+            if (badge) {
+                badge.querySelector('span').textContent = period === 'annual' ? 'Plano Anual' : 'Plano Mensal';
+            }
+            
+            updatePrice();
+        };
+
+        window.closePurchaseModal = function() {
+            const modal = document.getElementById('purchase-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+            document.body.style.overflow = '';
+        };
+
+        window.updateQuantity = function(delta) {
+            const input = document.getElementById('proxy-quantity');
+            if (input) {
+                let value = parseInt(input.value) + delta;
+                if (value < 1) value = 1;
+                if (value > 100) value = 100;
+                input.value = value;
+                updatePrice();
+            }
+        };
+
+        window.updatePrice = function() {
+            const quantity = parseInt(document.getElementById('proxy-quantity').value) || 1;
+            const unitPrice = selectedPeriod === 'annual' ? PRICE_PER_PROXY_ANNUAL : PRICE_PER_PROXY;
+            const total = (quantity * unitPrice).toFixed(2).replace('.', ',');
+            const display = quantity === 1 ? '1 proxy' : quantity + ' proxies';
+            
+            const totalEl = document.getElementById('total-price');
+            if (totalEl) {
+                totalEl.textContent = 'R$ ' + total;
+            }
+            
+            const displayEl = document.getElementById('proxy-quantity-display');
+            if (displayEl) {
+                displayEl.textContent = display + (selectedPeriod === 'annual' ? ' (anual)' : ' (mensal)');
+            }
+        };
+
+        window.createCheckout = async function() {
+            console.log('=== createCheckout called ===');
+            const btn = document.getElementById('buy-btn');
+            if (!btn) {
+                console.error('Button not found!');
+                alert('Erro: Botão não encontrado');
+                return;
+            }
+            
+            const quantity = parseInt(document.getElementById('proxy-quantity').value);
+            const email = document.getElementById('customer-email').value;
+            const whatsapp = document.getElementById('customer-whatsapp').value;
+            
+            console.log('Quantity:', quantity, 'Email:', email, 'Period:', selectedPeriod);
+            
+            if (!email) {
+                alert('Por favor, insira seu email');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = 'Processando...';
+            
+            try {
+                console.log('Sending request to /api/stripe/create-checkout...');
+                const response = await fetch('/api/stripe/create-checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        proxyCount: quantity,
+                        email: email,
+                        whatsapp: whatsapp,
+                        period: selectedPeriod
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('Checkout response:', data);
+                
+                if (data.success && data.checkoutUrl) {
+                    window.location.href = data.checkoutUrl;
+                } else {
+                    alert('Erro: ' + (data.error || data.message || 'Tente novamente'));
+                    btn.disabled = false;
+                    btn.textContent = 'Comprar Agora';
+                }
+            } catch (err) {
+                console.error('Checkout error:', err);
+                alert('Erro de conexão. Tente novamente.');
+                btn.disabled = false;
+                btn.textContent = 'Comprar Agora';
+            }
+        };
     </script>
     
     <!-- Purchase Modal -->
