@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // API Routes
-let stripeRoutes, authRoutes, testRoutes;
+let stripeRoutes, authRoutes, testRoutes, subscriptionRoutes;
 try {
   stripeRoutes = require('./routes/stripe');
   app.use('/api/stripe', stripeRoutes);
@@ -40,6 +40,14 @@ try {
   console.log('✅ Test routes registered');
 } catch (err) {
   console.error('❌ Error loading Test routes:', err.message);
+}
+
+try {
+  subscriptionRoutes = require('./routes/subscription');
+  app.use('/api/subscription', subscriptionRoutes);
+  console.log('✅ Subscription routes registered');
+} catch (err) {
+  console.error('❌ Error loading Subscription routes:', err.message);
 }
 
 app.get('/test', (req, res) => {

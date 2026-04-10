@@ -499,31 +499,64 @@
             spinner.classList.remove('hidden');
             
             try {
-                const res = await fetch('/api/auth/register', {
+                // Use the new registration endpoint that creates subscription and proxies
+                const res = await fetch('/api/subscription/register-after-payment', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         email,
                         password,
+                        name: localStorage.getItem('pendingAccountName') || null,
+                        whatsapp: localStorage.getItem('pendingAccountWhatsapp') || null,
                         proxyCount: paymentData?.metadata?.proxy_count || localStorage.getItem('pendingAccountProxies') || 1,
-                        period: paymentData?.metadata?.period || localStorage.getItem('pendingAccountPeriod') || 'monthly'
+                        period: paymentData?.metadata?.period || localStorage.getItem('pendingAccountPeriod') || 'monthly',
+                        stripeSessionId: sessionId
                     })
                 });
                 
                 const data = await res.json();
                 
                 if (data.success) {
-                    localStorage.setItem('token', data.token);
                     localStorage.setItem('fastproxy_token', data.token);
                     localStorage.removeItem('pendingAccountEmail');
                     localStorage.removeItem('pendingAccountPeriod');
                     localStorage.removeItem('pendingAccountProxies');
+                    localStorage.removeItem('pendingAccountName');
+                    localStorage.removeItem('pendingAccountWhatsapp');
+                    
+                    // Store user data
+                    localStorage.setItem('fastproxy_user', JSON.stringify(data.user));
+                    localStorage.setItem('fastproxy_subscription', JSON.stringify(data.subscription));
+                    localStorage.setItem('fastproxy_proxies', JSON.stringify(data.proxies));
+                    
+                    // Update success section with proxy info
+                    if (data.proxies && data.proxies.length > 0) {
+                        const proxiesList = data.proxies.map(p => p.line).join('\n');
+                        document.getElementById('success-section').innerHTML = `
+                            <div class="check-icon" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
+                                <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                </svg>
+                            </div>
+                            <h2 class="text-2xl font-bold mb-2">Conta Criada!</h2>
+                            <p class="text-sm mb-6" style="color: var(--text-secondary)">
+                                Seus proxies estão prontos! Abaixo estão suas credenciais.
+                            </p>
+                            <div class="text-left p-4 rounded-xl mb-6" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2);">
+                                <p class="text-xs mb-2" style="color: var(--text-secondary)">Copie e cole no seu软件:</p>
+                                <pre class="text-sm overflow-x-auto" style="color: #22c55e; white-space: pre-wrap; word-break: break-all;">${proxiesList}</pre>
+                            </div>
+                            <a href="portal.html" class="btn-primary inline-block w-full text-center">
+                                Acessar Painel do Cliente
+                            </a>
+                        `;
+                    }
                     
                     document.getElementById('account-section').classList.add('hidden');
                     document.getElementById('login-section').classList.add('hidden');
                     document.getElementById('success-section').classList.remove('hidden');
                 } else {
-                    errorDiv.textContent = data.error || 'Erro ao criar conta. Tente novamente.';
+                    errorDiv.textContent = data.message || 'Erro ao criar conta. Tente novamente.';
                     errorDiv.classList.remove('hidden');
                     btn.disabled = false;
                     btnText.classList.remove('hidden');
@@ -536,6 +569,75 @@
                     'Não foi possível criar sua conta. Entre em contato com o suporte com os dados abaixo.',
                     sessionId
                 );
+            }
+        });
+        
+        // Login form (after payment)
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const errorDiv = document.getElementById('login-error');
+            const btn = document.getElementById('login-btn');
+            const btnText = document.getElementById('login-btn-text');
+            const spinner = document.getElementById('login-spinner');
+            
+            errorDiv.classList.add('hidden');
+            btn.disabled = true;
+            btnText.classList.add('hidden');
+            spinner.classList.remove('hidden');
+            
+            try {
+                const res = await fetch('/api/subscription/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    localStorage.setItem('fastproxy_token', data.token);
+                    localStorage.setItem('fastproxy_user', JSON.stringify(data.user));
+                    localStorage.setItem('fastproxy_subscription', JSON.stringify(data.subscription));
+                    localStorage.setItem('fastproxy_proxies', JSON.stringify(data.proxies));
+                    
+                    // Update success section with proxy info
+                    if (data.proxies && data.proxies.length > 0) {
+                        const proxiesList = data.proxies.map(p => p.line).join('\n');
+                        document.getElementById('success-section').innerHTML = `
+                            <div class="check-icon" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
+                                <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <h2 class="text-2xl font-bold mb-2">Login Realizado!</h2>
+                            <p class="text-sm mb-6" style="color: var(--text-secondary)">
+                                Bem-vindo de volta! Aqui estão seus proxies.
+                            </p>
+                            <div class="text-left p-4 rounded-xl mb-6" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2);">
+                                <p class="text-xs mb-2" style="color: var(--text-secondary)">Copie e cole no seu软件:</p>
+                                <pre class="text-sm overflow-x-auto" style="color: #22c55e; white-space: pre-wrap; word-break: break-all;">${proxiesList}</pre>
+                            </div>
+                            <a href="portal.html" class="btn-primary inline-block w-full text-center">
+                                Acessar Painel do Cliente
+                            </a>
+                        `;
+                    }
+                    
+                    document.getElementById('login-section').classList.add('hidden');
+                    document.getElementById('success-section').classList.remove('hidden');
+                } else {
+                    errorDiv.textContent = data.message || 'Email ou senha incorretos.';
+                    errorDiv.classList.remove('hidden');
+                    btn.disabled = false;
+                    btnText.classList.remove('hidden');
+                    spinner.classList.add('hidden');
+                }
+            } catch (err) {
+                console.error('Erro:', err);
+                showError('Erro de Conexão', 'Não foi possível conectar ao servidor.', sessionId);
             }
         });
         
