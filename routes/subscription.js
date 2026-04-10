@@ -1043,6 +1043,42 @@ router.delete('/admin/proxies/:id', async (req, res) => {
   }
 });
 
+// Admin: Update proxy (return to stock)
+router.put('/admin/proxies/:id', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+
+    const { id } = req.params;
+    const { returnToStock } = req.body;
+
+    if (returnToStock) {
+      // Return proxy to stock - remove user and subscription association
+      await sql`
+        UPDATE proxies 
+        SET user_id = NULL, subscription_id = NULL, is_active = true, updated_at = NOW()
+        WHERE id = ${id}
+      `;
+      res.json({ success: true, message: 'Proxy devolvido ao estoque' });
+    } else {
+      res.json({ success: true, message: 'Proxy atualizado' });
+    }
+
+  } catch (err) {
+    console.error('Admin update proxy error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao atualizar proxy', error: err.message });
+  }
+});
+
 // Admin: Get all users
 router.get('/admin/users', async (req, res) => {
   try {
@@ -1245,6 +1281,106 @@ router.put('/admin/users/:id/subscription', async (req, res) => {
   } catch (err) {
     console.error('Admin update subscription error:', err);
     res.status(500).json({ success: false, message: 'Erro ao atualizar assinatura', error: err.message });
+  }
+});
+
+// Admin: Add proxies to stock (available pool)
+router.post('/admin/add-to-stock', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+
+    const { count } = req.body;
+    const quantity = parseInt(count) || 1;
+    
+    if (quantity < 1 || quantity > 100) {
+      return res.status(400).json({ success: false, message: 'Quantidade inválida (1-100)' });
+    }
+
+    const IP_BASE = process.env.PROXY_IP || '177.54.146.90';
+    const PORT_START = parseInt(process.env.PROXY_PORT_START || '11331');
+    
+    // Get highest port used
+    const maxPortResult = await sql`SELECT MAX(port) as max_port FROM proxies`;
+    let nextPort = PORT_START;
+    if (maxPortResult[0]?.max_port) {
+      nextPort = maxPortResult[0].max_port + 1;
+    }
+
+    const created = [];
+    for (let i = 0; i < quantity; i++) {
+      const port = nextPort + i;
+      const username = 'fp' + Math.floor(Math.random() * 90000 + 10000);
+      const password = Math.random().toString(36).slice(2, 10);
+      
+      await sql`
+        INSERT INTO proxies (ip, port, username, password, is_active)
+        VALUES (${IP_BASE}, ${port}, ${username}, ${password}, true)
+      `;
+      
+      created.push({ ip: IP_BASE, port, username });
+    }
+
+    console.log(`✅ Added ${quantity} proxies to stock`);
+
+    res.json({ 
+      success: true, 
+      message: `${quantity} proxies adicionados ao estoque!`,
+      proxies: created
+    });
+
+  } catch (err) {
+    console.error('Admin add to stock error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao adicionar ao estoque', error: err.message });
+  }
+});
+
+// Admin: Get stock (available proxies)
+router.get('/admin/stock', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+
+    const stockProxies = await sql`
+      SELECT id, ip, port, username, password, created_at
+      FROM proxies 
+      WHERE user_id IS NULL AND subscription_id IS NULL
+      ORDER BY id
+    `;
+
+    const allocatedProxies = await sql`
+      SELECT COUNT(*) as count FROM proxies WHERE user_id IS NOT NULL
+    `;
+
+    res.json({
+      success: true,
+      stock: stockProxies,
+      stockCount: stockProxies.length,
+      allocatedCount: allocatedProxies[0]?.count || 0,
+      totalCount: stockProxies.length + (allocatedProxies[0]?.count || 0)
+    });
+
+  } catch (err) {
+    console.error('Admin stock error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao buscar estoque', error: err.message });
   }
 });
 

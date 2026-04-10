@@ -234,35 +234,86 @@ router.post('/process-payment/:sessionId', async (req, res) => {
     `;
     const subscription = subscriptions[0];
     
-    // 6. Generate proxies
-    const IP_BASE = process.env.PROXY_IP || '177.54.146.90';
-    const PORT_START = parseInt(process.env.PROXY_PORT_START || '11331');
-    const PORT_END = parseInt(process.env.PROXY_PORT_END || '11368');
-    
-    function generateUsername() {
-      return 'fp' + Math.floor(Math.random() * 90000 + 10000);
-    }
-    function generatePassword() {
-      const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      let pwd = '';
-      for (let i = 0; i < 8; i++) {
-        pwd += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return pwd;
-    }
+    // 6. Allocate proxies from available stock
+    // First, check for available proxies (user_id is NULL - not allocated yet)
+    const availableProxies = await sql`
+      SELECT * FROM proxies 
+      WHERE user_id IS NULL AND subscription_id IS NULL AND is_active = true
+      ORDER BY id LIMIT ${proxyCount}
+    `;
     
     const proxies = [];
-    for (let i = 0; i < proxyCount; i++) {
-      const port = PORT_START + i; // Simple port allocation
-      const username = generateUsername();
-      const pwd = generatePassword();
+    
+    if (availableProxies.length >= proxyCount) {
+      // Use available proxies from stock
+      for (let i = 0; i < proxyCount; i++) {
+        const p = availableProxies[i];
+        await sql`
+          UPDATE proxies 
+          SET user_id = ${user.id}, subscription_id = ${subscription.id}, updated_at = NOW()
+          WHERE id = ${p.id}
+        `;
+        proxies.push({
+          id: p.id,
+          ip: p.ip,
+          port: p.port,
+          username: p.username,
+          password: p.password
+        });
+      }
+      console.log(`✅ Allocated ${proxyCount} proxies from stock`);
+    } else if (availableProxies.length > 0) {
+      // Partially available - use what's available and create remaining
+      for (const p of availableProxies) {
+        await sql`
+          UPDATE proxies 
+          SET user_id = ${user.id}, subscription_id = ${subscription.id}, updated_at = NOW()
+          WHERE id = ${p.id}
+        `;
+        proxies.push({
+          id: p.id,
+          ip: p.ip,
+          port: p.port,
+          username: p.username,
+          password: p.password
+        });
+      }
+      console.log(`⚠️ Only ${availableProxies.length} proxies available, need to create more`);
       
-      const newProxies = await sql`
-        INSERT INTO proxies (user_id, subscription_id, ip, port, username, password)
-        VALUES (${user.id}, ${subscription.id}, ${IP_BASE}, ${port}, ${username}, ${pwd})
-        RETURNING *
-      `;
-      proxies.push(newProxies[0]);
+      // Create remaining proxies
+      const IP_BASE = process.env.PROXY_IP || '177.54.146.90';
+      const remaining = proxyCount - availableProxies.length;
+      
+      for (let i = 0; i < remaining; i++) {
+        const username = 'fp' + Math.floor(Math.random() * 90000 + 10000);
+        const pwd = Math.random().toString(36).slice(2, 10);
+        const port = PORT_START + proxies.length + i;
+        
+        const newProxies = await sql`
+          INSERT INTO proxies (user_id, subscription_id, ip, port, username, password)
+          VALUES (${user.id}, ${subscription.id}, ${IP_BASE}, ${port}, ${username}, ${pwd})
+          RETURNING *
+        `;
+        proxies.push(newProxies[0]);
+      }
+    } else {
+      // No proxies in stock - create new ones
+      console.log('📦 No proxies in stock, creating new ones...');
+      const IP_BASE = process.env.PROXY_IP || '177.54.146.90';
+      const PORT_START = parseInt(process.env.PROXY_PORT_START || '11331');
+      
+      for (let i = 0; i < proxyCount; i++) {
+        const username = 'fp' + Math.floor(Math.random() * 90000 + 10000);
+        const pwd = Math.random().toString(36).slice(2, 10);
+        const port = PORT_START + i;
+        
+        const newProxies = await sql`
+          INSERT INTO proxies (user_id, subscription_id, ip, port, username, password)
+          VALUES (${user.id}, ${subscription.id}, ${IP_BASE}, ${port}, ${username}, ${pwd})
+          RETURNING *
+        `;
+        proxies.push(newProxies[0]);
+      }
     }
     
     // 7. Generate JWT

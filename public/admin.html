@@ -522,14 +522,15 @@
             if (action === 'delete') {
                 if (!confirm(`Excluir ${selected.length} proxy(s)?`)) return;
                 for (const id of selected) {
-                    await api(`/api/proxies/${id}`, 'DELETE');
+                    await api(`/api/subscription/admin/proxies/${id}`, 'DELETE');
                 }
                 showToast(`${selected.length} proxy(s) excluído(s)`);
-            } else if (['available', 'active', 'expired'].includes(action)) {
+            } else if (action === 'available') {
+                // Return to stock (remove user/subscription association)
                 for (const id of selected) {
-                    await api(`/api/proxies/${id}`, 'PUT', { status: action });
+                    await api(`/api/subscription/admin/proxies/${id}`, 'PUT', { returnToStock: true });
                 }
-                showToast(`Status alterado para ${selected.length} proxy(s)`);
+                showToast(`${selected.length} proxy(s) devolvido(s) ao estoque`);
             }
             
             loadProxies();
