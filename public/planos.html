@@ -21,10 +21,13 @@
     </script>
     <style>
         body { background: #0d1117; color: #fff; font-family: system-ui, -apple-system, sans-serif; }
-        .card-hover { transition: all 0.3s ease; }
-        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(34, 197, 94, 0.2); }
-        .gradient-border { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); padding: 2px; border-radius: 1rem; }
+        .plan-card { transition: all 0.3s ease; }
+        .plan-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(34, 197, 94, 0.15); }
+        .gradient-border { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); padding: 2px; border-radius: 1.25rem; }
         .popular-tag { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+        .type-btn { transition: all 0.2s ease; }
+        .type-btn:hover { transform: scale(1.02); }
+        .type-btn.active { transform: scale(1.05); }
     </style>
 </head>
 <body class="min-h-screen">
@@ -43,7 +46,7 @@
     </header>
 
     <!-- Hero -->
-    <section class="py-16 text-center">
+    <section class="py-12 text-center">
         <h1 class="text-4xl md:text-5xl font-bold mb-4">
             Escolha seu <span class="text-accent">Plano Proxy</span>
         </h1>
@@ -52,84 +55,74 @@
         </p>
     </section>
 
-    <!-- Proxy Types Selection Cards -->
-    <section class="container mx-auto px-4 py-8">
-        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            
-            <!-- IPv6 Card -->
-            <div onclick="selectType('ipv6')" id="card-ipv6" class="proxy-card cursor-pointer rounded-2xl p-6 border-2 border-accent bg-accent/10 hover:bg-accent/20 transition-all transform hover:scale-105 relative overflow-hidden">
-                <div class="absolute top-0 right-0 bg-accent text-black text-xs font-bold px-3 py-1 rounded-bl-lg">POPULAR</div>
-                <div class="text-4xl mb-4">🌐</div>
-                <h3 class="text-xl font-bold mb-2">IPv6</h3>
-                <p class="text-sm text-secondary mb-4">Melhor custo-benefício para automação e scraping</p>
-                <div class="flex items-center justify-between">
-                    <span class="text-2xl font-bold text-accent">R$ 29,90</span>
-                    <span class="text-xs text-secondary">/mês</span>
+    <!-- Type Selector -->
+    <section class="container mx-auto px-4 py-6">
+        <div class="flex flex-wrap justify-center gap-4">
+            <button onclick="selectType('ipv6')" id="btn-ipv6" class="type-btn active px-8 py-4 rounded-2xl border-2 border-accent bg-accent/20 flex items-center gap-3">
+                <span class="text-2xl">🌐</span>
+                <div class="text-left">
+                    <div class="font-bold">IPv6</div>
+                    <div class="text-xs text-secondary">R$ 29,90/mês</div>
                 </div>
-                <div class="mt-4 text-xs text-secondary">
-                    <i class="fas fa-check text-accent mr-1"></i> Mínimo 10 unidades<br>
-                    <i class="fas fa-check text-accent mr-1"></i> Datacenter Brasil 🇧🇷<br>
-                    <i class="fas fa-check text-accent mr-1"></i> Alta velocidade
+            </button>
+            <button onclick="selectType('ipv4')" id="btn-ipv4" class="type-btn px-8 py-4 rounded-2xl border-2 border-white/20 bg-white/5 flex items-center gap-3">
+                <span class="text-2xl">🖥️</span>
+                <div class="text-left">
+                    <div class="font-bold">IPv4</div>
+                    <div class="text-xs text-secondary">R$ 39,90/mês</div>
                 </div>
-            </div>
+            </button>
+            <button onclick="selectType('isp')" id="btn-isp" class="type-btn px-8 py-4 rounded-2xl border-2 border-white/20 bg-white/5 flex items-center gap-3 relative">
+                <span class="absolute -top-2 -right-2 bg-yellow-500 text-black text-xs px-2 py-0.5 rounded-full font-bold">PREMIUM</span>
+                <span class="text-2xl">🏢</span>
+                <div class="text-left">
+                    <div class="font-bold">ISP</div>
+                    <div class="text-xs text-secondary">R$ 49,90/mês</div>
+                </div>
+            </button>
+            <button onclick="selectType('mobile')" id="btn-mobile" class="type-btn px-8 py-4 rounded-2xl border-2 border-white/20 bg-white/5 flex items-center gap-3 relative">
+                <span class="absolute -top-2 -right-2 bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">ESPECIAL</span>
+                <span class="text-2xl">📱</span>
+                <div class="text-left">
+                    <div class="font-bold">Mobile 4G/5G</div>
+                    <div class="text-xs text-secondary">R$ 79,90/mês</div>
+                </div>
+            </button>
+        </div>
+    </section>
 
-            <!-- IPv4 Card -->
-            <div onclick="selectType('ipv4')" id="card-ipv4" class="proxy-card cursor-pointer rounded-2xl p-6 border-2 border-white/20 bg-white/5 hover:bg-white/10 transition-all transform hover:scale-105">
-                <div class="text-4xl mb-4">🖥️</div>
-                <h3 class="text-xl font-bold mb-2">IPv4</h3>
-                <p class="text-sm text-secondary mb-4">Alta compatibilidade com todos os sites</p>
-                <div class="flex items-center justify-between">
-                    <span class="text-2xl font-bold text-white">R$ 39,90</span>
-                    <span class="text-xs text-secondary">/mês</span>
-                </div>
-                <div class="mt-4 text-xs text-secondary">
-                    <i class="fas fa-check text-accent mr-1"></i> 1 proxy individual<br>
-                    <i class="fas fa-check text-accent mr-1"></i> Datacenter Brasil 🇧🇷<br>
-                    <i class="fas fa-check text-accent mr-1"></i> 99.9% uptime
-                </div>
-            </div>
-
-            <!-- ISP Card -->
-            <div onclick="selectType('isp')" id="card-isp" class="proxy-card cursor-pointer rounded-2xl p-6 border-2 border-white/20 bg-white/5 hover:bg-white/10 transition-all transform hover:scale-105 relative">
-                <div class="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-3 py-1 rounded-bl-lg">PREMIUM</div>
-                <div class="text-4xl mb-4">🏢</div>
-                <h3 class="text-xl font-bold mb-2">ISP</h3>
-                <p class="text-sm text-secondary mb-4">IP de provedor dedicado, mistura DC + Residencial</p>
-                <div class="flex items-center justify-between">
-                    <span class="text-2xl font-bold text-white">R$ 49,90</span>
-                    <span class="text-xs text-secondary">/mês</span>
-                </div>
-                <div class="mt-4 text-xs text-secondary">
-                    <i class="fas fa-check text-accent mr-1"></i> 1 proxy individual<br>
-                    <i class="fas fa-check text-accent mr-1"></i> IP de Operadora<br>
-                    <i class="fas fa-check text-accent mr-1"></i> Ideal para redes sociais
-                </div>
-            </div>
-
-            <!-- Mobile Card -->
-            <div onclick="selectType('mobile')" id="card-mobile" class="proxy-card cursor-pointer rounded-2xl p-6 border-2 border-white/20 bg-white/5 hover:bg-white/10 transition-all transform hover:scale-105 relative">
-                <div class="absolute top-0 right-0 bg-purple-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">ESPECIAL</div>
-                <div class="text-4xl mb-4">📱</div>
-                <h3 class="text-xl font-bold mb-2">Mobile 4G/5G</h3>
-                <p class="text-sm text-secondary mb-4">Para apps e redes sociais que exigem IP mobile</p>
-                <div class="flex items-center justify-between">
-                    <span class="text-2xl font-bold text-white">R$ 79,90</span>
-                    <span class="text-xs text-secondary">/mês</span>
-                </div>
-                <div class="mt-4 text-xs text-secondary">
-                    <i class="fas fa-check text-accent mr-1"></i> IP de Operadora Móvel<br>
-                    <i class="fas fa-check text-accent mr-1"></i> Rotativo ou fixo<br>
-                    <i class="fas fa-check text-accent mr-1"></i> Para TikTok, Instagram
-                </div>
-            </div>
-
+    <!-- Type Description -->
+    <section class="container mx-auto px-4 py-4 text-center">
+        <div id="type-description" class="text-secondary max-w-2xl mx-auto">
+            <p>Melhor custo-benefício para automação e scraping. Mínimo 10 unidades.</p>
         </div>
     </section>
 
     <!-- Plans Grid -->
     <section class="container mx-auto px-4 py-8">
-        <div id="plans-grid" class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div id="plans-grid" class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             <!-- Plans will be loaded here -->
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="container mx-auto px-4 py-12">
+        <div class="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div class="text-center p-6 rounded-2xl bg-white/5">
+                <i class="fas fa-bolt text-4xl text-accent mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">Alta Velocidade</h3>
+                <p class="text-secondary">Proxies otimizados para máxima performance.</p>
+            </div>
+            <div class="text-center p-6 rounded-2xl bg-white/5">
+                <i class="fas fa-shield-alt text-4xl text-accent mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">99.9% Uptime</h3>
+                <p class="text-secondary">Infraestrutura redundante para disponibilidade.</p>
+            </div>
+            <div class="text-center p-6 rounded-2xl bg-white/5">
+                <i class="fas fa-headset text-4xl text-accent mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">Suporte 24/7</h3>
+                <p class="text-secondary">Equipe técnica disponível sempre.</p>
+            </div>
         </div>
     </section>
 
@@ -167,28 +160,6 @@
         </div>
     </section>
 
-    <!-- Features -->
-    <section class="container mx-auto px-4 py-16">
-        <h2 class="text-3xl font-bold text-center mb-12">Por que escolher a FastProxy?</h2>
-        <div class="grid md:grid-cols-3 gap-8">
-            <div class="text-center p-6 rounded-2xl bg-white/5">
-                <i class="fas fa-bolt text-4xl text-accent mb-4"></i>
-                <h3 class="text-xl font-bold mb-2">Alta Velocidade</h3>
-                <p class="text-secondary">Proxies otimizados para máxima performance e velocidade.</p>
-            </div>
-            <div class="text-center p-6 rounded-2xl bg-white/5">
-                <i class="fas fa-shield-alt text-4xl text-accent mb-4"></i>
-                <h3 class="text-xl font-bold mb-2">99.9% Uptime</h3>
-                <p class="text-secondary">Infraestrutura redundante para disponibilidade máxima.</p>
-            </div>
-            <div class="text-center p-6 rounded-2xl bg-white/5">
-                <i class="fas fa-headset text-4xl text-accent mb-4"></i>
-                <h3 class="text-xl font-bold mb-2">Suporte 24/7</h3>
-                <p class="text-secondary">Equipe técnica disponível para ajudar a qualquer momento.</p>
-            </div>
-        </div>
-    </section>
-
     <!-- Footer -->
     <footer class="border-t border-white/10 py-8">
         <div class="container mx-auto px-4 text-center text-secondary">
@@ -202,112 +173,131 @@
     <script>
         const API_URL = '';
         let currentType = 'ipv6';
-        let currentPeriod = '1m';
         let appliedCoupon = null;
         
         const PRICING = {
             ipv6: {
                 name: 'IPv6',
-                description: 'Datacenter IPv6 - Ideal para scraping e automação',
+                description: 'Melhor custo-benefício para automação e scraping. Mínimo 10 unidades.',
                 minQty: 10,
                 sellPrice: 29.90,
-                icon: 'fa-network-wired'
+                icon: '🌐',
+                tag: 'POPULAR',
+                tagColor: 'bg-accent text-black'
             },
             ipv4: {
                 name: 'IPv4',
-                description: 'Datacenter IPv4 individual - Alta compatibilidade',
+                description: 'Alta compatibilidade com todos os sites. IP individual.',
                 minQty: 1,
                 sellPrice: 39.90,
-                icon: 'fa-server'
+                icon: '🖥️',
+                tag: null,
+                tagColor: ''
             },
             isp: {
                 name: 'ISP',
-                description: 'IP de provedor dedicado - Mistura datacenter + residencial',
+                description: 'IP de provedor dedicado. Mistura datacenter + residencial.',
                 minQty: 1,
                 sellPrice: 49.90,
-                icon: 'fa-building'
+                icon: '🏢',
+                tag: 'PREMIUM',
+                tagColor: 'bg-yellow-500 text-black'
             },
             mobile: {
                 name: 'Mobile 4G/5G',
-                description: 'IP de operadoras móveis - Para redes sociais e apps',
+                description: 'Para apps e redes sociais que exigem IP mobile.',
                 minQty: 1,
                 sellPrice: 79.90,
-                icon: 'fa-mobile-alt'
+                icon: '📱',
+                tag: 'ESPECIAL',
+                tagColor: 'bg-purple-500 text-white'
             }
         };
 
-        const PERIODS = [
-            { id: '1w', name: '1 Semana', months: 0.25, days: 7, discount: 0 },
-            { id: '2w', name: '2 Semanas', months: 0.5, days: 14, discount: 0 },
-            { id: '1m', name: '1 Mês', months: 1, days: 30, discount: 0 },
-            { id: '2m', name: '2 Meses', months: 2, days: 60, discount: 0.1 },
-            { id: '3m', name: '3 Meses', months: 3, days: 90, discount: 0.15 },
-            { id: '6m', name: '6 Meses', months: 6, days: 180, discount: 0.25 },
-            { id: '12m', name: '12 Meses', months: 12, days: 365, discount: 0.35 }
+        const DISPLAY_PERIODS = [
+            { id: '1m', name: '1 Mês', months: 1, badge: null },
+            { id: '6m', name: '6 Meses', months: 6, badge: '-25%' },
+            { id: '12m', name: '12 Meses', months: 12, badge: '-35%' }
         ];
 
         function selectType(type) {
             currentType = type;
-            document.querySelectorAll('.proxy-card').forEach(card => {
-                card.classList.remove('border-accent', 'bg-accent/10');
-                card.classList.add('border-white/20', 'bg-white/5');
+            
+            document.querySelectorAll('.type-btn').forEach(btn => {
+                btn.classList.remove('active', 'border-accent', 'bg-accent/20');
+                btn.classList.add('border-white/20', 'bg-white/5');
             });
-            document.getElementById(`card-${type}`).classList.remove('border-white/20', 'bg-white/5');
-            document.getElementById(`card-${type}`).classList.add('border-accent', 'bg-accent/10');
+            
+            const activeBtn = document.getElementById(`btn-${type}`);
+            activeBtn.classList.remove('border-white/20', 'bg-white/5');
+            activeBtn.classList.add('active', 'border-accent', 'bg-accent/20');
+            
+            document.getElementById('type-description').innerHTML = `<p>${PRICING[type].description}</p>`;
+            
             loadPlans();
         }
 
         function loadPlans() {
             const info = PRICING[currentType];
             const grid = document.getElementById('plans-grid');
+            const qty = info.minQty;
+            const basePrice = info.sellPrice;
             
-            grid.innerHTML = PERIODS.map(period => {
-                const qty = info.minQty;
-                const basePrice = info.sellPrice;
-                const discount = period.discount;
+            grid.innerHTML = DISPLAY_PERIODS.map((period, index) => {
                 const periodMonths = period.months;
+                const discount = period.id === '1m' ? 0 : (period.id === '6m' ? 0.25 : 0.35);
                 
                 let subtotal = basePrice * qty * periodMonths;
                 let discountAmount = subtotal * discount;
                 let total = subtotal - discountAmount;
-                let pricePerUnit = total / qty;
+                let pricePerProxy = total / qty;
                 
                 if (appliedCoupon) {
                     if (appliedCoupon.discount_percent) {
                         const cupomDiscount = total * (appliedCoupon.discount_percent / 100);
                         total -= cupomDiscount;
-                        pricePerUnit = total / qty;
+                        pricePerProxy = total / qty;
                     } else if (appliedCoupon.discount_amount) {
                         const cupomDiscount = Math.min(appliedCoupon.discount_amount, total);
                         total -= cupomDiscount;
-                        pricePerUnit = total / qty;
+                        pricePerProxy = total / qty;
                     }
                 }
                 
-                const savings = (basePrice * qty * periodMonths * discount).toFixed(2);
+                const isPopular = index === 1;
+                const savings = discountAmount > 0 ? discountAmount.toFixed(2) : null;
                 
                 return `
-                    <div class="card-hover rounded-2xl ${discount > 0 ? 'gradient-border' : ''} bg-primary p-1">
-                        <div class="bg-primary rounded-xl p-6 h-full">
-                            ${discount > 0 ? `<span class="popular-tag text-xs px-3 py-1 rounded-full text-black font-bold">-${(discount * 100).toFixed(0)}% OFF</span>` : ''}
-                            ${appliedCoupon ? `<span class="bg-blue-500 text-xs px-3 py-1 rounded-full text-white font-bold ml-2">CUPOM APLICADO</span>` : ''}
-                            <h3 class="text-2xl font-bold mt-2">${period.name}</h3>
+                    <div class="plan-card ${isPopular ? 'gradient-border' : ''} p-1 rounded-2xl">
+                        <div class="bg-primary rounded-xl p-6 h-full text-center relative">
+                            ${period.badge ? `<span class="absolute top-4 right-4 ${info.tagColor} text-xs px-2 py-1 rounded-full font-bold">${period.badge}</span>` : ''}
+                            ${isPopular ? `<span class="absolute top-4 left-4 bg-accent text-black text-xs px-2 py-1 rounded-full font-bold">RECOMENDADO</span>` : ''}
+                            
+                            <div class="text-3xl mb-2">${info.icon}</div>
+                            <h3 class="text-2xl font-bold mb-1">${period.name}</h3>
                             <p class="text-secondary text-sm mb-4">${qty} proxy(s) ${info.name}</p>
+                            
                             <div class="mb-4">
-                                <span class="text-3xl font-bold text-accent">R$ ${pricePerUnit.toFixed(2)}</span>
-                                <span class="text-secondary text-sm">/por proxy</span>
+                                <span class="text-4xl font-bold text-accent">R$ ${pricePerProxy.toFixed(2).replace('.', ',')}</span>
+                                <span class="text-secondary text-sm block">por proxy</span>
                             </div>
-                            ${discount > 0 ? `<p class="text-green-400 text-sm mb-2">Economia de R$ ${savings}</p>` : ''}
-                            ${appliedCoupon ? `<p class="text-blue-400 text-sm mb-2">Cupom: -R$ ${appliedCoupon.discount.toFixed(2)}</p>` : ''}
-                            <p class="text-2xl font-bold mb-4">Total: R$ ${total.toFixed(2)}</p>
-                            <ul class="text-sm text-secondary mb-6 space-y-2">
+                            
+                            ${savings ? `<p class="text-green-400 text-sm mb-2"><i class="fas fa-tag mr-1"></i>Economia de R$ ${savings}</p>` : ''}
+                            
+                            <div class="text-2xl font-bold mb-4 border-t border-white/10 pt-4">
+                                Total: <span class="text-accent">R$ ${total.toFixed(2).replace('.', ',')}</span>
+                            </div>
+                            
+                            <ul class="text-sm text-secondary mb-6 space-y-2 text-left">
                                 <li><i class="fas fa-check text-accent mr-2"></i>Alta velocidade</li>
                                 <li><i class="fas fa-check text-accent mr-2"></i>Suporte 24/7</li>
-                                <li><i class="fas fa-check text-accent mr-2"></i>IP do Brasil</li>
+                                <li><i class="fas fa-check text-accent mr-2"></i>IP do Brasil 🇧🇷</li>
+                                <li><i class="fas fa-check text-accent mr-2"></i>Entrega imediata</li>
                             </ul>
+                            
                             <button onclick="buyProxy('${currentType}', '${period.id}', ${qty})" 
-                                class="w-full py-3 rounded-xl bg-accent hover:bg-green-600 text-black font-bold transition">
-                                <i class="fas fa-shopping-cart mr-2"></i>Comprar
+                                class="w-full py-3 rounded-xl ${isPopular ? 'bg-accent hover:bg-green-600' : 'bg-white/10 hover:bg-white/20'} text-${isPopular ? 'black' : 'white'} font-bold transition">
+                                <i class="fas fa-shopping-cart mr-2"></i>Comprar Agora
                             </button>
                         </div>
                     </div>
@@ -376,7 +366,7 @@
 
             const termsAccepted = document.getElementById('terms-checkbox').checked;
             if (!termsAccepted) {
-                showToast('Você precisa aceitar os Termos de Uso para continuar', 'error');
+                showToast('Você precisa aceitar os Termos de Uso', 'error');
                 return;
             }
 
@@ -414,7 +404,7 @@
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
-            toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-xl font-semibold ${type === 'error' ? 'bg-red-500' : 'bg-accent'} text-${type === 'error' ? 'white' : 'black'} show`;
+            toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-xl font-semibold ${type === 'error' ? 'bg-red-500 text-white' : 'bg-accent text-black'} show`;
             setTimeout(() => toast.classList.add('hidden'), 3000);
         }
 
