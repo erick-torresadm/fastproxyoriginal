@@ -3,8 +3,9 @@ const router = express.Router();
 const { sql } = require('../lib/database');
 const { authenticate } = require('./subscription');
 
-// Points per R$ spent
-const POINTS_PER_REAL = 1;
+// Points: 1 point = R$ 0.10 (10 cents)
+const POINTS_VALUE = 0.10;
+const MIN_POINTS_REDEEM = 100; // 100 points = R$ 10,00
 
 router.get('/balance', authenticate, async (req, res) => {
   try {
@@ -22,7 +23,9 @@ router.get('/balance', authenticate, async (req, res) => {
         points: {
           total: 0,
           available: 0,
-          lifetime: 0
+          lifetime: 0,
+          valuePerPoint: POINTS_VALUE,
+          minRedeem: MIN_POINTS_REDEEM
         }
       });
     }
@@ -32,7 +35,10 @@ router.get('/balance', authenticate, async (req, res) => {
       points: {
         total: reward.total_points,
         available: reward.available_points,
-        lifetime: reward.lifetime_points
+        lifetime: reward.lifetime_points,
+        valuePerPoint: POINTS_VALUE,
+        minRedeem: MIN_POINTS_REDEEM,
+        valueAvailable: reward.available_points * POINTS_VALUE
       }
     });
   } catch (err) {
@@ -57,7 +63,7 @@ router.get('/history', authenticate, async (req, res) => {
       transactions: transactions.map(t => ({
         id: t.id,
         type: t.type,
-        points: t.points,
+        points: Math.abs(t.points),
         description: t.description,
         createdAt: t.created_at,
         orderId: t.order_id,
@@ -75,10 +81,10 @@ router.post('/redeem', authenticate, async (req, res) => {
   try {
     const { points } = req.body;
 
-    if (!points || points < 100) {
+    if (!points || points < MIN_POINTS_REDEEM) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Mínimo de 100 pontos para resgate' 
+        message: `Mínimo de ${MIN_POINTS_REDEEM} pontos para resgate (R$ ${(MIN_POINTS_REDEEM * POINTS_VALUE).toFixed(2)})` 
       });
     }
 
@@ -93,8 +99,8 @@ router.post('/redeem', authenticate, async (req, res) => {
       });
     }
 
-    // Convert points to discount (100 points = R$ 1,00)
-    const discountAmount = points / 100;
+    // Convert points to discount (1 point = R$ 0.10)
+    const discountAmount = points * POINTS_VALUE;
 
     // Create coupon for the user
     const couponCode = 'PONTOS' + Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -135,6 +141,7 @@ router.post('/redeem', authenticate, async (req, res) => {
       coupon: {
         code: couponCode,
         discount: discountAmount,
+        pointsUsed: points,
         expiresAt: expiresAt
       }
     });
@@ -146,7 +153,11 @@ router.post('/redeem', authenticate, async (req, res) => {
 
 async function awardPointsForOrder(userId, orderId, orderValue) {
   try {
-    const points = Math.floor(orderValue * POINTS_PER_REAL);
+    // 1 point per R$ spent, each point = R$ 0.10
+    // So if someone spends R$ 100, they get 100 points = R$ 10,00 credit
+    const points = Math.floor(orderValue);
+
+    if (points <= 0) return 0;
 
     // Get or create reward record
     let [reward] = await sql`
@@ -175,11 +186,11 @@ async function awardPointsForOrder(userId, orderId, orderValue) {
         user_id, order_id, type, points, description
       ) VALUES (
         ${userId}, ${orderId}, 'earn', ${points},
-        ${`Pontos ganhos na compra - R$ ${orderValue.toFixed(2)}`}
+        ${`Pontos ganhos na compra - R$ ${orderValue.toFixed(2)} → ${points} pontos`}
       )
     `;
 
-    console.log(`✅ Awarded ${points} points to user ${userId}`);
+    console.log(`✅ Awarded ${points} points to user ${userId} (R$ ${(points * POINTS_VALUE).toFixed(2)} em crédito)`);
     return points;
   } catch (err) {
     console.error('Award points error:', err);

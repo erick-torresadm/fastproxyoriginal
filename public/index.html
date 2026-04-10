@@ -1716,39 +1716,48 @@
         function loadHomePlans() {
             const info = HOME_PRICING[currentType];
             const grid = document.getElementById('home-plans-grid');
-            const qty = info.minQty;
             const basePrice = info.sellPrice;
             
             grid.innerHTML = HOME_PERIODS.map((period, index) => {
                 const discount = period.discount;
-                
-                const subtotal = basePrice * qty;
-                const discountAmount = subtotal * discount;
-                const total = subtotal - discountAmount;
                 const isPopular = index === 1;
-                const savings = discountAmount > 0 ? discountAmount.toFixed(2) : null;
                 const badgeText = discount > 0 ? `-${Math.round(discount * 100)}%` : null;
                 
                 return `
-                    <div class="plan-card rounded-2xl p-1 ${isPopular ? 'border-2' : ''} transition-all duration-300" style="${isPopular ? 'border-color: var(--badge-text)' : 'border: 1px solid var(--border-color)'}">
+                    <div class="plan-card rounded-2xl p-1 ${isPopular ? 'border-2' : ''} transition-all duration-300" id="home-plan-${period.id}" style="${isPopular ? 'border-color: var(--badge-text)' : 'border: 1px solid var(--border-color)'}">
                         <div class="rounded-xl p-6 h-full text-center relative" style="background: var(--bg-card)">
                             ${badgeText ? `<span class="absolute top-4 right-4 ${info.tagClass} text-xs px-2 py-1 rounded-full font-bold">${badgeText}</span>` : ''}
                             ${isPopular ? `<span class="absolute top-4 left-4 bg-green-500 text-black text-xs px-2 py-1 rounded-full font-bold">RECOMENDADO</span>` : ''}
                             
                             <div class="text-3xl mb-2">${info.icon}</div>
                             <h3 class="text-xl font-bold mb-1" style="color: var(--text-primary)">${period.name}</h3>
-                            <p class="text-sm mb-4" style="color: var(--text-zinc)">${qty} proxy(s) ${info.name}</p>
+                            <p class="text-sm mb-4" style="color: var(--text-zinc)">${info.name}</p>
                             
                             <div class="mb-4">
                                 <span class="text-3xl font-bold text-green-500">R$ ${basePrice.toFixed(2).replace('.', ',')}</span>
                                 <span class="text-sm block" style="color: var(--text-muted)">por proxy/mês</span>
                             </div>
                             
-                            ${savings ? `<p class="text-green-400 text-sm mb-2"><i class="fas fa-tag mr-1"></i>Economia de R$ ${savings}</p>` : ''}
-                            
-                            <div class="text-xl font-bold mb-4 border-t border-white/10 pt-4" style="color: var(--text-primary)">
-                                Total: <span class="text-green-500">R$ ${total.toFixed(2).replace('.', ',')}</span>
+                            <div class="mb-4">
+                                <label class="text-sm block mb-2" style="color: var(--text-muted)">Quantidade</label>
+                                <div class="flex items-center justify-center gap-2">
+                                    <button onclick="changeHomeQty('${period.id}', -1)" class="w-8 h-8 rounded-lg hover:bg-white/20 flex items-center justify-center text-lg" style="background: var(--bg-secondary)">-</button>
+                                    <input type="number" id="home-qty-${period.id}" value="${info.minQty}" min="${info.minQty}" max="100" 
+                                        class="w-16 text-center py-2 rounded-lg border text-lg font-bold"
+                                        style="background: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary)"
+                                        onchange="updateHomePlanPrice('${period.id}', ${basePrice}, ${discount})">
+                                    <button onclick="changeHomeQty('${period.id}', 1)" class="w-8 h-8 rounded-lg hover:bg-white/20 flex items-center justify-center text-lg" style="background: var(--bg-secondary)">+</button>
+                                </div>
                             </div>
+                            
+                            <div class="text-lg font-bold mb-2 border-t border-white/10 pt-4" style="color: var(--text-primary)">
+                                <span style="color: var(--text-muted)">Total:</span> 
+                                <span id="home-total-${period.id}" class="text-green-500">R$ ${basePrice.toFixed(2).replace('.', ',')}</span>
+                            </div>
+                            
+                            <p class="text-xs mb-4" style="color: var(--text-muted)">
+                                Total anual: <span id="home-annual-${period.id}">R$ ${(basePrice * 12).toFixed(2).replace('.', ',')}</span>
+                            </p>
                             
                             <ul class="text-sm mb-6 space-y-2 text-left" style="color: var(--text-zinc)">
                                 <li><span class="text-green-500">✓</span> Alta velocidade</li>
@@ -1757,7 +1766,7 @@
                                 <li><span class="text-green-500">✓</span> Entrega imediata</li>
                             </ul>
                             
-                            <button onclick="startHomePurchase('${currentType}', '${period.id}', ${qty})" 
+                            <button onclick="startHomePurchase('${currentType}', '${period.id}')" 
                                 class="w-full py-3 rounded-xl font-bold transition-all ${isPopular ? 'bg-green-500 text-black hover:bg-green-600' : 'border-2 border-green-500 text-green-500 hover:bg-green-500/10'}">
                                 <i class="fas fa-shopping-cart mr-2"></i>Comprar Agora
                             </button>
@@ -1767,9 +1776,32 @@
             }).join('');
         }
 
+        function changeHomeQty(periodId, delta) {
+            const input = document.getElementById(`home-qty-${periodId}`);
+            const newVal = Math.max(parseInt(input.min), parseInt(input.value) + delta);
+            input.value = newVal;
+            
+            const planCard = document.getElementById(`home-plan-${periodId}`);
+            const basePrice = parseFloat(planCard.dataset.price || 29.90);
+            const discount = parseFloat(planCard.dataset.discount || 0);
+            
+            updateHomePlanPrice(periodId, basePrice, discount);
+        }
+
+        function updateHomePlanPrice(periodId, basePrice, discount) {
+            const qty = parseInt(document.getElementById(`home-qty-${periodId}`).value) || 1;
+            const total = basePrice * qty;
+            const finalTotal = total * (1 - discount);
+            const annualTotal = basePrice * 12 * qty;
+            
+            document.getElementById(`home-total-${periodId}`).textContent = `R$ ${finalTotal.toFixed(2).replace('.', ',')}`;
+            document.getElementById(`home-annual-${periodId}`).textContent = `R$ ${annualTotal.toFixed(2).replace('.', ',')}`;
+        }
+
         let homePendingPurchase = null;
 
-        function startHomePurchase(type, period, quantity) {
+        function startHomePurchase(type, period) {
+            const quantity = parseInt(document.getElementById(`home-qty-${period}`).value) || 1;
             homePendingPurchase = { type, period, quantity };
             openHomeTermsModal();
         }

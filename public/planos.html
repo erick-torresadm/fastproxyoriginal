@@ -279,7 +279,8 @@
                     <div class="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-xl p-6 text-center mb-6 border border-yellow-500/30">
                         <div class="text-4xl font-bold text-yellow-500" id="modal-total-points">0</div>
                         <div class="text-sm text-secondary">pontos disponíveis</div>
-                        <div class="text-sm text-secondary mt-2">1 ponto = R$ 0,01 de desconto</div>
+                        <div class="text-sm text-secondary mt-2">1 ponto = R$ 0,10 de desconto</div>
+                        <div class="text-xs text-accent mt-1">Valor disponível: R$ <span id="modal-points-value">0,00</span></div>
                     </div>
                     
                     <div class="space-y-3 mb-6">
@@ -561,43 +562,47 @@
         function loadPlans() {
             const info = PRICING[currentType];
             const grid = document.getElementById('plans-grid');
-            const qty = info.minQty;
             const basePrice = info.sellPrice;
             
             grid.innerHTML = DISPLAY_PERIODS.map((period, index) => {
                 const discount = period.discount;
-                
-                // Preço: por proxy por mês, sem multiplicar por período
-                // Total = preço mensal * quantidade
-                // Desconto no TOTAL do período (não multiplica meses)
-                let total = basePrice * qty;
-                let discountAmount = total * discount;
-                let finalTotal = total - discountAmount;
-                let pricePerProxy = basePrice;
-                
                 const isPopular = index === 1;
-                const savings = discountAmount > 0 ? discountAmount.toFixed(2) : null;
+                const badgeText = discount > 0 ? `-${Math.round(discount * 100)}%` : null;
                 
                 return `
-                    <div class="plan-card ${isPopular ? 'gradient-border' : ''} p-1 rounded-2xl">
+                    <div class="plan-card ${isPopular ? 'gradient-border' : ''} p-1 rounded-2xl" id="plan-${period.id}">
                         <div class="bg-primary rounded-xl p-6 h-full text-center relative">
-                            ${period.badge ? `<span class="absolute top-4 right-4 ${info.tagColor} text-xs px-2 py-1 rounded-full font-bold">${period.badge}</span>` : ''}
+                            ${badgeText ? `<span class="absolute top-4 right-4 ${info.tagColor} text-xs px-2 py-1 rounded-full font-bold">${badgeText}</span>` : ''}
                             ${isPopular ? `<span class="absolute top-4 left-4 bg-accent text-black text-xs px-2 py-1 rounded-full font-bold">RECOMENDADO</span>` : ''}
                             
                             <div class="text-3xl mb-2">${info.icon}</div>
                             <h3 class="text-2xl font-bold mb-1">${period.name}</h3>
-                            <p class="text-secondary text-sm mb-4">${qty} proxy(s) ${info.name}</p>
+                            <p class="text-secondary text-sm mb-4">${info.name}</p>
                             
                             <div class="mb-4">
-                                <span class="text-4xl font-bold text-accent">R$ ${pricePerProxy.toFixed(2).replace('.', ',')}</span>
+                                <span class="text-4xl font-bold text-accent">R$ ${basePrice.toFixed(2).replace('.', ',')}</span>
                                 <span class="text-secondary text-sm block">por proxy/mês</span>
                             </div>
                             
-                            ${savings ? `<p class="text-green-400 text-sm mb-2"><i class="fas fa-tag mr-1"></i>Economia de R$ ${savings}</p>` : ''}
-                            
-                            <div class="text-2xl font-bold mb-4 border-t border-white/10 pt-4">
-                                Total: <span class="text-accent">R$ ${finalTotal.toFixed(2).replace('.', ',')}</span>
+                            <div class="mb-4">
+                                <label class="text-sm text-secondary block mb-2">Quantidade</label>
+                                <div class="flex items-center justify-center gap-2">
+                                    <button onclick="changeQty('${period.id}', -1)" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-lg">-</button>
+                                    <input type="number" id="qty-${period.id}" value="${info.minQty}" min="${info.minQty}" max="100" 
+                                        class="w-16 text-center py-2 rounded-lg bg-white/10 border border-white/20 text-white text-lg font-bold"
+                                        onchange="updatePlanPrice('${period.id}', ${basePrice}, ${discount})">
+                                    <button onclick="changeQty('${period.id}', 1)" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-lg">+</button>
+                                </div>
                             </div>
+                            
+                            <div class="text-lg font-bold mb-2 border-t border-white/10 pt-4">
+                                <span class="text-secondary">Total:</span> 
+                                <span id="total-${period.id}" class="text-accent">R$ ${basePrice.toFixed(2).replace('.', ',')}</span>
+                            </div>
+                            
+                            <p class="text-xs text-secondary mb-4">
+                                Total anual: <span id="annual-${period.id}">R$ ${(basePrice * 12).toFixed(2).replace('.', ',')}</span>
+                            </p>
                             
                             <ul class="text-sm text-secondary mb-6 space-y-2 text-left">
                                 <li><i class="fas fa-check text-accent mr-2"></i>Alta velocidade</li>
@@ -606,7 +611,7 @@
                                 <li><i class="fas fa-check text-accent mr-2"></i>Entrega imediata</li>
                             </ul>
                             
-                            <button onclick="startPurchase('${currentType}', '${period.id}', ${qty})" 
+                            <button onclick="startPurchase('${currentType}', '${period.id}')" 
                                 class="w-full py-3 rounded-xl ${isPopular ? 'bg-accent hover:bg-green-600' : 'bg-white/10 hover:bg-white/20'} text-${isPopular ? 'black' : 'white'} font-bold transition">
                                 <i class="fas fa-shopping-cart mr-2"></i>Comprar Agora
                             </button>
@@ -616,7 +621,30 @@
             }).join('');
         }
 
-        function startPurchase(type, period, quantity) {
+        function changeQty(periodId, delta) {
+            const input = document.getElementById(`qty-${periodId}`);
+            const newVal = Math.max(parseInt(input.min), parseInt(input.value) + delta);
+            input.value = newVal;
+            
+            const planCard = document.getElementById(`plan-${periodId}`);
+            const basePrice = parseFloat(planCard.dataset.price || 29.90);
+            const discount = parseFloat(planCard.dataset.discount || 0);
+            
+            updatePlanPrice(periodId, basePrice, discount);
+        }
+
+        function updatePlanPrice(periodId, basePrice, discount) {
+            const qty = parseInt(document.getElementById(`qty-${periodId}`).value) || 1;
+            const total = basePrice * qty;
+            const finalTotal = total * (1 - discount);
+            const annualTotal = basePrice * 12 * qty;
+            
+            document.getElementById(`total-${periodId}`).textContent = `R$ ${finalTotal.toFixed(2).replace('.', ',')}`;
+            document.getElementById(`annual-${periodId}`).textContent = `R$ ${annualTotal.toFixed(2).replace('.', ',')}`;
+        }
+
+        function startPurchase(type, period) {
+            const quantity = parseInt(document.getElementById(`qty-${period}`).value) || 1;
             pendingPurchase = { type, period, quantity };
             openTermsModal();
         }
@@ -825,7 +853,6 @@
         function openRewardsModal() {
             document.getElementById('rewards-modal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
-            document.getElementById('modal-total-points').textContent = currentPoints;
             document.getElementById('coupon-generated').classList.add('hidden');
             
             const token = localStorage.getItem('fastproxy_token');
@@ -836,7 +863,9 @@
             .then(data => {
                 if (data.success) {
                     currentPoints = data.points.available;
+                    const pointsValue = (currentPoints * 0.10).toFixed(2);
                     document.getElementById('modal-total-points').textContent = currentPoints;
+                    document.getElementById('modal-points-value').textContent = pointsValue.replace('.', ',');
                 }
             });
         }
@@ -856,7 +885,7 @@
             const points = parseInt(document.getElementById('redeem-points').value);
             
             if (!points || points < 100) {
-                showToast('Mínimo de 100 pontos para resgate', 'error');
+                showToast('Mínimo de 100 pontos para resgate (R$ 10,00)', 'error');
                 return;
             }
             
@@ -883,6 +912,7 @@
                     
                     currentPoints -= points;
                     document.getElementById('modal-total-points').textContent = currentPoints;
+                    document.getElementById('modal-points-value').textContent = (currentPoints * 0.10).toFixed(2).replace('.', ',');
                     document.getElementById('reward-points-display').textContent = currentPoints;
                 } else {
                     showToast(data.message || 'Erro ao gerar cupom', 'error');
