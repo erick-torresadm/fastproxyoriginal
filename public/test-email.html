@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testar Email - FastProxy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-900 text-white min-h-screen flex items-center justify-center p-8">
+    <div class="max-w-md w-full">
+        <h1 class="text-2xl font-bold mb-6 text-center">Testar Sistema de Email</h1>
+        
+        <div class="space-y-4">
+            <button onclick="testEmail('welcome')" class="w-full bg-green-600 hover:bg-green-500 py-3 rounded-xl font-semibold">
+                Testar Email de Boas-vindas
+            </button>
+            
+            <button onclick="testEmail('swap')" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-semibold">
+                Testar Email de Troca de Proxy
+            </button>
+            
+            <button onclick="testEmail('renewal')" class="w-full bg-yellow-600 hover:bg-yellow-500 py-3 rounded-xl font-semibold">
+                Testar Email de Renovação
+            </button>
+        </div>
+        
+        <div id="result" class="mt-6 p-4 rounded-xl bg-black/50 hidden"></div>
+    </div>
+    
+    <script>
+        async function testEmail(type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.classList.remove('hidden');
+            resultDiv.innerHTML = '<p class="text-yellow-400">Enviando...</p>';
+            
+            try {
+                const response = await fetch('/api/test/test-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: 'ericktorresadm@hotmail.com' })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <p class="text-green-400 font-bold">✅ Sucesso!</p>
+                        <p class="text-sm mt-2">${data.message || 'Email enviado!'}</p>
+                        <p class="text-xs text-gray-500 mt-2">Verifique sua caixa de entrada (incluindo spam)</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p class="text-red-400 font-bold">❌ Erro</p>
+                        <p class="text-sm mt-2">${data.message || data.error || 'Erro desconhecido'}</p>
+                        ${data.hint ? `<p class="text-xs text-yellow-500 mt-2">💡 ${data.hint}</p>` : ''}
+                    `;
+                }
+            } catch (err) {
+                resultDiv.innerHTML = `
+                    <p class="text-red-400">Erro de conexão</p>
+                    <p class="text-xs text-gray-500 mt-2">${err.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
