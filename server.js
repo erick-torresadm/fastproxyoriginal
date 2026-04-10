@@ -106,6 +106,14 @@ try {
   console.error('❌ Error loading Checkout routes:', err.message);
 }
 
+try {
+  const accessLogsRoutes = require('./routes/accesslogs');
+  app.use('/api/accesslogs', accessLogsRoutes);
+  console.log('✅ Access Logs routes registered');
+} catch (err) {
+  console.error('❌ Error loading Access Logs routes:', err.message);
+}
+
 app.get('/test', (req, res) => {
   res.json({ 
     message: 'FastProxy API running', 

@@ -154,6 +154,12 @@
                     <button onclick="showTab('users')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-secondary whitespace-nowrap">
                         <i class="fas fa-users mr-2"></i>Usuários
                     </button>
+                    <button onclick="showTab('coupons')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-secondary whitespace-nowrap">
+                        <i class="fas fa-tag mr-2"></i>Cupons
+                    </button>
+                    <button onclick="showTab('logs')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-secondary whitespace-nowrap">
+                        <i class="fas fa-history mr-2"></i>Logs
+                    </button>
                     <button onclick="showTab('tutorials')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-secondary whitespace-nowrap">
                         <i class="fas fa-book mr-2"></i>Tutoriais
                     </button>
@@ -249,6 +255,125 @@
                                     </tr>
                                 </thead>
                                 <tbody id="proxies-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Coupons -->
+                <section id="tab-coupons" class="hidden">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="card rounded-2xl p-6">
+                            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                                <i class="fas fa-plus text-green-400"></i>Criar Cupom
+                            </h2>
+                            <form id="coupon-form" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm text-secondary mb-2">Código do Cupom</label>
+                                    <input type="text" id="coupon-code" placeholder="DESCONTO10" class="input-field w-full rounded-xl px-4 py-3 text-white uppercase" required>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm text-secondary mb-2">Desconto (%)</label>
+                                        <input type="number" id="coupon-percent" placeholder="10" min="1" max="100" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm text-secondary mb-2">Desconto (R$)</label>
+                                        <input type="number" id="coupon-amount" placeholder="10.00" step="0.01" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm text-secondary mb-2">Validade (dias)</label>
+                                        <input type="number" id="coupon-days" placeholder="30" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm text-secondary mb-2">Máximo de usos</label>
+                                        <input type="number" id="coupon-max" placeholder="Ilimitado" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn-primary w-full py-3 rounded-xl font-semibold text-white">
+                                    <i class="fas fa-save mr-2"></i>Criar Cupom
+                                </button>
+                            </form>
+                        </div>
+                        <div class="card rounded-2xl p-6">
+                            <h2 class="text-xl font-bold mb-4">Cupons Criados</h2>
+                            <div id="coupons-list" class="space-y-2 max-h-96 overflow-y-auto"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Access Logs (Marco Civil Compliance) -->
+                <section id="tab-logs" class="hidden">
+                    <div class="card rounded-2xl p-6 mb-6">
+                        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <i class="fas fa-shield-alt text-green-400"></i>Logs de Acesso - Marco Civil (Lei 12.965/2014)
+                        </h2>
+                        <p class="text-sm text-secondary mb-4">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Mantemos registros de conexão por 6 meses para compliance legal. 
+                            Em caso de ordem judicial, você pode identificar quem usou cada proxy.
+                        </p>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm text-secondary mb-2">Buscar por Usuário</label>
+                                <input type="number" id="log-user-id" placeholder="ID do usuário" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-secondary mb-2">Data Início</label>
+                                <input type="date" id="log-start-date" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-secondary mb-2">Data Fim</label>
+                                <input type="date" id="log-end-date" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                            </div>
+                            <div class="flex items-end gap-2">
+                                <button onclick="searchLogs()" class="btn-primary px-6 py-3 rounded-xl font-semibold text-white flex-1">
+                                    <i class="fas fa-search mr-2"></i>Buscar
+                                </button>
+                                <button onclick="exportLogs()" class="bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-xl font-semibold text-white">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-4 gap-4 mb-4">
+                            <div class="bg-white/5 rounded-xl p-4 text-center">
+                                <div class="text-2xl font-bold text-green-400" id="stat-total-connections">0</div>
+                                <div class="text-sm text-secondary">Total Conexões</div>
+                            </div>
+                            <div class="bg-white/5 rounded-xl p-4 text-center">
+                                <div class="text-2xl font-bold text-blue-400" id="stat-active-users">0</div>
+                                <div class="text-sm text-secondary">Usuários Ativos</div>
+                            </div>
+                            <div class="bg-white/5 rounded-xl p-4 text-center">
+                                <div class="text-2xl font-bold text-yellow-400" id="stat-proxies-used">0</div>
+                                <div class="text-sm text-secondary">Proxies Utilizados</div>
+                            </div>
+                            <div class="bg-white/5 rounded-xl p-4 text-center">
+                                <div class="text-2xl font-bold text-purple-400" id="stat-unique-ips">0</div>
+                                <div class="text-sm text-secondary">IPs Únicos</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card rounded-2xl overflow-hidden">
+                        <div class="p-4 border-b border-white/10 flex justify-between items-center">
+                            <h2 class="font-bold">Registros de Acesso</h2>
+                            <button onclick="loadLogs()" class="text-green-400 hover:text-green-300"><i class="fas fa-sync"></i></button>
+                        </div>
+                        <div class="overflow-x-auto max-h-96">
+                            <table class="w-full">
+                                <thead class="bg-white/5 sticky top-0">
+                                    <tr class="text-left text-sm text-secondary">
+                                        <th class="px-4 py-3">Usuário</th>
+                                        <th class="px-4 py-3">Proxy</th>
+                                        <th class="px-4 py-3">IP Cliente</th>
+                                        <th class="px-4 py-3">Destino</th>
+                                        <th class="px-4 py-3">Método</th>
+                                        <th class="px-4 py-3">Data/Hora</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="logs-table"></tbody>
                             </table>
                         </div>
                     </div>
@@ -529,13 +654,17 @@
                 clickedBtn.classList.add('bg-green-500/20', 'text-green-400');
             }
             
-            ['add', 'stock', 'users', 'tutorials', 'blog'].forEach(t => {
-                document.getElementById(`tab-${t}`).classList.add('hidden');
+            ['add', 'stock', 'users', 'coupons', 'logs', 'tutorials', 'blog'].forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                if (el) el.classList.add('hidden');
             });
-            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            const tabEl = document.getElementById(`tab-${tab}`);
+            if (tabEl) tabEl.classList.remove('hidden');
             
             if (tab === 'stock') loadProxies();
             if (tab === 'users') loadUsers();
+            if (tab === 'coupons') loadCoupons();
+            if (tab === 'logs') { loadLogs(); loadLogStats(); }
             if (tab === 'tutorials') loadTutorials();
             if (tab === 'blog') loadPosts();
         }
@@ -581,6 +710,132 @@
                 document.getElementById('login-error').classList.remove('hidden');
             }
             btn.innerHTML = 'Entrar';
+        }
+
+        // Coupons Functions
+        document.getElementById('coupon-form')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const code = document.getElementById('coupon-code').value.trim();
+            const percent = document.getElementById('coupon-percent').value;
+            const amount = document.getElementById('coupon-amount').value;
+            const days = document.getElementById('coupon-days').value;
+            const max = document.getElementById('coupon-max').value;
+            
+            try {
+                const result = await api('/api/coupons/admin/create', 'POST', {
+                    code,
+                    discount_percent: percent || null,
+                    discount_amount: amount || null,
+                    valid_days: days || null,
+                    max_uses: max || null
+                });
+                
+                if (result.success) {
+                    showToast('Cupom criado!', 'success');
+                    this.reset();
+                    loadCoupons();
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (err) {
+                showToast('Erro', 'error');
+            }
+        });
+
+        async function loadCoupons() {
+            try {
+                const data = await api('/api/coupons/admin/list');
+                const coupons = data.coupons || [];
+                const list = document.getElementById('coupons-list');
+                
+                if (coupons.length > 0) {
+                    list.innerHTML = coupons.map(c => `<div class="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                        <div>
+                            <div class="font-bold">${c.code}</div>
+                            <div class="text-xs text-secondary">
+                                ${c.discount_percent ? c.discount_percent + '%' : 'R$ ' + c.discount_amount}
+                                | Usado: ${c.used_count}${c.max_uses ? '/' + c.max_uses : ''}
+                                | ${c.is_active ? '✅ Ativo' : '❌ Inativo'}
+                            </div>
+                        </div>
+                        <button onclick="deleteCoupon(${c.id})" class="text-red-400 hover:text-red-300"><i class="fas fa-trash"></i></button>
+                    </div>`).join('');
+                } else {
+                    list.innerHTML = '<p class="text-secondary text-center py-4">Nenhum cupom</p>';
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        async function deleteCoupon(id) {
+            if (!confirm('Excluir cupom?')) return;
+            const result = await api(`/api/coupons/admin/${id}`, 'DELETE');
+            if (result.success) { showToast('Cupom deletado'); loadCoupons(); }
+        }
+
+        // Access Logs Functions
+        async function loadLogs() {
+            try {
+                const userId = document.getElementById('log-user-id').value;
+                const startDate = document.getElementById('log-start-date').value;
+                const endDate = document.getElementById('log-end-date').value;
+                
+                let endpoint = '/api/accesslogs/admin/logs?limit=100';
+                if (userId) endpoint += `&userId=${userId}`;
+                if (startDate && endDate) endpoint += `&startDate=${startDate}&endDate=${endDate}`;
+                
+                const data = await api(endpoint);
+                const logs = data.logs || [];
+                const tbody = document.getElementById('logs-table');
+                
+                if (logs.length > 0) {
+                    tbody.innerHTML = logs.map(l => `<tr class="border-t border-white/5 hover:bg-white/5">
+                        <td class="px-4 py-3">
+                            <div class="font-medium">${l.email || 'N/A'}</div>
+                            <div class="text-xs opacity-50">${l.name || ''}</div>
+                        </td>
+                        <td class="px-4 py-3 text-sm">${l.proxy_ip || 'N/A'}:${l.proxy_port || ''}</td>
+                        <td class="px-4 py-3 text-sm font-mono">${l.client_ip || 'N/A'}</td>
+                        <td class="px-4 py-3 text-sm">${l.target_host || 'N/A'}</td>
+                        <td class="px-4 py-3 text-sm">${l.request_method || 'N/A'}</td>
+                        <td class="px-4 py-3 text-sm">${l.connected_at ? new Date(l.connected_at).toLocaleString('pt-BR') : 'N/A'}</td>
+                    </tr>`).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-secondary">Nenhum registro encontrado</td></tr>';
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        async function loadLogStats() {
+            try {
+                const data = await api('/api/accesslogs/admin/stats');
+                const stats = data.stats;
+                if (stats) {
+                    document.getElementById('stat-total-connections').textContent = stats.total_conexoes || 0;
+                    document.getElementById('stat-active-users').textContent = stats.usuarios_ativos || 0;
+                    document.getElementById('stat-proxies-used').textContent = stats.proxies_utilizados || 0;
+                    document.getElementById('stat-unique-ips').textContent = stats.ips_unicos_acesso || 0;
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        async function searchLogs() {
+            await loadLogs();
+            await loadLogStats();
+        }
+
+        function exportLogs() {
+            const userId = document.getElementById('log-user-id').value;
+            const startDate = document.getElementById('log-start-date').value;
+            const endDate = document.getElementById('log-end-date').value;
+            
+            let url = '/api/accesslogs/admin/export';
+            const params = [];
+            if (userId) params.push(`userId=${userId}`);
+            if (startDate) params.push(`startDate=${startDate}`);
+            if (endDate) params.push(`endDate=${endDate}`);
+            if (params.length > 0) url += '?' + params.join('&');
+            
+            window.open(url, '_blank');
         }
 
         function logout() {
