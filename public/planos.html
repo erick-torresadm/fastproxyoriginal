@@ -77,6 +77,21 @@
         </div>
     </section>
 
+    <!-- Coupon Section -->
+    <section class="container mx-auto px-4 py-8 max-w-lg">
+        <div class="bg-white/5 rounded-2xl p-6">
+            <h3 class="text-xl font-bold mb-4"><i class="fas fa-tag text-accent mr-2"></i>Tem um cupom?</h3>
+            <div class="flex gap-2">
+                <input type="text" id="coupon-input" placeholder="Digite seu cupom" 
+                    class="flex-1 px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-secondary focus:border-accent focus:outline-none uppercase">
+                <button onclick="applyCoupon()" class="px-6 py-3 rounded-xl bg-accent text-black font-semibold hover:bg-green-600 transition">
+                    Aplicar
+                </button>
+            </div>
+            <p id="coupon-message" class="mt-2 text-sm hidden"></p>
+        </div>
+    </section>
+
     <!-- Features -->
     <section class="container mx-auto px-4 py-16">
         <h2 class="text-3xl font-bold text-center mb-12">Por que escolher a FastProxy?</h2>
@@ -113,6 +128,7 @@
         const API_URL = '';
         let currentType = 'ipv6';
         let currentPeriod = '1m';
+        let appliedCoupon = null;
         
         const PRICING = {
             ipv6: {
@@ -174,21 +190,36 @@
                 const qty = info.minQty;
                 const basePrice = info.sellPrice;
                 const discount = period.discount;
-                const pricePerUnit = basePrice * (1 - discount);
-                const total = pricePerUnit * qty;
+                let pricePerUnit = basePrice * (1 - discount);
+                let total = pricePerUnit * qty;
+                
+                if (appliedCoupon) {
+                    if (appliedCoupon.discount_percent) {
+                        const cupomDiscount = total * (appliedCoupon.discount_percent / 100);
+                        total -= cupomDiscount;
+                        pricePerUnit = total / qty;
+                    } else if (appliedCoupon.discount_amount) {
+                        const cupomDiscount = Math.min(appliedCoupon.discount_amount, total);
+                        total -= cupomDiscount;
+                        pricePerUnit = total / qty;
+                    }
+                }
+                
                 const savings = (basePrice * qty * discount).toFixed(2);
                 
                 return `
                     <div class="card-hover rounded-2xl ${discount > 0 ? 'gradient-border' : ''} bg-primary p-1">
                         <div class="bg-primary rounded-xl p-6 h-full">
                             ${discount > 0 ? `<span class="popular-tag text-xs px-3 py-1 rounded-full text-black font-bold">-${(discount * 100).toFixed(0)}% OFF</span>` : ''}
+                            ${appliedCoupon ? `<span class="bg-blue-500 text-xs px-3 py-1 rounded-full text-white font-bold ml-2">CUPOM APLICADO</span>` : ''}
                             <h3 class="text-2xl font-bold mt-2">${period.name}</h3>
                             <p class="text-secondary text-sm mb-4">${qty} proxy(s) ${info.name}</p>
                             <div class="mb-4">
                                 <span class="text-4xl font-bold text-accent">R$ ${pricePerUnit.toFixed(2)}</span>
                                 <span class="text-secondary">/por proxy</span>
                             </div>
-                            ${discount > 0 ? `<p class="text-green-400 text-sm mb-4">Economia de R$ ${savings}</p>` : ''}
+                            ${discount > 0 ? `<p class="text-green-400 text-sm mb-2">Economia de R$ ${savings}</p>` : ''}
+                            ${appliedCoupon ? `<p class="text-blue-400 text-sm mb-2">Cupom: -R$ ${appliedCoupon.discount.toFixed(2)}</p>` : ''}
                             <p class="text-2xl font-bold mb-4">Total: R$ ${total.toFixed(2)}</p>
                             <ul class="text-sm text-secondary mb-6 space-y-2">
                                 <li><i class="fas fa-check text-accent mr-2"></i>Alta velocidade</li>
@@ -204,6 +235,56 @@
                 `;
             }).join('');
         }
+        
+        async function applyCoupon() {
+            const code = document.getElementById('coupon-input').value.trim();
+            const message = document.getElementById('coupon-message');
+            
+            if (!code) {
+                message.textContent = 'Digite um código de cupom';
+                message.className = 'mt-2 text-sm text-red-400';
+                message.classList.remove('hidden');
+                return;
+            }
+            
+            const token = localStorage.getItem('fastproxy_token');
+            if (!token) {
+                message.textContent = 'Faça login para usar cupons';
+                message.className = 'mt-2 text-sm text-yellow-400';
+                message.classList.remove('hidden');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/api/coupons/validate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ code, orderValue: 29.90 })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    appliedCoupon = data.coupon;
+                    message.textContent = data.message;
+                    message.className = 'mt-2 text-sm text-green-400';
+                    loadPlans();
+                } else {
+                    appliedCoupon = null;
+                    message.textContent = data.message;
+                    message.className = 'mt-2 text-sm text-red-400';
+                    loadPlans();
+                }
+                message.classList.remove('hidden');
+            } catch (err) {
+                message.textContent = 'Erro ao validar cupom';
+                message.className = 'mt-2 text-sm text-red-400';
+                message.classList.remove('hidden');
+            }
+        }
 
         async function buyProxy(type, period, quantity) {
             const token = localStorage.getItem('fastproxy_token');
@@ -215,22 +296,29 @@
             }
 
             try {
-                const response = await fetch(`${API_URL}/api/proxyseller/buy`, {
+                showToast('Criando checkout...', 'info');
+                
+                const response = await fetch(`${API_URL}/api/checkout/create-checkout-session`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ type, period, quantity })
+                    body: JSON.stringify({ 
+                        type, 
+                        period, 
+                        quantity,
+                        couponCode: appliedCoupon?.code
+                    })
                 });
 
                 const data = await response.json();
                 
-                if (data.success) {
-                    showToast(data.message, 'success');
-                    setTimeout(() => window.location.href = '/portal.html', 2000);
+                if (data.success && data.url) {
+                    showToast('Redirecionando para pagamento...', 'success');
+                    setTimeout(() => window.location.href = data.url, 1000);
                 } else {
-                    showToast(data.message, 'error');
+                    showToast(data.message || 'Erro ao criar checkout', 'error');
                 }
             } catch (err) {
                 showToast('Erro ao processar compra', 'error');

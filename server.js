@@ -90,6 +90,22 @@ try {
   console.error('❌ Error loading ProxySeller routes:', err.message);
 }
 
+try {
+  const couponRoutes = require('./routes/coupons');
+  app.use('/api/coupons', couponRoutes);
+  console.log('✅ Coupons routes registered');
+} catch (err) {
+  console.error('❌ Error loading Coupons routes:', err.message);
+}
+
+try {
+  const checkoutRoutes = require('./routes/checkout');
+  app.use('/api/checkout', checkoutRoutes);
+  console.log('✅ Checkout routes registered');
+} catch (err) {
+  console.error('❌ Error loading Checkout routes:', err.message);
+}
+
 app.get('/test', (req, res) => {
   res.json({ 
     message: 'FastProxy API running', 
