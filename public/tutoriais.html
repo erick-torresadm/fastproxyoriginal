@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutoriais - FastProxy | Como Usar Proxies</title>
+    <meta name="description" content="Aprenda como configurar e usar proxies da FastProxy. Tutoriais completos com imagens para instalar no seu navegador, software de automação e muito mais.">
+    <meta name="keywords" content="tutorial proxy, como usar proxy, configuração proxy, proxy navegador, automação proxy">
+    <meta property="og:title" content="Tutoriais - FastProxy">
+    <meta property="og:description" content="Aprenda como configurar e usar proxies da FastProxy.">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://fastproxyoriginal.vercel.app/tutoriais.html">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f0fdf4', 400: '#4ade80', 500: '#22c55e', 600: '#16a34a' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --bg-primary: #09090b;
+            --bg-secondary: rgba(24, 24, 27, 0.5);
+            --bg-card: rgba(24, 24, 27, 0.9);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --border-color: rgba(255, 255, 255, 0.08);
+        }
+        html { background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', sans-serif; }
+        .card { background: var(--bg-card); border: 1px solid var(--border-color); }
+        .gradient-text { background: linear-gradient(135deg, #4ade80, #22c55e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .theme-toggle { position: relative; width: 48px; height: 24px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; }
+        .theme-toggle::before { content: '☀️'; position: absolute; left: 6px; top: 50%; transform: translateY(-50%); font-size: 10px; }
+        .theme-toggle::after { content: '🌙'; position: absolute; right: 6px; top: 50%; transform: translateY(-50%); font-size: 10px; }
+        nav { background: var(--bg-card); backdrop-filter: blur(20px); }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full z-50 border-b" style="border-color: var(--border-color)">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="/" class="flex items-center gap-3">
+                <img src="img/LOGO%20FAST%20PROXY.png" alt="FastProxy" class="h-9">
+            </a>
+            <div class="flex items-center gap-6">
+                <a href="/" class="text-sm opacity-60 hover:opacity-100 transition">Início</a>
+                <a href="tutoriais.html" class="text-sm font-semibold text-green-400">Tutoriais</a>
+                <a href="blog.html" class="text-sm opacity-60 hover:opacity-100 transition">Blog</a>
+                <a href="portal.html" class="text-sm py-2 px-4 rounded-lg font-medium" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); color: #22c55e;">Área do Cliente</a>
+                <button onclick="toggleTheme()" class="theme-toggle"></button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="pt-32 pb-16 px-6">
+        <div class="max-w-4xl mx-auto text-center">
+            <h1 class="text-4xl md:text-5xl font-black mb-6">
+                <span class="gradient-text">Tutoriais</span> FastProxy
+            </h1>
+            <p class="text-xl opacity-60 max-w-2xl mx-auto">
+                Aprenda como configurar e usar seus proxies em diferentes plataformas e navegadores.
+            </p>
+        </div>
+    </section>
+
+    <!-- Categories -->
+    <section class="py-8 px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex flex-wrap gap-3 justify-center mb-12">
+                <button onclick="filterTutorials('all')" class="filter-btn active px-4 py-2 rounded-full text-sm font-medium" data-filter="all">
+                    Todos
+                </button>
+                <button onclick="filterTutorials('navegador')" class="filter-btn px-4 py-2 rounded-full text-sm font-medium opacity-60" data-filter="navegador">
+                    Navegadores
+                </button>
+                <button onclick="filterTutorials('automacao')" class="filter-btn px-4 py-2 rounded-full text-sm font-medium opacity-60" data-filter="automacao">
+                    Automação
+                </button>
+                <button onclick="filterTutorials('configuracao')" class="filter-btn px-4 py-2 rounded-full text-sm font-medium opacity-60" data-filter="configuracao">
+                    Configuração
+                </button>
+            </div>
+
+            <!-- Tutorials Grid -->
+            <div id="tutorials-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Tutorial 1 -->
+                <article class="tutorial-card card rounded-2xl overflow-hidden" data-category="navegador">
+                    <div class="h-48 flex items-center justify-center" style="background: linear-gradient(135deg, #22c55e20, #16a34a10);">
+                        <i class="fab fa-chrome text-6xl text-green-500"></i>
+                    </div>
+                    <div class="p-6">
+                        <span class="text-xs font-medium text-green-400 uppercase tracking-wider">Navegador</span>
+                        <h3 class="text-lg font-bold mt-2 mb-3">Configurar Proxy no Chrome</h3>
+                        <p class="text-sm opacity-60 mb-4">Aprenda a usar seus proxies FastProxy no Google Chrome para navegação anônima.</p>
+                        <a href="tutorial-proxy-chrome.html" class="text-sm text-green-400 font-medium hover:underline">Ler tutorial →</a>
+                    </div>
+                </article>
+
+                <!-- Tutorial 2 -->
+                <article class="tutorial-card card rounded-2xl overflow-hidden" data-category="navegador">
+                    <div class="h-48 flex items-center justify-center" style="background: linear-gradient(135deg, #f9731620, #ea580c10);">
+                        <i class="fab fa-firefox text-6xl text-orange-500"></i>
+                    </div>
+                    <div class="p-6">
+                        <span class="text-xs font-medium text-orange-400 uppercase tracking-wider">Navegador</span>
+                        <h3 class="text-lg font-bold mt-2 mb-3">Configurar Proxy no Firefox</h3>
+                        <p class="text-sm opacity-60 mb-4">Tutorial completo para configurar proxies no Mozilla Firefox.</p>
+                        <a href="tutorial-proxy-firefox.html" class="text-sm text-green-400 font-medium hover:underline">Ler tutorial →</a>
+                    </div>
+                </article>
+
+                <!-- Tutorial 3 -->
+                <article class="tutorial-card card rounded-2xl overflow-hidden" data-category="automacao">
+                    <div class="h-48 flex items-center justify-center" style="background: linear-gradient(135deg, #3b82f620, #2563eb10);">
+                        <i class="fas fa-robot text-6xl text-blue-500"></i>
+                    </div>
+                    <div class="p-6">
+                        <span class="text-xs font-medium text-blue-400 uppercase tracking-wider">Automação</span>
+                        <h3 class="text-lg font-bold mt-2 mb-3">Dolphin Anty + FastProxy</h3>
+                        <p class="text-sm opacity-60 mb-4">Configure múltiplos perfis no Dolphin Anty usando seus proxies FastProxy.</p>
+                        <a href="tutorial-dolphin-anty.html" class="text-sm text-green-400 font-medium hover:underline">Ler tutorial →</a>
+                    </div>
+                </article>
+
+                <!-- Tutorial 4 -->
+                <article class="tutorial-card card rounded-2xl overflow-hidden" data-category="configuracao">
+                    <div class="h-48 flex items-center justify-center" style="background: linear-gradient(135deg, #8b5cf620, #7c3aed10);">
+                        <i class="fas fa-mobile-alt text-6xl text-purple-500"></i>
+                    </div>
+                    <div class="p-6">
+                        <span class="text-xs font-medium text-purple-400 uppercase tracking-wider">Configuração</span>
+                        <h3 class="text-lg font-bold mt-2 mb-3">Proxy em Celular Android</h3>
+                        <p class="text-sm opacity-60 mb-4">Configure seus proxies no smartphone Android para apps e jogos.</p>
+                        <a href="tutorial-proxy-android.html" class="text-sm text-green-400 font-medium hover:underline">Ler tutorial →</a>
+                    </div>
+                </article>
+
+                <!-- Tutorial 5 -->
+                <article class="tutorial-card card rounded-2xl overflow-hidden" data-category="automacao">
+                    <div class="h-48 flex items-center justify-center" style="background: linear-gradient(135deg, #ec489920, #db277710);">
+                        <i class="fas fa-laptop text-6xl text-pink-500"></i>
+                    </div>
+                    <div class="p-6">
+                        <span class="text-xs font-medium text-pink-400 uppercase tracking-wider">Automação</span>
+                        <h3 class="text-lg font-bold mt-2 mb-3">Multi-Login com antidetect</h3>
+                        <p class="text-sm opacity-60 mb-4">Gerencie várias contas simultaneamente com navegadores antidetect.</p>
+                        <a href="tutorial-multilogin.html" class="text-sm text-green-400 font-medium hover:underline">Ler tutorial →</a>
+                    </div>
+                </article>
+
+                <!-- Tutorial 6 -->
+                <article class="tutorial-card card rounded-2xl overflow-hidden" data-category="configuracao">
+                    <div class="h-48 flex items-center justify-center" style="background: linear-gradient(135deg, #14b8a620, #0d948810);">
+                        <i class="fas fa-network-wired text-6xl text-teal-500"></i>
+                    </div>
+                    <div class="p-6">
+                        <span class="text-xs font-medium text-teal-400 uppercase tracking-wider">Configuração</span>
+                        <h3 class="text-lg font-bold mt-2 mb-3">Entenda Formato de Proxy</h3>
+                        <p class="text-sm opacity-60 mb-4">IP:Porta:Usuario:Senha - entenda cada campo das suas credenciais.</p>
+                        <a href="tutorial-formato-proxy.html" class="text-sm text-green-400 font-medium hover:underline">Ler tutorial →</a>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-16 px-6">
+        <div class="max-w-4xl mx-auto text-center">
+            <div class="card rounded-3xl p-8 md:p-12" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.05)); border: 1px solid rgba(34, 197, 94, 0.2);">
+                <h2 class="text-2xl md:text-3xl font-bold mb-4">Precisa de ajuda?</h2>
+                <p class="opacity-60 mb-6">Entre em contato com nosso suporte para dúvidas sobre configuração de proxies.</p>
+                <a href="https://wa.me/5511999999999" target="_blank" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-500 text-white px-6 py-3 rounded-xl font-semibold transition">
+                    <i class="fab fa-whatsapp text-xl"></i>
+                    Falar com Suporte
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-8 px-6 border-t" style="border-color: var(--border-color)">
+        <div class="max-w-6xl mx-auto text-center text-sm opacity-40">
+            <p>© 2026 FastProxy. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <style>
+        .filter-btn { background: var(--bg-card); border: 1px solid var(--border-color); transition: all 0.3s; }
+        .filter-btn:hover { opacity: 1; }
+        .filter-btn.active { background: rgba(34, 197, 94, 0.2); border-color: rgba(34, 197, 94, 0.5); color: #22c55e; opacity: 1; }
+        .tutorial-card { transition: transform 0.3s, box-shadow 0.3s; }
+        .tutorial-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); }
+    </style>
+
+    <script>
+        function toggleTheme() {
+            document.documentElement.classList.toggle('light');
+            if (document.documentElement.classList.contains('light')) {
+                document.documentElement.style.cssText = '--bg-primary: #ffffff; --bg-secondary: #f4f4f5; --bg-card: #ffffff; --text-primary: #18181b; --text-secondary: #52525b; --border-color: #e4e4e7;';
+            } else {
+                document.documentElement.style.cssText = '';
+            }
+        }
+
+        function filterTutorials(category) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.add('opacity-60');
+            });
+            
+            const activeBtn = document.querySelector(`[data-filter="${category}"]`);
+            activeBtn.classList.add('active');
+            activeBtn.classList.remove('opacity-60');
+            
+            document.querySelectorAll('.tutorial-card').forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

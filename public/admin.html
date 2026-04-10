@@ -154,6 +154,12 @@
                     <button onclick="showTab('users')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-secondary whitespace-nowrap">
                         <i class="fas fa-users mr-2"></i>Usuários
                     </button>
+                    <button onclick="showTab('tutorials')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-secondary whitespace-nowrap">
+                        <i class="fas fa-book mr-2"></i>Tutoriais
+                    </button>
+                    <button onclick="showTab('blog')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-secondary whitespace-nowrap">
+                        <i class="fas fa-blog mr-2"></i>Blog
+                    </button>
                 </div>
 
                 <!-- Add Single Proxy -->
@@ -272,6 +278,186 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- Tutorials -->
+                <section id="tab-tutorials" class="hidden">
+                    <div class="card rounded-2xl p-6 mb-6">
+                        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <i class="fas fa-plus text-green-400"></i>Novo Tutorial
+                        </h2>
+                        <form id="tutorial-form" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm text-secondary mb-2">Título</label>
+                                    <input type="text" id="tutorial-title" required placeholder="Como configurar proxy no Chrome" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-secondary mb-2">Slug</label>
+                                    <input type="text" id="tutorial-slug" required placeholder="como-configurar-proxy-chrome" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm text-secondary mb-2">Categoria</label>
+                                    <select id="tutorial-category" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                                        <option value="configuracao">Configuração</option>
+                                        <option value="windows">Windows</option>
+                                        <option value="macos">macOS</option>
+                                        <option value="linux">Linux</option>
+                                        <option value="android">Android</option>
+                                        <option value="ios">iOS</option>
+                                        <option value="navegadores">Navegadores</option>
+                                        <option value="apps">Aplicativos</option>
+                                        <option value="outros">Outros</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-secondary mb-2">Ícone</label>
+                                    <select id="tutorial-icon" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                                        <option value="book">📖 Livro</option>
+                                        <option value="cog">⚙️ Configuração</option>
+                                        <option value="globe">🌐 Navegador</option>
+                                        <option value="desktop">💻 Desktop</option>
+                                        <option value="mobile">📱 Mobile</option>
+                                        <option value="shield">🛡️ Segurança</option>
+                                        <option value="rocket">🚀 Rápido</option>
+                                        <option value="question">❓ Ajuda</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-secondary mb-2">Status</label>
+                                    <select id="tutorial-status" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                                        <option value="draft">Rascunho</option>
+                                        <option value="published">Publicado</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-secondary mb-2">Resumo (excerpt)</label>
+                                <input type="text" id="tutorial-excerpt" placeholder="Breve descrição do tutorial..." class="input-field w-full rounded-xl px-4 py-3 text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-secondary mb-2">Conteúdo (Markdown)</label>
+                                <textarea id="tutorial-content" rows="10" placeholder="# Título&#10;&#10;Seu conteúdo aqui..." class="input-field w-full rounded-xl px-4 py-3 text-white font-mono text-sm"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-secondary mb-2">URL da Imagem (opcional)</label>
+                                <input type="url" id="tutorial-image" placeholder="https://..." class="input-field w-full rounded-xl px-4 py-3 text-white">
+                            </div>
+                            <button type="submit" class="btn-primary w-full py-3 rounded-xl font-semibold text-white">
+                                <i class="fas fa-save mr-2"></i>Salvar Tutorial
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="card rounded-2xl overflow-hidden">
+                        <div class="p-4 border-b border-white/10 flex justify-between items-center">
+                            <h2 class="font-bold">Tutoriais</h2>
+                            <button onclick="loadTutorials()" class="text-green-400 hover:text-green-300"><i class="fas fa-sync"></i></button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-white/5">
+                                    <tr class="text-left text-sm text-secondary">
+                                        <th class="px-4 py-3">Título</th>
+                                        <th class="px-4 py-3">Categoria</th>
+                                        <th class="px-4 py-3">Status</th>
+                                        <th class="px-4 py-3">Data</th>
+                                        <th class="px-4 py-3 text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tutorials-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Blog -->
+                <section id="tab-blog" class="hidden">
+                    <div class="card rounded-2xl p-6 mb-6">
+                        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <i class="fas fa-plus text-green-400"></i>Novo Post
+                        </h2>
+                        <form id="post-form" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm text-secondary mb-2">Título</label>
+                                    <input type="text" id="post-title" required placeholder="Título do post" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-secondary mb-2">Slug</label>
+                                    <input type="text" id="post-slug" required placeholder="titulo-do-post" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm text-secondary mb-2">Categoria</label>
+                                    <select id="post-category" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                                        <option value="geral">Geral</option>
+                                        <option value="novidades">Novidades</option>
+                                        <option value="dicas">Dicas</option>
+                                        <option value="seguranca">Segurança</option>
+                                        <option value="tutoriais">Tutoriais</option>
+                                        <option value="precos">Preços</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-secondary mb-2">Status</label>
+                                    <select id="post-status" class="input-field w-full rounded-xl px-4 py-3 text-white">
+                                        <option value="draft">Rascunho</option>
+                                        <option value="published">Publicado</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-secondary mb-2">URL da Imagem</label>
+                                    <input type="url" id="post-image" placeholder="https://..." class="input-field w-full rounded-xl px-4 py-3 text-white">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-secondary mb-2">Resumo</label>
+                                <input type="text" id="post-excerpt" placeholder="Breve descrição do post..." class="input-field w-full rounded-xl px-4 py-3 text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-secondary mb-2">Conteúdo (Markdown)</label>
+                                <textarea id="post-content" rows="10" placeholder="# Título&#10;&#10;Seu conteúdo aqui..." class="input-field w-full rounded-xl px-4 py-3 text-white font-mono text-sm"></textarea>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm text-secondary mb-2">Meta Title (SEO)</label>
+                                    <input type="text" id="post-meta-title" placeholder="Título para SEO..." class="input-field w-full rounded-xl px-4 py-3 text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-secondary mb-2">Meta Description (SEO)</label>
+                                    <input type="text" id="post-meta-desc" placeholder="Descrição para SEO..." class="input-field w-full rounded-xl px-4 py-3 text-white">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-primary w-full py-3 rounded-xl font-semibold text-white">
+                                <i class="fas fa-save mr-2"></i>Salvar Post
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="card rounded-2xl overflow-hidden">
+                        <div class="p-4 border-b border-white/10 flex justify-between items-center">
+                            <h2 class="font-bold">Posts do Blog</h2>
+                            <button onclick="loadPosts()" class="text-green-400 hover:text-green-300"><i class="fas fa-sync"></i></button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-white/5">
+                                    <tr class="text-left text-sm text-secondary">
+                                        <th class="px-4 py-3">Título</th>
+                                        <th class="px-4 py-3">Categoria</th>
+                                        <th class="px-4 py-3">Status</th>
+                                        <th class="px-4 py-3">Data</th>
+                                        <th class="px-4 py-3 text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="posts-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
             </div>
         </div>
     </main>
@@ -343,13 +529,15 @@
                 clickedBtn.classList.add('bg-green-500/20', 'text-green-400');
             }
             
-            ['add', 'stock', 'users'].forEach(t => {
+            ['add', 'stock', 'users', 'tutorials', 'blog'].forEach(t => {
                 document.getElementById(`tab-${t}`).classList.add('hidden');
             });
             document.getElementById(`tab-${tab}`).classList.remove('hidden');
             
             if (tab === 'stock') loadProxies();
             if (tab === 'users') loadUsers();
+            if (tab === 'tutorials') loadTutorials();
+            if (tab === 'blog') loadPosts();
         }
 
         async function api(endpoint, method = 'GET', body = null) {
@@ -762,6 +950,261 @@
             const count = this.value.trim().split('\n').filter(l => l.trim()).length;
             document.getElementById('bulk-count').textContent = count;
         });
+
+        // Tutorials functions
+        function generateSlug(title, existingSlug) {
+            const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+            document.getElementById('tutorial-slug').value = slug;
+        }
+
+        document.getElementById('tutorial-title')?.addEventListener('input', function() {
+            generateSlug(this.value);
+        });
+
+        document.getElementById('tutorial-form')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const data = {
+                title: document.getElementById('tutorial-title').value,
+                slug: document.getElementById('tutorial-slug').value,
+                category: document.getElementById('tutorial-category').value,
+                icon: document.getElementById('tutorial-icon').value,
+                status: document.getElementById('tutorial-status').value,
+                excerpt: document.getElementById('tutorial-excerpt').value,
+                content: document.getElementById('tutorial-content').value,
+                image_url: document.getElementById('tutorial-image').value
+            };
+            
+            try {
+                const result = await api('/api/subscription/admin/tutorials', 'POST', data);
+                if (result.success) {
+                    showToast('Tutorial salvo!');
+                    this.reset();
+                    loadTutorials();
+                } else {
+                    showToast(result.message || 'Erro', 'error');
+                }
+            } catch (err) {
+                showToast('Erro de conexão', 'error');
+            }
+        });
+
+        async function loadTutorials() {
+            try {
+                const data = await api('/api/subscription/admin/tutorials');
+                const tutorials = data.tutorials || [];
+                const tbody = document.getElementById('tutorials-table');
+                
+                if (tutorials.length > 0) {
+                    tbody.innerHTML = tutorials.map(t => `<tr class="border-t border-white/5 hover:bg-white/5">
+                        <td class="px-4 py-3">
+                            <div class="font-medium">${t.title}</div>
+                            <div class="text-xs opacity-50">/${t.slug}</div>
+                        </td>
+                        <td class="px-4 py-3 text-sm capitalize">${t.category}</td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 rounded text-xs ${t.status === 'published' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}">
+                                ${t.status === 'published' ? 'Publicado' : 'Rascunho'}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-sm opacity-50">${new Date(t.created_at).toLocaleDateString('pt-BR')}</td>
+                        <td class="px-4 py-3 text-center">
+                            <button onclick="editTutorial(${t.id})" class="text-blue-400 hover:text-blue-300 mr-2"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteTutorial(${t.id})" class="text-red-400 hover:text-red-300"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-muted">Nenhum tutorial</td></tr>';
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function editTutorial(id) {
+            const data = await api('/api/subscription/admin/tutorials');
+            const tutorial = data.tutorials?.find(t => t.id === id);
+            if (!tutorial) return;
+            
+            document.getElementById('tutorial-title').value = tutorial.title;
+            document.getElementById('tutorial-slug').value = tutorial.slug;
+            document.getElementById('tutorial-category').value = tutorial.category || 'configuracao';
+            document.getElementById('tutorial-icon').value = tutorial.icon || 'book';
+            document.getElementById('tutorial-status').value = tutorial.status || 'draft';
+            document.getElementById('tutorial-excerpt').value = tutorial.excerpt || '';
+            document.getElementById('tutorial-content').value = tutorial.content || '';
+            document.getElementById('tutorial-image').value = tutorial.image_url || '';
+            
+            showToast('Editando tutorial - faça suas alterações e salve');
+            
+            const form = document.getElementById('tutorial-form');
+            form.onsubmit = async function(e) {
+                e.preventDefault();
+                const result = await api(`/api/subscription/admin/tutorials/${id}`, 'PUT', {
+                    title: document.getElementById('tutorial-title').value,
+                    slug: document.getElementById('tutorial-slug').value,
+                    category: document.getElementById('tutorial-category').value,
+                    icon: document.getElementById('tutorial-icon').value,
+                    status: document.getElementById('tutorial-status').value,
+                    excerpt: document.getElementById('tutorial-excerpt').value,
+                    content: document.getElementById('tutorial-content').value,
+                    image_url: document.getElementById('tutorial-image').value
+                });
+                
+                if (result.success) {
+                    showToast('Tutorial atualizado!');
+                    form.reset();
+                    form.onsubmit = null;
+                    document.getElementById('tutorial-form').addEventListener('submit', arguments.callee);
+                    loadTutorials();
+                } else {
+                    showToast(result.message || 'Erro', 'error');
+                }
+            };
+        }
+
+        async function deleteTutorial(id) {
+            if (!confirm('Excluir tutorial?')) return;
+            try {
+                const data = await api(`/api/subscription/admin/tutorials/${id}`, 'DELETE');
+                if (data.success) {
+                    showToast('Tutorial excluído');
+                    loadTutorials();
+                } else {
+                    showToast(data.message || 'Erro', 'error');
+                }
+            } catch (err) {
+                showToast('Erro de conexão', 'error');
+            }
+        }
+
+        // Blog posts functions
+        function generatePostSlug(title) {
+            const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+            document.getElementById('post-slug').value = slug;
+        }
+
+        document.getElementById('post-title')?.addEventListener('input', function() {
+            generatePostSlug(this.value);
+        });
+
+        document.getElementById('post-form')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const data = {
+                title: document.getElementById('post-title').value,
+                slug: document.getElementById('post-slug').value,
+                category: document.getElementById('post-category').value,
+                status: document.getElementById('post-status').value,
+                excerpt: document.getElementById('post-excerpt').value,
+                content: document.getElementById('post-content').value,
+                image_url: document.getElementById('post-image').value,
+                meta_title: document.getElementById('post-meta-title').value,
+                meta_description: document.getElementById('post-meta-desc').value
+            };
+            
+            try {
+                const result = await api('/api/subscription/admin/posts', 'POST', data);
+                if (result.success) {
+                    showToast('Post salvo!');
+                    this.reset();
+                    loadPosts();
+                } else {
+                    showToast(result.message || 'Erro', 'error');
+                }
+            } catch (err) {
+                showToast('Erro de conexão', 'error');
+            }
+        });
+
+        async function loadPosts() {
+            try {
+                const data = await api('/api/subscription/admin/posts');
+                const posts = data.posts || [];
+                const tbody = document.getElementById('posts-table');
+                
+                if (posts.length > 0) {
+                    tbody.innerHTML = posts.map(p => `<tr class="border-t border-white/5 hover:bg-white/5">
+                        <td class="px-4 py-3">
+                            <div class="font-medium">${p.title}</div>
+                            <div class="text-xs opacity-50">/${p.slug}</div>
+                        </td>
+                        <td class="px-4 py-3 text-sm capitalize">${p.category}</td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 rounded text-xs ${p.status === 'published' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}">
+                                ${p.status === 'published' ? 'Publicado' : 'Rascunho'}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-sm opacity-50">${new Date(p.created_at).toLocaleDateString('pt-BR')}</td>
+                        <td class="px-4 py-3 text-center">
+                            <button onclick="editPost(${p.id})" class="text-blue-400 hover:text-blue-300 mr-2"><i class="fas fa-edit"></i></button>
+                            <button onclick="deletePost(${p.id})" class="text-red-400 hover:text-red-300"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-muted">Nenhum post</td></tr>';
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function editPost(id) {
+            const data = await api('/api/subscription/admin/posts');
+            const post = data.posts?.find(p => p.id === id);
+            if (!post) return;
+            
+            document.getElementById('post-title').value = post.title;
+            document.getElementById('post-slug').value = post.slug;
+            document.getElementById('post-category').value = post.category || 'geral';
+            document.getElementById('post-status').value = post.status || 'draft';
+            document.getElementById('post-excerpt').value = post.excerpt || '';
+            document.getElementById('post-content').value = post.content || '';
+            document.getElementById('post-image').value = post.image_url || '';
+            document.getElementById('post-meta-title').value = post.meta_title || '';
+            document.getElementById('post-meta-desc').value = post.meta_description || '';
+            
+            showToast('Editando post - faça suas alterações e salve');
+            
+            const form = document.getElementById('post-form');
+            form.onsubmit = async function(e) {
+                e.preventDefault();
+                const result = await api(`/api/subscription/admin/posts/${id}`, 'PUT', {
+                    title: document.getElementById('post-title').value,
+                    slug: document.getElementById('post-slug').value,
+                    category: document.getElementById('post-category').value,
+                    status: document.getElementById('post-status').value,
+                    excerpt: document.getElementById('post-excerpt').value,
+                    content: document.getElementById('post-content').value,
+                    image_url: document.getElementById('post-image').value,
+                    meta_title: document.getElementById('post-meta-title').value,
+                    meta_description: document.getElementById('post-meta-desc').value
+                });
+                
+                if (result.success) {
+                    showToast('Post atualizado!');
+                    form.reset();
+                    form.onsubmit = null;
+                    document.getElementById('post-form').addEventListener('submit', arguments.callee);
+                    loadPosts();
+                } else {
+                    showToast(result.message || 'Erro', 'error');
+                }
+            };
+        }
+
+        async function deletePost(id) {
+            if (!confirm('Excluir post?')) return;
+            try {
+                const data = await api(`/api/subscription/admin/posts/${id}`, 'DELETE');
+                if (data.success) {
+                    showToast('Post excluído');
+                    loadPosts();
+                } else {
+                    showToast(data.message || 'Erro', 'error');
+                }
+            } catch (err) {
+                showToast('Erro de conexão', 'error');
+            }
+        }
 
         // Load admin check on page load
         if (token) {

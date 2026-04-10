@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - FastProxy | Artigos sobre Proxies e Automação</title>
+    <meta name="description" content="Blog da FastProxy. Artigos, dicas e novidades sobre proxies, automação, múltiplas contas e muito mais para turbinar seus resultados.">
+    <meta name="keywords" content="blog proxy, dicas proxy, automação marketing, múltiplas contas, marketing digital">
+    <meta property="og:title" content="Blog - FastProxy">
+    <meta property="og:description" content="Artigos, dicas e novidades sobre proxies e automação.">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://fastproxyoriginal.vercel.app/blog.html">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f0fdf4', 400: '#4ade80', 500: '#22c55e', 600: '#16a34a' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --bg-primary: #09090b;
+            --bg-secondary: rgba(24, 24, 27, 0.5);
+            --bg-card: rgba(24, 24, 27, 0.9);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --border-color: rgba(255, 255, 255, 0.08);
+        }
+        html { background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', sans-serif; }
+        .card { background: var(--bg-card); border: 1px solid var(--border-color); }
+        .gradient-text { background: linear-gradient(135deg, #4ade80, #22c55e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .theme-toggle { position: relative; width: 48px; height: 24px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; }
+        .theme-toggle::before { content: '☀️'; position: absolute; left: 6px; top: 50%; transform: translateY(-50%); font-size: 10px; }
+        .theme-toggle::after { content: '🌙'; position: absolute; right: 6px; top: 50%; transform: translateY(-50%); font-size: 10px; }
+        nav { background: var(--bg-card); backdrop-filter: blur(20px); }
+        .post-image { height: 200px; background-size: cover; background-position: center; }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full z-50 border-b" style="border-color: var(--border-color)">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="/" class="flex items-center gap-3">
+                <img src="img/LOGO%20FAST%20PROXY.png" alt="FastProxy" class="h-9">
+            </a>
+            <div class="flex items-center gap-6">
+                <a href="/" class="text-sm opacity-60 hover:opacity-100 transition">Início</a>
+                <a href="tutoriais.html" class="text-sm opacity-60 hover:opacity-100 transition">Tutoriais</a>
+                <a href="blog.html" class="text-sm font-semibold text-green-400">Blog</a>
+                <a href="portal.html" class="text-sm py-2 px-4 rounded-lg font-medium" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); color: #22c55e;">Área do Cliente</a>
+                <button onclick="toggleTheme()" class="theme-toggle"></button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="pt-32 pb-16 px-6">
+        <div class="max-w-4xl mx-auto text-center">
+            <h1 class="text-4xl md:text-5xl font-black mb-6">
+                <span class="gradient-text">Blog</span> FastProxy
+            </h1>
+            <p class="text-xl opacity-60 max-w-2xl mx-auto">
+                Artigos, dicas e novidades sobre proxies, automação e marketing digital.
+            </p>
+        </div>
+    </section>
+
+    <!-- Featured Post -->
+    <section class="pb-16 px-6">
+        <div class="max-w-6xl mx-auto">
+            <article class="card rounded-3xl overflow-hidden">
+                <div class="md:flex">
+                    <div class="md:w-1/2 post-image" style="background-image: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800'); background-color: #1a1a1a;">
+                        <div class="h-full flex items-center justify-center bg-gradient-to-br from-green-900/50 to-transparent">
+                            <i class="fas fa-chart-line text-8xl text-green-500 opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400">Destaque</span>
+                            <span class="text-xs opacity-40">10 de Abril, 2026</span>
+                        </div>
+                        <h2 class="text-2xl md:text-3xl font-bold mb-4">
+                            Como Multiplicar seus Resultados com Múltiplas Contas
+                        </h2>
+                        <p class="opacity-60 mb-6">
+                            Descubra como usar proxies para gerenciar múltiplas contas sem ser bloqueado. 
+                            Estratégias comprovadas para масштабировать suas operações.
+                        </p>
+                        <a href="blog-multiplas-contas.html" class="inline-flex items-center gap-2 text-green-400 font-medium hover:underline">
+                            Ler artigo <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <!-- Latest Posts -->
+    <section class="pb-16 px-6">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-2xl font-bold mb-8">Últimos Artigos</h2>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Post 1 -->
+                <article class="card rounded-2xl overflow-hidden">
+                    <div class="post-image flex items-center justify-center" style="background: linear-gradient(135deg, #22c55e20, #16a34a10);">
+                        <i class="fas fa-shield-alt text-5xl text-green-500"></i>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xs opacity-40">8 Abr, 2026</span>
+                            <span class="text-xs text-green-400">Segurança</span>
+                        </div>
+                        <h3 class="font-bold mb-2">Por que seus proxies param de funcionar?</h3>
+                        <p class="text-sm opacity-60 mb-4">Entenda os motivos mais comuns e como evitá-los.</p>
+                        <a href="blog-proxy-problemas.html" class="text-sm text-green-400 font-medium hover:underline">Ler mais →</a>
+                    </div>
+                </article>
+
+                <!-- Post 2 -->
+                <article class="card rounded-2xl overflow-hidden">
+                    <div class="post-image flex items-center justify-center" style="background: linear-gradient(135deg, #3b82f620, #2563eb10);">
+                        <i class="fas fa-bullhorn text-5xl text-blue-500"></i>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xs opacity-40">5 Abr, 2026</span>
+                            <span class="text-xs text-blue-400">Marketing</span>
+                        </div>
+                        <h3 class="font-bold mb-2">5 Plataformas que Exigem Proxies Dedicados</h3>
+                        <p class="text-sm opacity-60 mb-4">Conheça as plataformas onde proxy compartilhado não funciona.</p>
+                        <a href="blog-plataformas-proxy.html" class="text-sm text-green-400 font-medium hover:underline">Ler mais →</a>
+                    </div>
+                </article>
+
+                <!-- Post 3 -->
+                <article class="card rounded-2xl overflow-hidden">
+                    <div class="post-image flex items-center justify-center" style="background: linear-gradient(135deg, #8b5cf620, #7c3aed10);">
+                        <i class="fas fa-robot text-5xl text-purple-500"></i>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xs opacity-40">2 Abr, 2026</span>
+                            <span class="text-xs text-purple-400">Automação</span>
+                        </div>
+                        <h3 class="font-bold mb-2">Introdução ao Browser Antidetect</h3>
+                        <p class="text-sm opacity-60 mb-4">O que é e por que você precisa de um para масштабирование.</p>
+                        <a href="blog-antidetect.html" class="text-sm text-green-400 font-medium hover:underline">Ler mais →</a>
+                    </div>
+                </article>
+
+                <!-- Post 4 -->
+                <article class="card rounded-2xl overflow-hidden">
+                    <div class="post-image flex items-center justify-center" style="background: linear-gradient(135deg, #f59e0b20, #d9770610);">
+                        <i class="fas fa-sync text-5xl text-yellow-500"></i>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xs opacity-40">28 Mar, 2026</span>
+                            <span class="text-xs text-yellow-400">Dicas</span>
+                        </div>
+                        <h3 class="font-bold mb-2">Quando Trocar seu Proxy</h3>
+                        <p class="text-sm opacity-60 mb-4">Sinais de que seus proxies precisam ser substituídos.</p>
+                        <a href="blog-quando-trocar.html" class="text-sm text-green-400 font-medium hover:underline">Ler mais →</a>
+                    </div>
+                </article>
+
+                <!-- Post 5 -->
+                <article class="card rounded-2xl overflow-hidden">
+                    <div class="post-image flex items-center justify-center" style="background: linear-gradient(135deg, #ef444420, #dc262610);">
+                        <i class="fas fa-globe text-5xl text-red-500"></i>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xs opacity-40">25 Mar, 2026</span>
+                            <span class="text-xs text-red-400">Geolocalização</span>
+                        </div>
+                        <h3 class="font-bold mb-2">Proxy Brasileiro: Para Que Serve?</h3>
+                        <p class="text-sm opacity-60 mb-4">Casos de uso para proxies do Brasil.</p>
+                        <a href="blog-proxy-brasileiro.html" class="text-sm text-green-400 font-medium hover:underline">Ler mais →</a>
+                    </div>
+                </article>
+
+                <!-- Post 6 -->
+                <article class="card rounded-2xl overflow-hidden">
+                    <div class="post-image flex items-center justify-center" style="background: linear-gradient(135deg, #14b8a620, #0d948810);">
+                        <i class="fas fa-tachometer-alt text-5xl text-teal-500"></i>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xs opacity-40">20 Mar, 2026</span>
+                            <span class="text-xs text-teal-400">Performance</span>
+                        </div>
+                        <h3 class="font-bold mb-2">Como Testar Velocidade do Proxy</h3>
+                        <p class="text-sm opacity-60 mb-4">Ferramentas e métodos para medir a performance.</p>
+                        <a href="blog-teste-velocidade.html" class="text-sm text-green-400 font-medium hover:underline">Ler mais →</a>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter -->
+    <section class="py-16 px-6">
+        <div class="max-w-4xl mx-auto text-center">
+            <div class="card rounded-3xl p-8 md:p-12" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.05)); border: 1px solid rgba(34, 197, 94, 0.2);">
+                <i class="fas fa-envelope text-4xl text-green-500 mb-4"></i>
+                <h2 class="text-2xl font-bold mb-4">Receba Novidades</h2>
+                <p class="opacity-60 mb-6">Cadastre seu email para receber dicas e novidades sobre proxies.</p>
+                <form class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+                    <input type="email" placeholder="seu@email.com" class="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-green-500 focus:outline-none">
+                    <button type="submit" class="bg-green-600 hover:bg-green-500 text-white px-6 py-3 rounded-xl font-semibold transition">
+                        Inscrever
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-8 px-6 border-t" style="border-color: var(--border-color)">
+        <div class="max-w-6xl mx-auto text-center text-sm opacity-40">
+            <p>© 2026 FastProxy. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        function toggleTheme() {
+            document.documentElement.classList.toggle('light');
+            if (document.documentElement.classList.contains('light')) {
+                document.documentElement.style.cssText = '--bg-primary: #ffffff; --bg-secondary: #f4f4f5; --bg-card: #ffffff; --text-primary: #18181b; --text-secondary: #52525b; --border-color: #e4e4e7;';
+            } else {
+                document.documentElement.style.cssText = '';
+            }
+        }
+    </script>
+</body>
+</html>

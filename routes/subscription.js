@@ -1337,4 +1337,328 @@ router.post('/admin/setup', async (req, res) => {
   }
 });
 
+// Public: Get all tutorials
+router.get('/tutorials', async (req, res) => {
+  try {
+    const tutorials = await sql`
+      SELECT id, title, slug, excerpt, content, category, icon, image_url, created_at, updated_at
+      FROM tutorials
+      WHERE status = 'published'
+      ORDER BY created_at DESC
+    `;
+    
+    res.json({ success: true, tutorials });
+  } catch (err) {
+    console.error('Get tutorials error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao buscar tutoriais' });
+  }
+});
+
+// Public: Get single tutorial by slug
+router.get('/tutorials/:slug', async (req, res) => {
+  try {
+    const { slug } = req.params;
+    
+    const tutorials = await sql`
+      SELECT * FROM tutorials WHERE slug = ${slug} AND status = 'published'
+    `;
+    
+    if (tutorials.length === 0) {
+      return res.status(404).json({ success: false, message: 'Tutorial não encontrado' });
+    }
+    
+    res.json({ success: true, tutorial: tutorials[0] });
+  } catch (err) {
+    console.error('Get tutorial error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao buscar tutorial' });
+  }
+});
+
+// Admin: CRUD Tutorials
+router.get('/admin/tutorials', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+
+    const tutorials = await sql`
+      SELECT * FROM tutorials ORDER BY created_at DESC
+    `;
+    
+    res.json({ success: true, tutorials });
+  } catch (err) {
+    console.error('Admin get tutorials error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao buscar tutoriais' });
+  }
+});
+
+router.post('/admin/tutorials', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+
+    const { title, slug, excerpt, content, category, icon, image_url, status } = req.body;
+    
+    if (!title || !slug) {
+      return res.status(400).json({ success: false, message: 'Título e slug são obrigatórios' });
+    }
+    
+    const tutorials = await sql`
+      INSERT INTO tutorials (title, slug, excerpt, content, category, icon, image_url, status)
+      VALUES (${title}, ${slug}, ${excerpt || null}, ${content || null}, ${category || 'configuracao'}, ${icon || 'book'}, ${image_url || null}, ${status || 'draft'})
+      RETURNING *
+    `;
+    
+    res.status(201).json({ success: true, tutorial: tutorials[0] });
+  } catch (err) {
+    console.error('Admin create tutorial error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao criar tutorial', error: err.message });
+  }
+});
+
+router.put('/admin/tutorials/:id', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+
+    const { id } = req.params;
+    const { title, slug, excerpt, content, category, icon, image_url, status } = req.body;
+    
+    const tutorials = await sql`
+      UPDATE tutorials 
+      SET title = COALESCE(${title}, title),
+          slug = COALESCE(${slug}, slug),
+          excerpt = ${excerpt},
+          content = ${content},
+          category = ${category},
+          icon = ${icon},
+          image_url = ${image_url},
+          status = ${status},
+          updated_at = NOW()
+      WHERE id = ${id}
+      RETURNING *
+    `;
+    
+    if (tutorials.length === 0) {
+      return res.status(404).json({ success: false, message: 'Tutorial não encontrado' });
+    }
+    
+    res.json({ success: true, tutorial: tutorials[0] });
+  } catch (err) {
+    console.error('Admin update tutorial error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao atualizar tutorial' });
+  }
+});
+
+router.delete('/admin/tutorials/:id', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+
+    const { id } = req.params;
+    
+    await sql`DELETE FROM tutorials WHERE id = ${id}`;
+    
+    res.json({ success: true, message: 'Tutorial excluído' });
+  } catch (err) {
+    console.error('Admin delete tutorial error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao excluir tutorial' });
+  }
+});
+
+// Blog posts (similar structure)
+router.get('/posts', async (req, res) => {
+  try {
+    const posts = await sql`
+      SELECT id, title, slug, excerpt, content, category, image_url, created_at
+      FROM blog_posts
+      WHERE status = 'published'
+      ORDER BY created_at DESC
+    `;
+    
+    res.json({ success: true, posts });
+  } catch (err) {
+    console.error('Get posts error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao buscar posts' });
+  }
+});
+
+router.get('/posts/:slug', async (req, res) => {
+  try {
+    const { slug } = req.params;
+    
+    const posts = await sql`
+      SELECT * FROM blog_posts WHERE slug = ${slug} AND status = 'published'
+    `;
+    
+    if (posts.length === 0) {
+      return res.status(404).json({ success: false, message: 'Post não encontrado' });
+    }
+    
+    res.json({ success: true, post: posts[0] });
+  } catch (err) {
+    console.error('Get post error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao buscar post' });
+  }
+});
+
+router.get('/admin/posts', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+
+    const posts = await sql`SELECT * FROM blog_posts ORDER BY created_at DESC`;
+    res.json({ success: true, posts });
+  } catch (err) {
+    console.error('Admin get posts error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao buscar posts' });
+  }
+});
+
+router.post('/admin/posts', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+
+    const { title, slug, excerpt, content, category, image_url, status, meta_title, meta_description } = req.body;
+    
+    if (!title || !slug) {
+      return res.status(400).json({ success: false, message: 'Título e slug são obrigatórios' });
+    }
+    
+    const posts = await sql`
+      INSERT INTO blog_posts (title, slug, excerpt, content, category, image_url, status, meta_title, meta_description)
+      VALUES (${title}, ${slug}, ${excerpt || null}, ${content || null}, ${category || 'geral'}, ${image_url || null}, ${status || 'draft'}, ${meta_title || null}, ${meta_description || null})
+      RETURNING *
+    `;
+    
+    res.status(201).json({ success: true, post: posts[0] });
+  } catch (err) {
+    console.error('Admin create post error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao criar post', error: err.message });
+  }
+});
+
+router.put('/admin/posts/:id', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+
+    const { id } = req.params;
+    const { title, slug, excerpt, content, category, image_url, status, meta_title, meta_description } = req.body;
+    
+    const posts = await sql`
+      UPDATE blog_posts 
+      SET title = COALESCE(${title}, title),
+          slug = COALESCE(${slug}, slug),
+          excerpt = ${excerpt},
+          content = ${content},
+          category = ${category},
+          image_url = ${image_url},
+          status = ${status},
+          meta_title = ${meta_title},
+          meta_description = ${meta_description},
+          updated_at = NOW()
+      WHERE id = ${id}
+      RETURNING *
+    `;
+    
+    if (posts.length === 0) {
+      return res.status(404).json({ success: false, message: 'Post não encontrado' });
+    }
+    
+    res.json({ success: true, post: posts[0] });
+  } catch (err) {
+    console.error('Admin update post error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao atualizar post' });
+  }
+});
+
+router.delete('/admin/posts/:id', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+
+    const { id } = req.params;
+    
+    await sql`DELETE FROM blog_posts WHERE id = ${id}`;
+    
+    res.json({ success: true, message: 'Post excluído' });
+  } catch (err) {
+    console.error('Admin delete post error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao excluir post' });
+  }
+});
+
 module.exports = router;
