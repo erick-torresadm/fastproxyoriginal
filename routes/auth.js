@@ -2,12 +2,24 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const User = require('../models/User');
 const { auth, admin } = require('../middleware/auth');
 
 router.post('/register', async (req, res) => {
   try {
     const { email, password, proxyCount, period } = req.body;
+    
+    console.log('Register attempt:', email, proxyCount, period);
+    
+    // Check MongoDB connection
+    if (mongoose.connection.readyState !== 1) {
+      console.error('MongoDB not connected. State:', mongoose.connection.readyState);
+      return res.status(503).json({ 
+        success: false, 
+        message: 'Banco de dados temporariamente indisponível. Tente novamente em alguns minutos.' 
+      });
+    }
 
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Email e senha são obrigatórios' });

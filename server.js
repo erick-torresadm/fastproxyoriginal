@@ -6,22 +6,33 @@ const mongoose = require('mongoose');
 
 console.log('=== LOADING SERVER ===');
 console.log('STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY ? 'set' : 'missing');
+console.log('MONGODB_URI:', process.env.MONGODB_URI ? 'set' : 'missing');
 
-// MongoDB Connection with longer timeout
+// MongoDB Connection
 const MONGODB_URI = process.env.MONGODB_URI;
-if (MONGODB_URI) {
-  mongoose.connect(MONGODB_URI, {
-    serverSelectionTimeoutMS: 30000, // 30 seconds
-    socketTimeoutMS: 45000,
-    maxPoolSize: 10,
-    retryWrites: true,
-    w: 'majority'
-  })
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch(err => console.error('❌ MongoDB connection error:', err.message));
-} else {
-  console.warn('⚠️ MONGODB_URI not set - Auth features will not work');
+let mongooseConnected = false;
+
+async function connectMongo() {
+  if (!MONGODB_URI) {
+    console.warn('⚠️ MONGODB_URI not set - Auth features will not work');
+    return;
+  }
+  
+  try {
+    await mongoose.connect(MONGODB_URI, {
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 30000,
+      maxPoolSize: 5,
+      retryWrites: true
+    });
+    mongooseConnected = true;
+    console.log('✅ MongoDB connected');
+  } catch (err) {
+    console.error('❌ MongoDB connection error:', err.message);
+  }
 }
+
+connectMongo();
 
 const app = express();
 
