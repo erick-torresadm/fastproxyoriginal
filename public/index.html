@@ -1198,6 +1198,17 @@
                     Todos os planos incluem suporte 24/7, ativação imediata e reposições
                 </span>
             </p>
+
+            <!-- Other Countries Button -->
+            <div class="text-center mt-8">
+                <button onclick="openIntlModal()" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border transition-all hover:bg-green-500/10 hover:border-green-500" style="border-color: var(--border-color); color: var(--text-secondary)">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>Procurando proxies de outros países?</span>
+                    <span class="text-sm text-green-500">Ver opções →</span>
+                </button>
+            </div>
         </div>
     </section>
 
@@ -1571,6 +1582,143 @@
         </div>
     </div>
 
+    <!-- International Proxy Modal -->
+    <div id="intl-modal" class="fixed inset-0 z-[140] hidden">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeIntlModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+            <div class="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden pointer-events-auto">
+                <div class="p-6 border-b" style="border-color: var(--border-color)">
+                    <h2 class="text-xl font-bold flex items-center gap-3" style="color: var(--text-primary)">
+                        <i class="fas fa-globe text-green-500"></i>
+                        Proxies de Outros Países
+                    </h2>
+                    <p class="text-sm mt-2" style="color: var(--text-zinc)">Escolha o país, tipo, quantidade e período</p>
+                </div>
+                
+                <div class="p-6 overflow-y-auto max-h-[60vh]">
+                    <div id="intl-step-1" class="mb-6">
+                        <h3 class="font-bold mb-4 flex items-center gap-2" style="color: var(--text-primary)">
+                            <span class="w-6 h-6 rounded-full bg-green-500 text-black flex items-center justify-center text-sm font-bold">1</span>
+                            Selecione o país
+                        </h3>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <button onclick="selectIntlCountry('us', '🇺🇸 EUA')" class="intl-country-btn p-3 rounded-xl border transition-all text-left hover:border-green-500" style="border-color: var(--border-color)">
+                                <div class="text-xl mb-1">🇺🇸</div>
+                                <div class="font-bold text-sm" style="color: var(--text-primary)">Estados Unidos</div>
+                            </button>
+                            <button onclick="selectIntlCountry('de', '🇩🇪 Alemanha')" class="intl-country-btn p-3 rounded-xl border transition-all text-left hover:border-green-500" style="border-color: var(--border-color)">
+                                <div class="text-xl mb-1">🇩🇪</div>
+                                <div class="font-bold text-sm" style="color: var(--text-primary)">Alemanha</div>
+                            </button>
+                            <button onclick="selectIntlCountry('uk', '🇬🇧 Reino Unido')" class="intl-country-btn p-3 rounded-xl border transition-all text-left hover:border-green-500" style="border-color: var(--border-color)">
+                                <div class="text-xl mb-1">🇬🇧</div>
+                                <div class="font-bold text-sm" style="color: var(--text-primary)">Reino Unido</div>
+                            </button>
+                            <button onclick="selectIntlCountry('fr', '🇫🇷 França')" class="intl-country-btn p-3 rounded-xl border transition-all text-left hover:border-green-500" style="border-color: var(--border-color)">
+                                <div class="text-xl mb-1">🇫🇷</div>
+                                <div class="font-bold text-sm" style="color: var(--text-primary)">França</div>
+                            </button>
+                            <button onclick="selectIntlCountry('nl', '🇳🇱 Holanda')" class="intl-country-btn p-3 rounded-xl border transition-all text-left hover:border-green-500" style="border-color: var(--border-color)">
+                                <div class="text-xl mb-1">🇳🇱</div>
+                                <div class="font-bold text-sm" style="color: var(--text-primary)">Holanda</div>
+                            </button>
+                            <button onclick="selectIntlCountry('br', '🇧🇷 Brasil')" class="intl-country-btn p-3 rounded-xl border transition-all text-left hover:border-green-500" style="border-color: var(--border-color)">
+                                <div class="text-xl mb-1">🇧🇷</div>
+                                <div class="font-bold text-sm" style="color: var(--text-primary)">Brasil</div>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="intl-step-2" class="mb-6 hidden">
+                        <h3 class="font-bold mb-4 flex items-center gap-2" style="color: var(--text-primary)">
+                            <span class="w-6 h-6 rounded-full bg-green-500 text-black flex items-center justify-center text-sm font-bold">2</span>
+                            Selecione o tipo
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="selectIntlType('ipv4')" class="intl-type-btn p-4 rounded-xl border transition-all text-left hover:border-green-500" style="border-color: var(--border-color)">
+                                <div class="text-2xl mb-2">🖥️</div>
+                                <div class="font-bold">IPv4</div>
+                                <div class="text-xs" style="color: var(--text-muted)">Individual, alta compatibilidade</div>
+                                <div class="text-sm text-green-500 mt-1">R$ 39,90/mês</div>
+                            </button>
+                            <button onclick="selectIntlType('isp')" class="intl-type-btn p-4 rounded-xl border transition-all text-left hover:border-green-500" style="border-color: var(--border-color)">
+                                <div class="text-2xl mb-2">🏢</div>
+                                <div class="font-bold">ISP</div>
+                                <div class="text-xs" style="color: var(--text-muted)">IP de provedor dedicado</div>
+                                <div class="text-sm text-green-500 mt-1">R$ 49,90/mês</div>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="intl-step-3" class="hidden">
+                        <h3 class="font-bold mb-4 flex items-center gap-2" style="color: var(--text-primary)">
+                            <span class="w-6 h-6 rounded-full bg-green-500 text-black flex items-center justify-center text-sm font-bold">3</span>
+                            Quantidade e Período
+                        </h3>
+                        
+                        <div class="rounded-xl p-4 mb-4" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3)">
+                            <p class="text-sm" style="color: var(--text-muted)">Configuração:</p>
+                            <p class="font-bold text-green-500" id="intl-summary">-</p>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm mb-2" style="color: var(--text-muted)">Quantidade</label>
+                                <div class="flex items-center justify-center gap-4">
+                                    <button onclick="changeHomeIntlQty(-1)" class="w-10 h-10 rounded-lg flex items-center justify-center text-lg" style="background: var(--bg-secondary)">-</button>
+                                    <input type="number" id="home-intl-qty" value="1" min="1"
+                                        class="w-20 text-center py-2 rounded-lg border text-lg font-bold"
+                                        style="background: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary)"
+                                        onchange="updateHomeIntlPrice()">
+                                    <button onclick="changeHomeIntlQty(1)" class="w-10 h-10 rounded-lg flex items-center justify-center text-lg" style="background: var(--bg-secondary)">+</button>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm mb-2" style="color: var(--text-muted)">Período</label>
+                                <div class="grid grid-cols-4 gap-2">
+                                    <button onclick="selectHomeIntlPeriod('1m', 0)" class="intl-period-btn p-3 rounded-xl border text-sm" id="home-period-1m" style="border-color: var(--border-color)">1 Mês</button>
+                                    <button onclick="selectHomeIntlPeriod('3m', 0.15)" class="intl-period-btn p-3 rounded-xl border text-sm" id="home-period-3m" style="border-color: var(--border-color)">3 Meses<br><span class="text-xs text-green-500">-15%</span></button>
+                                    <button onclick="selectHomeIntlPeriod('6m', 0.25)" class="intl-period-btn p-3 rounded-xl border text-sm" id="home-period-6m" style="border-color: var(--border-color)">6 Meses<br><span class="text-xs text-green-500">-25%</span></button>
+                                    <button onclick="selectHomeIntlPeriod('12m', 0.35)" class="intl-period-btn p-3 rounded-xl border text-sm" id="home-period-12m" style="border-color: var(--border-color)">12 Meses<br><span class="text-xs text-green-500">-35%</span></button>
+                                </div>
+                            </div>
+                            
+                            <div class="rounded-xl p-4" style="background: var(--bg-secondary)">
+                                <div class="flex justify-between mb-2">
+                                    <span style="color: var(--text-muted)">Preço por proxy:</span>
+                                    <span id="home-intl-price" class="font-bold">R$ 0,00</span>
+                                </div>
+                                <div class="flex justify-between text-sm" style="color: var(--text-muted)">
+                                    <span>Desconto:</span>
+                                    <span id="home-intl-discount" class="text-green-500">-R$ 0,00</span>
+                                </div>
+                                <div class="flex justify-between text-xl font-bold border-t pt-2 mt-2" style="border-color: var(--border-color)">
+                                    <span>Total:</span>
+                                    <span id="home-intl-total" class="text-green-500">R$ 0,00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-6 border-t" style="border-color: var(--border-color)">
+                    <div class="flex gap-4">
+                        <button onclick="closeIntlModal()" class="flex-1 py-3 rounded-xl border transition-all" style="border-color: var(--border-color); color: var(--text-primary)">
+                            Fechar
+                        </button>
+                        <button onclick="buyHomeIntlProxy()" id="buy-home-intl-btn" class="flex-1 py-3 rounded-xl bg-green-500 text-black font-bold transition-all disabled:opacity-50" disabled>
+                            <i class="fas fa-shopping-cart mr-2"></i>Finalizar Compra
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 px-6 py-3 rounded-xl font-semibold hidden z-50"></div>
+
     <script>
         // Theme toggle
         const html = document.getElementById('html-root');
@@ -1893,7 +2041,9 @@
                         buyerDocument: document_,
                         buyerWhatsapp: whatsapp,
                         buyerAddress: address,
-                        termsAccepted: true
+                        termsAccepted: true,
+                        country: homePendingPurchase.country || null,
+                        countryName: homePendingPurchase.countryName || null
                     })
                 });
 
@@ -2236,6 +2386,208 @@
                 updateTotal();
             }
         });
+
+        // International Proxy Modal Functions
+        let intlConfig = {
+            country: null,
+            countryName: '',
+            type: null,
+            typeName: '',
+            typePrice: 0,
+            period: '1m',
+            periodDiscount: 0,
+            quantity: 1
+        };
+
+        const INTL_TYPE_PRICES = {
+            'ipv4': { name: 'IPv4', price: 39.90 },
+            'isp': { name: 'ISP', price: 49.90 }
+        };
+
+        function openIntlModal() {
+            const modal = document.getElementById('intl-modal');
+            if (!modal) return;
+            
+            intlConfig = {
+                country: null,
+                countryName: '',
+                type: null,
+                typeName: '',
+                typePrice: 0,
+                period: '1m',
+                periodDiscount: 0,
+                quantity: 1
+            };
+            
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            
+            document.getElementById('intl-step-1').classList.remove('hidden');
+            document.getElementById('intl-step-2').classList.add('hidden');
+            document.getElementById('intl-step-3').classList.add('hidden');
+            document.getElementById('buy-home-intl-btn').disabled = true;
+            
+            document.querySelectorAll('.intl-country-btn').forEach(btn => {
+                btn.style.borderColor = 'var(--border-color)';
+                btn.style.background = '';
+            });
+            
+            document.querySelectorAll('.intl-type-btn').forEach(btn => {
+                btn.style.borderColor = 'var(--border-color)';
+                btn.style.background = '';
+            });
+            
+            document.querySelectorAll('.intl-period-btn').forEach(btn => {
+                btn.style.borderColor = 'var(--border-color)';
+                btn.style.background = 'var(--bg-secondary)';
+            });
+            
+            document.getElementById('home-period-1m').style.borderColor = 'var(--badge-text)';
+            document.getElementById('home-period-1m').style.background = 'rgba(34, 197, 94, 0.1)';
+            
+            document.getElementById('home-intl-qty').value = 1;
+            document.getElementById('intl-summary').textContent = '-';
+            document.getElementById('home-intl-price').textContent = 'R$ 0,00';
+            document.getElementById('home-intl-discount').textContent = '-R$ 0,00';
+            document.getElementById('home-intl-total').textContent = 'R$ 0,00';
+        }
+
+        function closeIntlModal() {
+            document.getElementById('intl-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        function selectIntlCountry(code, name) {
+            intlConfig.country = code;
+            intlConfig.countryName = name;
+            
+            document.querySelectorAll('.intl-country-btn').forEach(btn => {
+                btn.style.borderColor = 'var(--border-color)';
+                btn.style.background = '';
+            });
+            
+            event.currentTarget.style.borderColor = 'var(--badge-text)';
+            event.currentTarget.style.background = 'rgba(34, 197, 94, 0.1)';
+            
+            document.getElementById('intl-step-2').classList.remove('hidden');
+            document.getElementById('intl-step-3').classList.add('hidden');
+            
+            document.querySelectorAll('.intl-type-btn').forEach(btn => {
+                btn.style.borderColor = 'var(--border-color)';
+                btn.style.background = '';
+            });
+            
+            updateIntlSummary();
+        }
+
+        function selectIntlType(type) {
+            intlConfig.type = type;
+            intlConfig.typeName = INTL_TYPE_PRICES[type].name;
+            intlConfig.typePrice = INTL_TYPE_PRICES[type].price;
+            
+            document.querySelectorAll('.intl-type-btn').forEach(btn => {
+                btn.style.borderColor = 'var(--border-color)';
+                btn.style.background = '';
+            });
+            
+            event.currentTarget.style.borderColor = 'var(--badge-text)';
+            event.currentTarget.style.background = 'rgba(34, 197, 94, 0.1)';
+            
+            document.getElementById('intl-step-3').classList.remove('hidden');
+            document.getElementById('buy-home-intl-btn').disabled = false;
+            
+            document.getElementById('home-intl-qty').value = 1;
+            intlConfig.quantity = 1;
+            
+            selectHomeIntlPeriod('1m', 0);
+            updateHomeIntlPrice();
+            updateIntlSummary();
+        }
+
+        function selectHomeIntlPeriod(periodId, discount) {
+            intlConfig.period = periodId;
+            intlConfig.periodDiscount = discount;
+            
+            document.querySelectorAll('.intl-period-btn').forEach(btn => {
+                btn.style.borderColor = 'var(--border-color)';
+                btn.style.background = 'var(--bg-secondary)';
+            });
+            
+            const activeBtn = document.getElementById(`home-period-${periodId}`);
+            if (activeBtn) {
+                activeBtn.style.borderColor = 'var(--badge-text)';
+                activeBtn.style.background = 'rgba(34, 197, 94, 0.1)';
+            }
+            
+            updateHomeIntlPrice();
+            updateIntlSummary();
+        }
+
+        function changeHomeIntlQty(delta) {
+            const input = document.getElementById('home-intl-qty');
+            const newVal = Math.max(1, parseInt(input.value || 1) + delta);
+            input.value = newVal;
+            intlConfig.quantity = newVal;
+            updateHomeIntlPrice();
+            updateIntlSummary();
+        }
+
+        function updateHomeIntlPrice() {
+            const qty = parseInt(document.getElementById('home-intl-qty').value) || 1;
+            intlConfig.quantity = qty;
+            
+            const basePrice = intlConfig.typePrice || 0;
+            const subtotal = basePrice * qty;
+            const discount = subtotal * intlConfig.periodDiscount;
+            const total = subtotal - discount;
+            
+            document.getElementById('home-intl-price').textContent = `R$ ${basePrice.toFixed(2).replace('.', ',')}`;
+            document.getElementById('home-intl-discount').textContent = `-R$ ${discount.toFixed(2).replace('.', ',')}`;
+            document.getElementById('home-intl-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        }
+
+        function updateIntlSummary() {
+            const summary = `${intlConfig.countryName || '-'} - ${intlConfig.typeName || '-'}`;
+            document.getElementById('intl-summary').textContent = summary;
+        }
+
+        function buyHomeIntlProxy() {
+            const token = localStorage.getItem('fastproxy_token');
+            if (!token) {
+                showToast('Faça login para comprar', 'error');
+                setTimeout(() => window.location.href = '/login.html', 1500);
+                return;
+            }
+            
+            if (!intlConfig.country || !intlConfig.type) {
+                showToast('Complete todas as etapas', 'error');
+                return;
+            }
+            
+            homePendingPurchase = {
+                type: intlConfig.type,
+                period: intlConfig.period,
+                quantity: intlConfig.quantity,
+                country: intlConfig.country,
+                countryName: intlConfig.countryName
+            };
+            
+            closeIntlModal();
+            openHomeTermsModal();
+        }
+
+        // Toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            if (!toast) {
+                console.log(message);
+                return;
+            }
+            toast.textContent = message;
+            toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-xl font-semibold z-50 ${type === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-black'}`;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
     </script>
 </body>
 </html>

@@ -23,8 +23,19 @@ const MIN_QUANTITY = {
 
 const PERIOD_DISCOUNTS = {
     '1m': 0,
+    '3m': 0.15,
     '6m': 0.25,
     '12m': 0.35
+};
+
+// Country mapping for ProxySeller
+const COUNTRY_MAP = {
+    'us': { id: 'US', name: 'Estados Unidos' },
+    'de': { id: 'DE', name: 'Alemanha' },
+    'uk': { id: 'GB', name: 'Reino Unido' },
+    'fr': { id: 'FR', name: 'França' },
+    'nl': { id: 'NL', name: 'Holanda' },
+    'br': { id: 'BR', name: 'Brasil' }
 };
 
 function calculateOrderPrice(type, period, quantity) {
@@ -59,7 +70,9 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
       buyerDocument,
       buyerWhatsapp,
       buyerAddress,
-      termsAccepted
+      termsAccepted,
+      country,
+      countryName
     } = req.body;
 
     const proxyType = proxyseller.PROXY_TYPES[type];
@@ -98,6 +111,12 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + periodDays);
 
+    // Determine country for proxy
+    const isInternational = country && country !== 'br';
+    const countryInfo = COUNTRY_MAP[country] || { id: proxyType.countryId, name: countryName || 'Brasil' };
+    const displayCountryName = countryName || (isInternational ? countryInfo.name : 'Brasil');
+    const countryId = countryInfo.id;
+
     // Save terms acceptance
     const termsVersion = '1.0';
     await sql`
@@ -113,7 +132,7 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
         buyer_name, buyer_document, buyer_whatsapp, buyer_address, buyer_email,
         terms_accepted, terms_accepted_at
       ) VALUES (
-        ${req.user.id}, ${type}, 'Brazil', ${proxyType.countryId}, ${qty},
+        ${req.user.id}, ${type}, ${displayCountryName}, ${countryId}, ${qty},
         ${period}, ${periodDays}, 
         ${0}, ${0},
         ${finalPrice}, ${finalPrice},
@@ -136,14 +155,25 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
 
     const periodNames = {
       '1m': '1 Mês',
+      '3m': '3 Meses',
       '6m': '6 Meses',
       '12m': '12 Meses'
     };
 
-    const productName = `${qty}x Proxy ${proxyType.name} Brasil - ${periodNames[period] || period}`;
+    const countryFlag = {
+      'Estados Unidos': '🇺🇸',
+      'Alemanha': '🇩🇪',
+      'Reino Unido': '🇬🇧',
+      'França': '🇫🇷',
+      'Holanda': '🇳🇱',
+      'Brasil': '🇧🇷'
+    };
+
+    const flag = countryFlag[displayCountryName] || '🌍';
+    const productName = `${qty}x Proxy ${proxyType.name} ${displayCountryName} - ${periodNames[period] || period}`;
     const productDescription = `
 ${proxyType.description}
-País: Brasil 🇧🇷
+País: ${displayCountryName} ${flag}
 Período: ${periodNames[period] || period} (${periodDays} dias)
 Quantidade: ${qty} proxy(s)
 ${pricing.discount > 0 ? `Desconto período: ${pricing.discount * 100}%` : ''}
@@ -175,6 +205,10 @@ Entrega imediata após confirmação de pagamento
         proxyType: type,
         quantity: qty.toString(),
         period: period,
+        country: country || 'br',
+        countryId: countryId,
+        countryName: displayCountryName,
+        isInternational: isInternational ? 'true' : 'false',
         buyerName: buyerName || '',
         buyerDocument: buyerDocument || '',
         buyerWhatsapp: buyerWhatsapp || '',
@@ -227,10 +261,12 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
 
         if (order && order.payment_status !== 'paid') {
           const proxyType = proxyseller.PROXY_TYPES[order.proxy_type];
+          const countryId = session.metadata?.countryId || order.country_id || proxyType?.countryId;
+          const isInternational = session.metadata?.isInternational === 'true';
           
           const calcResult = await proxyseller.calculateOrder({
             type: order.proxy_type,
-            countryId: order.country_id,
+            countryId: countryId,
             periodId: order.period,
             quantity: order.quantity,
             protocol: 'HTTPS',
@@ -241,7 +277,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
           if (calcResult.data.balance >= calcResult.data.total) {
             const orderResult = await proxyseller.makeOrder({
               type: order.proxy_type,
-              countryId: order.country_id,
+              countryId: countryId,
               periodId: order.period,
               quantity: order.quantity,
               protocol: 'HTTPS',
