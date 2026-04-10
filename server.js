@@ -8,6 +8,7 @@ console.log('=== LOADING SERVER ===');
 console.log('STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY ? 'set' : 'missing');
 console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'set' : 'missing');
 console.log('STRIPE_TEST_MODE:', process.env.STRIPE_TEST_MODE || 'false');
+console.log('PROXYSELLER_API_KEY:', process.env.PROXYSELLER_API_KEY ? 'set' : 'missing');
 
 const app = express();
 
@@ -79,6 +80,14 @@ try {
   console.log('✅ Subscription routes registered');
 } catch (err) {
   console.error('❌ Error loading Subscription routes:', err.message);
+}
+
+try {
+  const proxyRoutes = require('./routes/proxyseller');
+  app.use('/api/proxyseller', proxyRoutes);
+  console.log('✅ ProxySeller routes registered');
+} catch (err) {
+  console.error('❌ Error loading ProxySeller routes:', err.message);
 }
 
 app.get('/test', (req, res) => {
