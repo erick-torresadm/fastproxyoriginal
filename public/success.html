@@ -138,7 +138,7 @@
             animation: spin 1s linear infinite;
         }
 
-        .hidden { display: none; }
+        .hidden { display: none !important; }
 
         .fade-in {
             animation: fadeIn 0.5s ease;
@@ -147,6 +147,22 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        .error-box {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+
+        .warning-box {
+            background: rgba(234, 179, 8, 0.1);
+            border: 1px solid rgba(234, 179, 8, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
         }
     </style>
 </head>
@@ -189,7 +205,7 @@
                     <input type="password" id="reg-password-confirm" placeholder="Repita a senha" required minlength="6">
                 </div>
                 
-                <div id="register-error" class="hidden text-sm text-red-400"></div>
+                <div id="register-error" class="error-box hidden"></div>
                 
                 <button type="submit" id="register-btn" class="btn-primary">
                     <span id="register-btn-text">Criar Conta e Ver Proxies</span>
@@ -226,6 +242,39 @@
                 Suas credenciais foram enviadas para seu email.
             </p>
         </div>
+
+        <!-- Error / Manual Activation -->
+        <div id="error-section" class="hidden fade-in">
+            <div class="check-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+            </div>
+            
+            <h2 class="text-2xl font-bold mb-2" id="error-title">Ops! Algo deu errado</h2>
+            <p class="text-sm mb-6" style="color: var(--text-secondary)" id="error-message">
+                Não foi possível criar sua conta automaticamente.
+            </p>
+            
+            <div class="warning-box text-left mb-6">
+                <p class="text-sm font-medium mb-2" style="color: #fbbf24;">📋 Seus dados do pedido:</p>
+                <p class="text-xs" style="color: var(--text-secondary)" id="error-order-info">
+                    Carregando informações...
+                </p>
+            </div>
+            
+            <p class="text-sm mb-4" style="color: var(--text-secondary)">
+                Entre em contato com o suporte para ativar sua conta manualmente:
+            </p>
+            
+            <a href="https://wa.me/5511999999999" target="_blank" class="btn-primary inline-block w-full text-center mb-4" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);">
+                💬 Falar com Suporte
+            </a>
+            
+            <a href="/" class="text-sm underline block" style="color: var(--text-secondary)">
+                Voltar para Home
+            </a>
+        </div>
     </div>
 
     <script>
@@ -237,13 +286,19 @@
         async function verifyPayment() {
             if (!sessionId) {
                 document.getElementById('order-details').innerHTML = `
-                    <p class="text-red-400">Sessão não encontrada. Entre em contato com o suporte.</p>
+                    <p class="text-red-400">❌ Sessão não encontrada.</p>
+                    <p class="text-xs mt-2" style="color: var(--text-secondary)">Entre em contato com o suporte com o ID da sessão.</p>
                 `;
                 return;
             }
             
             try {
                 const res = await fetch(`/api/stripe/verify/${sessionId}`);
+                
+                if (!res.ok) {
+                    throw new Error('Falha na verificação do pagamento');
+                }
+                
                 const data = await res.json();
                 
                 if (data.success && data.paymentStatus === 'paid') {
@@ -255,8 +310,8 @@
                     document.getElementById('order-details').innerHTML = `
                         <div class="space-y-2">
                             <p class="font-semibold" style="color: var(--green)">✅ Pedido Confirmado!</p>
-                            <p class="text-sm" style="color: var(--text-secondary)">Email: ${data.customerEmail}</p>
-                            <p class="text-sm" style="color: var(--text-secondary)">Valor: R$ ${data.amountTotal}</p>
+                            <p class="text-sm" style="color: var(--text-secondary)">Email: ${data.customerEmail || 'Não informado'}</p>
+                            <p class="text-sm" style="color: var(--text-secondary)">Valor: R$ ${data.amountTotal || '0'}</p>
                             <p class="text-sm" style="color: var(--text-secondary)">Plano: ${period === 'annual' ? 'Anual' : 'Mensal'}</p>
                             <p class="text-sm" style="color: var(--text-secondary)">Proxies: ${proxyCount}</p>
                         </div>
@@ -270,15 +325,27 @@
                     }, 1500);
                 } else {
                     document.getElementById('order-details').innerHTML = `
-                        <p class="text-red-400">Pagamento ainda não confirmado. Tente novamente em alguns minutos.</p>
+                        <p style="color: #f59e0b;">⏳ Pagamento ainda sendo processado.</p>
+                        <p class="text-xs mt-2" style="color: var(--text-secondary)">Aguarde alguns minutos e atualize a página.</p>
                     `;
                 }
             } catch (err) {
                 console.error('Erro ao verificar:', err);
-                document.getElementById('order-details').innerHTML = `
-                    <p class="text-red-400">Erro ao verificar pagamento. Entre em contato com o suporte.</p>
-                `;
+                showError('Erro de Conexão', 'Não foi possível conectar ao servidor. Tente novamente em alguns minutos.', sessionId);
             }
+        }
+        
+        function showError(title, message, sessionId) {
+            document.getElementById('payment-section').classList.add('hidden');
+            document.getElementById('account-section').classList.add('hidden');
+            document.getElementById('error-section').classList.remove('hidden');
+            
+            document.getElementById('error-title').textContent = title;
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-order-info').textContent = 
+                `Session ID: ${sessionId || 'N/A'}\n` +
+                `Data: ${new Date().toLocaleString('pt-BR')}\n` +
+                `Guarde estas informações para o suporte.`;
         }
         
         // Register form
@@ -294,6 +361,12 @@
             const spinner = document.getElementById('register-spinner');
             
             errorDiv.classList.add('hidden');
+            
+            if (!email) {
+                errorDiv.textContent = 'Email é obrigatório. Tente novamente.';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
             
             if (password !== passwordConfirm) {
                 errorDiv.textContent = 'As senhas não coincidem.';
@@ -326,7 +399,6 @@
                 const data = await res.json();
                 
                 if (data.success) {
-                    // Store token and redirect
                     localStorage.setItem('token', data.token);
                     localStorage.removeItem('pendingAccountEmail');
                     localStorage.removeItem('pendingAccountPeriod');
@@ -343,11 +415,11 @@
                 }
             } catch (err) {
                 console.error('Erro:', err);
-                errorDiv.textContent = 'Erro de conexão. Tente novamente.';
-                errorDiv.classList.remove('hidden');
-                btn.disabled = false;
-                btnText.classList.remove('hidden');
-                spinner.classList.add('hidden');
+                showError(
+                    'Erro de Conexão',
+                    'Não foi possível criar sua conta. Entre em contato com o suporte com os dados abaixo.',
+                    sessionId
+                );
             }
         });
         

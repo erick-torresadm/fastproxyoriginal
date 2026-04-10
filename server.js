@@ -2,9 +2,26 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const mongoose = require('mongoose');
 
 console.log('=== LOADING SERVER ===');
 console.log('STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY ? 'set' : 'missing');
+
+// MongoDB Connection with longer timeout
+const MONGODB_URI = process.env.MONGODB_URI;
+if (MONGODB_URI) {
+  mongoose.connect(MONGODB_URI, {
+    serverSelectionTimeoutMS: 30000, // 30 seconds
+    socketTimeoutMS: 45000,
+    maxPoolSize: 10,
+    retryWrites: true,
+    w: 'majority'
+  })
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.error('❌ MongoDB connection error:', err.message));
+} else {
+  console.warn('⚠️ MONGODB_URI not set - Auth features will not work');
+}
 
 const app = express();
 
@@ -41,14 +58,20 @@ try {
 }
 
 app.get('/test', (req, res) => {
-  res.json({ message: 'Server is working', provider: 'Stripe' });
+  res.json({ 
+    message: 'Server is working', 
+    stripeMode: process.env.STRIPE_TEST_MODE === 'true' ? 'TEST' : 'PRODUCTION',
+    mongodb: MONGODB_URI ? 'configured' : 'NOT CONFIGURED'
+  });
 });
 
 app.get('/debug/env', (req, res) => {
   res.json({
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ? 'set' : 'missing',
     STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY ? 'set' : 'missing',
+    STRIPE_TEST_MODE: process.env.STRIPE_TEST_MODE,
     APP_URL: process.env.APP_URL,
+    MONGODB_URI: MONGODB_URI ? 'set' : 'missing',
     NODE_ENV: process.env.NODE_ENV
   });
 });
