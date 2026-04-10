@@ -1151,14 +1151,14 @@
             <div class="text-center mb-16 reveal">
                 <span class="text-sm font-semibold uppercase tracking-widest primary-text">ESCOLHA SEU PLANO</span>
                 <h2 class="font-bold text-4xl md:text-5xl mt-4" style="color: var(--text-primary)">Tipos de Proxy Disponíveis</h2>
-                <p class="text-lg mt-4" style="color: var(--text-zinc)">Selecione o tipo ideal para sua necessidade</p>
+                <p class="text-lg mt-4" style="color: var(--text-zinc)">Clique em um tipo para selecionar o período</p>
             </div>
 
-            <!-- Proxy Type Cards -->
+            <!-- Proxy Type Cards - Clickable -->
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                 
                 <!-- IPv6 Card -->
-                <div class="group relative plan-card rounded-3xl p-6 transition-all duration-500 border-2" style="border-color: var(--badge-text)">
+                <div onclick="openRecurrenceModal('ipv6', 29.90, 10)" class="group relative plan-card rounded-3xl p-6 transition-all duration-500 border-2 cursor-pointer hover:scale-105" style="border-color: var(--badge-text)">
                     <div class="absolute -top-3 left-4 px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-green-500 to-emerald-600 text-white">
                         POPULAR
                     </div>
@@ -1171,27 +1171,20 @@
                     
                     <div class="text-center mb-4">
                         <div class="flex items-baseline justify-center gap-1">
-                            <span class="text-4xl font-black primary-text">R$ 29</span>
+                            <span class="text-3xl font-black primary-text">R$ 29</span>
                             <span class="text-lg" style="color: var(--text-muted)">.90</span>
                         </div>
                         <span class="text-sm" style="color: var(--text-muted)">por proxy/mês</span>
-                        <div class="mt-2 text-xs px-3 py-1 rounded-full inline-block" style="background: var(--bg-secondary); color: var(--text-zinc)">
-                            Mínimo 10 unidades
-                        </div>
                     </div>
                     
-                    <ul class="space-y-2 mb-6 text-sm">
+                    <div class="text-xs text-center mb-4" style="color: var(--text-muted)">
+                        Mínimo 10 unidades
+                    </div>
+                    
+                    <ul class="space-y-2 mb-4 text-sm">
                         <li class="flex items-center gap-2">
                             <span style="color: var(--badge-text)">✓</span>
                             <span style="color: var(--text-zinc)">Datacenter Brasil 🇧🇷</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <span style="color: var(--badge-text)">✓</span>
-                            <span style="color: var(--text-zinc)">Alta velocidade</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <span style="color: var(--badge-text)">✓</span>
-                            <span style="color: var(--text-zinc)">Ideal para scraping</span>
                         </li>
                         <li class="flex items-center gap-2">
                             <span style="color: var(--badge-text)">✓</span>
@@ -1199,29 +1192,26 @@
                         </li>
                     </ul>
                     
-                    <a href="/planos.html?type=ipv6" class="block w-full py-3 rounded-xl font-bold text-center transition-all duration-300 cursor-pointer" style="background: var(--badge-text); color: #000">
-                        Selecionar
-                    </a>
+                    <button class="w-full py-3 rounded-xl font-bold transition-all duration-300" style="background: var(--badge-text); color: #000">
+                        Selecionar Período
+                    </button>
                 </div>
                 
                 <!-- IPv4 Card -->
-                <div class="group relative plan-card rounded-3xl p-6 transition-all duration-500" style="background: var(--bg-secondary); border: 1px solid var(--border-color)">
+                <div onclick="openRecurrenceModal('ipv4', 39.90, 1)" class="group relative plan-card rounded-3xl p-6 transition-all duration-500 cursor-pointer hover:scale-105" style="background: var(--bg-secondary); border: 1px solid var(--border-color)">
                     
                     <div class="text-center mb-4">
                         <div class="text-5xl mb-3">🖥️</div>
                         <h3 class="text-xl font-bold" style="color: var(--text-primary)">IPv4</h3>
-                        <p class="text-sm mt-2" style="color: var(--text-zinc)">Alta compatibilidade com todos os sites</p>
+                        <p class="text-sm mt-2" style="color: var(--text-zinc)">Alta compatibilidade</p>
                     </div>
                     
                     <div class="text-center mb-4">
                         <div class="flex items-baseline justify-center gap-1">
-                            <span class="text-4xl font-black" style="color: var(--text-primary)">R$ 39</span>
+                            <span class="text-3xl font-black" style="color: var(--text-primary)">R$ 39</span>
                             <span class="text-lg" style="color: var(--text-muted)">.90</span>
                         </div>
                         <span class="text-sm" style="color: var(--text-muted)">por proxy/mês</span>
-                        <div class="mt-2 text-xs px-3 py-1 rounded-full inline-block" style="background: rgba(34, 197, 94, 0.1); color: var(--badge-text)">
-                            1 proxy individual
-                        </div>
                     </div>
                     
                     <ul class="space-y-2 mb-6 text-sm">
@@ -1231,25 +1221,17 @@
                         </li>
                         <li class="flex items-center gap-2">
                             <span style="color: var(--badge-text)">✓</span>
-                            <span style="color: var(--text-zinc)">99.9% uptime</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <span style="color: var(--badge-text)">✓</span>
-                            <span style="color: var(--text-zinc)">Universal</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <span style="color: var(--badge-text)">✓</span>
                             <span style="color: var(--text-zinc)">HTTP/HTTPS/SOCKS5</span>
                         </li>
                     </ul>
                     
-                    <a href="/planos.html?type=ipv4" class="block w-full py-3 rounded-xl font-bold text-center border-2 transition-all duration-300 cursor-pointer" style="border-color: var(--badge-text); color: var(--badge-text)">
-                        Selecionar
-                    </a>
+                    <button class="w-full py-3 rounded-xl font-bold border-2 transition-all duration-300" style="border-color: var(--badge-text); color: var(--badge-text)">
+                        Selecionar Período
+                    </button>
                 </div>
                 
                 <!-- ISP Card -->
-                <div class="group relative plan-card rounded-3xl p-6 transition-all duration-500" style="background: var(--bg-secondary); border: 1px solid var(--border-color)">
+                <div onclick="openRecurrenceModal('isp', 49.90, 1)" class="group relative plan-card rounded-3xl p-6 transition-all duration-500 cursor-pointer hover:scale-105" style="background: var(--bg-secondary); border: 1px solid var(--border-color)">
                     <div class="absolute -top-3 left-4 px-3 py-1 rounded-full text-xs font-bold bg-yellow-500 text-black">
                         PREMIUM
                     </div>
@@ -1257,46 +1239,35 @@
                     <div class="text-center mb-4">
                         <div class="text-5xl mb-3">🏢</div>
                         <h3 class="text-xl font-bold" style="color: var(--text-primary)">ISP</h3>
-                        <p class="text-sm mt-2" style="color: var(--text-zinc)">IP de provedor dedicado</p>
+                        <p class="text-sm mt-2" style="color: var(--text-zinc)">IP de Operadora</p>
                     </div>
                     
                     <div class="text-center mb-4">
                         <div class="flex items-baseline justify-center gap-1">
-                            <span class="text-4xl font-black" style="color: var(--text-primary)">R$ 49</span>
+                            <span class="text-3xl font-black" style="color: var(--text-primary)">R$ 49</span>
                             <span class="text-lg" style="color: var(--text-muted)">.90</span>
                         </div>
                         <span class="text-sm" style="color: var(--text-muted)">por proxy/mês</span>
-                        <div class="mt-2 text-xs px-3 py-1 rounded-full inline-block" style="background: rgba(34, 197, 94, 0.1); color: var(--badge-text)">
-                            1 proxy individual
-                        </div>
                     </div>
                     
                     <ul class="space-y-2 mb-6 text-sm">
-                        <li class="flex items-center gap-2">
-                            <span style="color: var(--badge-text)">✓</span>
-                            <span style="color: var(--text-zinc)">IP de Operadora</span>
-                        </li>
                         <li class="flex items-center gap-2">
                             <span style="color: var(--badge-text)">✓</span>
                             <span style="color: var(--text-zinc)">Mistura DC + Residencial</span>
                         </li>
                         <li class="flex items-center gap-2">
                             <span style="color: var(--badge-text)">✓</span>
-                            <span style="color: var(--text-zinc)">Ideal para redes sociais</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <span style="color: var(--badge-text)">✓</span>
-                            <span style="color: var(--text-zinc)">HTTP/HTTPS/SOCKS5</span>
+                            <span style="color: var(--text-zinc)">Ideal redes sociais</span>
                         </li>
                     </ul>
                     
-                    <a href="/planos.html?type=isp" class="block w-full py-3 rounded-xl font-bold text-center border-2 transition-all duration-300 cursor-pointer" style="border-color: var(--badge-text); color: var(--badge-text)">
-                        Selecionar
-                    </a>
+                    <button class="w-full py-3 rounded-xl font-bold border-2 transition-all duration-300" style="border-color: var(--badge-text); color: var(--badge-text)">
+                        Selecionar Período
+                    </button>
                 </div>
                 
                 <!-- Mobile Card -->
-                <div class="group relative plan-card rounded-3xl p-6 transition-all duration-500" style="background: var(--bg-secondary); border: 1px solid var(--border-color)">
+                <div onclick="openRecurrenceModal('mobile', 79.90, 1)" class="group relative plan-card rounded-3xl p-6 transition-all duration-500 cursor-pointer hover:scale-105" style="background: var(--bg-secondary); border: 1px solid var(--border-color)">
                     <div class="absolute -top-3 left-4 px-3 py-1 rounded-full text-xs font-bold bg-purple-500 text-white">
                         ESPECIAL
                     </div>
@@ -1309,13 +1280,10 @@
                     
                     <div class="text-center mb-4">
                         <div class="flex items-baseline justify-center gap-1">
-                            <span class="text-4xl font-black" style="color: var(--text-primary)">R$ 79</span>
+                            <span class="text-3xl font-black" style="color: var(--text-primary)">R$ 79</span>
                             <span class="text-lg" style="color: var(--text-muted)">.90</span>
                         </div>
                         <span class="text-sm" style="color: var(--text-muted)">por proxy/mês</span>
-                        <div class="mt-2 text-xs px-3 py-1 rounded-full inline-block" style="background: rgba(34, 197, 94, 0.1); color: var(--badge-text)">
-                            1 proxy individual
-                        </div>
                     </div>
                     
                     <ul class="space-y-2 mb-6 text-sm">
@@ -1325,46 +1293,13 @@
                         </li>
                         <li class="flex items-center gap-2">
                             <span style="color: var(--badge-text)">✓</span>
-                            <span style="color: var(--text-zinc)">Rotativo ou fixo</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <span style="color: var(--badge-text)">✓</span>
-                            <span style="color: var(--text-zinc)">TikTok, Instagram, WhatsApp</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <span style="color: var(--badge-text)">✓</span>
-                            <span style="color: var(--text-zinc)">HTTP/HTTPS</span>
+                            <span style="color: var(--text-zinc)">TikTok, Instagram</span>
                         </li>
                     </ul>
                     
-                    <a href="/planos.html?type=mobile" class="block w-full py-3 rounded-xl font-bold text-center border-2 transition-all duration-300 cursor-pointer" style="border-color: var(--badge-text); color: var(--badge-text)">
-                        Selecionar
-                    </a>
-                </div>
-            </div>
-
-            <!-- Info -->
-            <div class="max-w-2xl mx-auto text-center">
-                <p class="text-sm font-medium mb-4" style="color: var(--text-secondary)">
-                    🎉 Descontos por período:
-                </p>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="p-4 rounded-xl" style="background: var(--bg-secondary); border: 1px solid var(--border-color)">
-                        <div class="text-2xl font-bold primary-text">1 Mês</div>
-                        <div class="text-sm" style="color: var(--text-muted)">Sem desconto</div>
-                    </div>
-                    <div class="p-4 rounded-xl" style="background: var(--bg-secondary); border: 1px solid var(--border-color)">
-                        <div class="text-2xl font-bold primary-text">3 Meses</div>
-                        <div class="text-sm" style="color: var(--badge-text)">15% OFF</div>
-                    </div>
-                    <div class="p-4 rounded-xl" style="background: var(--bg-secondary); border: 1px solid var(--border-color)">
-                        <div class="text-2xl font-bold primary-text">6 Meses</div>
-                        <div class="text-sm" style="color: var(--badge-text)">25% OFF</div>
-                    </div>
-                    <div class="p-4 rounded-xl" style="background: var(--bg-secondary); border: 1px solid var(--border-color)">
-                        <div class="text-2xl font-bold primary-text">12 Meses</div>
-                        <div class="text-sm" style="color: var(--badge-text)">35% OFF</div>
-                    </div>
+                    <button class="w-full py-3 rounded-xl font-bold border-2 transition-all duration-300" style="border-color: var(--badge-text); color: var(--badge-text)">
+                        Selecionar Período
+                    </button>
                 </div>
             </div>
             
@@ -1503,8 +1438,65 @@
         </div>
     </footer>
 
+    <!-- Recurrence Selection Modal -->
+    <div id="recurrence-modal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeRecurrenceModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+            <div class="recurrence-modal-content bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl w-full max-w-lg p-6 relative pointer-events-auto transform scale-95 opacity-0 transition-all duration-300 ease-out" onclick="event.stopPropagation()">
+                <button onclick="closeRecurrenceModal()" class="absolute top-4 right-4 p-2 rounded-lg hover:bg-[var(--bg-secondary)] transition-colors" style="color: var(--text-muted)">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+                
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-bold mb-2" style="color: var(--text-primary)">Selecione o Período</h3>
+                    <p class="text-sm" style="color: var(--text-zinc)">Escolha por quanto tempo você deseja seus proxies</p>
+                </div>
+                
+                <div id="recurrence-info" class="mb-4 p-4 rounded-xl text-center" style="background: var(--bg-secondary); border: 1px solid var(--border-color)">
+                    <div class="flex items-center justify-center gap-2 mb-2">
+                        <span id="recurrence-type-icon" class="text-2xl">🌐</span>
+                        <span id="recurrence-type-name" class="text-xl font-bold" style="color: var(--badge-text)">IPv6</span>
+                    </div>
+                    <p id="recurrence-min-qty" class="text-sm" style="color: var(--text-secondary)">Mínimo: 10 proxies</p>
+                </div>
+                
+                <div id="period-options" class="grid grid-cols-2 gap-3 mb-4">
+                    <!-- Period options will be inserted here -->
+                </div>
+                
+                <div id="recurrence-summary" class="p-4 rounded-xl" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3);">
+                    <div class="flex justify-between items-center mb-2">
+                        <span style="color: var(--text-secondary)">Período</span>
+                        <span id="summary-period" class="font-semibold" style="color: var(--text-primary)">1 Mês</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span style="color: var(--text-secondary)">Quantidade</span>
+                        <input type="number" id="recurrence-quantity" min="10" value="10" 
+                            class="w-20 px-2 py-1 rounded-lg text-center border outline-none"
+                            style="background: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary)"
+                            onchange="updateRecurrenceTotal()">
+                    </div>
+                    <div class="flex justify-between items-center pt-2" style="border-top: 1px solid var(--border-color)">
+                        <span style="color: var(--text-secondary)">Total</span>
+                        <span id="summary-total" class="text-xl font-bold" style="color: var(--badge-text)">R$ 299,00</span>
+                    </div>
+                </div>
+                
+                <button onclick="confirmRecurrence()" id="confirm-recurrence-btn" class="w-full mt-4 py-4 rounded-xl font-bold plan-btn-filled flex items-center justify-center gap-2">
+                    <i class="fas fa-shopping-cart mr-2"></i>Continuar para Pagamento
+                </button>
+                
+                <p class="text-center text-xs mt-4" style="color: var(--text-muted)">
+                    Pagamento seguro via Cartão de Crédito
+                </p>
+            </div>
+        </div>
+    </div>
+
     <!-- Checkout Modal -->
-    <div id="checkout-modal" class="fixed inset-0 z-[100] hidden">
+    <div id="checkout-modal" class="fixed inset-0 z-[110] hidden">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeCheckoutModal()"></div>
         <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
             <div class="checkout-modal-content bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl w-full max-w-md p-8 relative pointer-events-auto transform scale-95 opacity-0 transition-all duration-300 ease-out" onclick="event.stopPropagation()">
@@ -1686,7 +1678,173 @@
 
         // Checkout Modal
         let currentPeriod = 'monthly';
+        let currentType = 'ipv6';
         let basePrice = 29.90;
+
+        // Recurrence Modal
+        let selectedType = 'ipv6';
+        let selectedPeriod = '1m';
+        let periodMonths = 1;
+        
+        const PRICING = {
+            ipv6: { name: 'IPv6', icon: '🌐', price: 29.90, minQty: 10 },
+            ipv4: { name: 'IPv4', icon: '🖥️', price: 39.90, minQty: 1 },
+            isp: { name: 'ISP', icon: '🏢', price: 49.90, minQty: 1 },
+            mobile: { name: 'Mobile 4G/5G', icon: '📱', price: 79.90, minQty: 1 }
+        };
+
+        const PERIODS = [
+            { id: '1w', name: '1 Semana', months: 0.25, days: 7, discount: 0 },
+            { id: '2w', name: '2 Semanas', months: 0.5, days: 14, discount: 0 },
+            { id: '1m', name: '1 Mês', months: 1, days: 30, discount: 0 },
+            { id: '2m', name: '2 Meses', months: 2, days: 60, discount: 0.10 },
+            { id: '3m', name: '3 Meses', months: 3, days: 90, discount: 0.15 },
+            { id: '6m', name: '6 Meses', months: 6, days: 180, discount: 0.25 },
+            { id: '12m', name: '12 Meses', months: 12, days: 365, discount: 0.35 }
+        ];
+
+        function openRecurrenceModal(type, price, minQty) {
+            selectedType = type;
+            selectedPeriod = '1m';
+            periodMonths = 1;
+            
+            const info = PRICING[type] || { name: type.toUpperCase(), icon: '🌐', price, minQty };
+            
+            document.getElementById('recurrence-type-icon').textContent = info.icon;
+            document.getElementById('recurrence-type-name').textContent = info.name;
+            document.getElementById('recurrence-min-qty').textContent = `Mínimo: ${info.minQty} proxy(s)`;
+            document.getElementById('recurrence-quantity').min = info.minQty;
+            document.getElementById('recurrence-quantity').value = info.minQty;
+            
+            renderPeriodOptions(info.price, info.minQty);
+            updateRecurrenceTotal();
+            
+            openRecurrenceModalUI();
+        }
+
+        function renderPeriodOptions(price, minQty) {
+            const container = document.getElementById('period-options');
+            container.innerHTML = PERIODS.map(period => {
+                const totalPrice = price * period.months * (1 - period.discount) * minQty;
+                const hasDiscount = period.discount > 0;
+                
+                return `
+                    <button onclick="selectPeriodOption('${period.id}', ${period.months}, ${price}, ${minQty})" 
+                        class="period-btn p-3 rounded-xl text-left transition-all ${hasDiscount ? 'gradient-border' : ''}"
+                        style="background: var(--bg-secondary); border: 1px solid var(--border-color)"
+                        data-period="${period.id}">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-semibold text-sm" style="color: var(--text-primary)">${period.name}</span>
+                            ${hasDiscount ? `<span class="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-400">-${(period.discount * 100).toFixed(0)}%</span>` : ''}
+                        </div>
+                        <span class="text-lg font-bold" style="color: var(--badge-text)">R$ ${totalPrice.toFixed(2).replace('.', ',')}</span>
+                    </button>
+                `;
+            }).join('');
+            
+            selectPeriodOption('1m', 1, price, minQty);
+        }
+
+        function selectPeriodOption(periodId, months, price, minQty) {
+            selectedPeriod = periodId;
+            periodMonths = months;
+            
+            document.querySelectorAll('.period-btn').forEach(btn => {
+                btn.style.borderColor = 'var(--border-color)';
+                btn.style.background = 'var(--bg-secondary)';
+            });
+            
+            const activeBtn = document.querySelector(`[data-period="${periodId}"]`);
+            if (activeBtn) {
+                activeBtn.style.borderColor = 'var(--badge-text)';
+                activeBtn.style.background = 'rgba(34, 197, 94, 0.1)';
+            }
+            
+            updateRecurrenceTotal();
+        }
+
+        function updateRecurrenceTotal() {
+            const price = PRICING[selectedType]?.price || 29.90;
+            const quantity = parseInt(document.getElementById('recurrence-quantity').value) || PRICING[selectedType]?.minQty || 1;
+            const period = PERIODS.find(p => p.id === selectedPeriod) || PERIODS[2];
+            
+            const subtotal = price * periodMonths * quantity;
+            const discount = subtotal * period.discount;
+            const total = subtotal - discount;
+            
+            document.getElementById('summary-period').textContent = period.name;
+            document.getElementById('summary-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        }
+
+        function openRecurrenceModalUI() {
+            const modal = document.getElementById('recurrence-modal');
+            const content = modal.querySelector('.recurrence-modal-content');
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            
+            requestAnimationFrame(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            });
+        }
+
+        function closeRecurrenceModal() {
+            const modal = document.getElementById('recurrence-modal');
+            const content = modal.querySelector('.recurrence-modal-content');
+            
+            content.classList.add('scale-95', 'opacity-0');
+            content.classList.remove('scale-100', 'opacity-100');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }, 300);
+        }
+
+        function confirmRecurrence() {
+            const quantity = parseInt(document.getElementById('recurrence-quantity').value) || PRICING[selectedType]?.minQty || 1;
+            
+            closeRecurrenceModal();
+            
+            setTimeout(() => {
+                openCheckoutModalWithData(selectedType, selectedPeriod, quantity);
+            }, 350);
+        }
+
+        function openCheckoutModalWithData(type, period, quantity) {
+            const info = PRICING[type] || { name: type.toUpperCase(), price: 29.90 };
+            const periodInfo = PERIODS.find(p => p.id === period) || PERIODS[2];
+            const pricePerMonth = info.price * (1 - periodInfo.discount);
+            
+            currentType = type;
+            currentPeriod = period;
+            basePrice = pricePerMonth;
+            
+            const planNames = {
+                '1w': '1 Semana',
+                '2w': '2 Semanas',
+                '1m': '1 Mês',
+                '2m': '2 Meses',
+                '3m': '3 Meses',
+                '6m': '6 Meses',
+                '12m': '12 Meses'
+            };
+            
+            document.getElementById('modal-plan-name').textContent = `${info.name} - ${planNames[period]}`;
+            document.getElementById('modal-quantity').textContent = `${quantity} proxy(s)`;
+            document.getElementById('modal-total').textContent = `R$ ${(pricePerMonth * periodInfo.months * quantity).toFixed(2).replace('.', ',')}`;
+            
+            document.getElementById('proxy-count').value = quantity;
+            document.getElementById('proxy-count').min = info.minQty || 1;
+            document.getElementById('proxy-count').max = 100;
+            document.getElementById('proxy-count').disabled = true;
+            
+            document.getElementById('checkout-email').value = '';
+            document.getElementById('checkout-whatsapp').value = '';
+            
+            openModal();
+            updateTotal();
+        }
 
         function getDiscount(quantity) {
             if (quantity >= 50) return 0.20;
@@ -1798,7 +1956,8 @@
                         email,
                         whatsapp,
                         proxyCount,
-                        period: currentPeriod
+                        period: currentPeriod,
+                        type: currentType
                     })
                 });
                 
@@ -1809,6 +1968,7 @@
                     localStorage.setItem('pendingAccountEmail', email);
                     localStorage.setItem('pendingAccountPeriod', currentPeriod);
                     localStorage.setItem('pendingAccountProxies', proxyCount);
+                    localStorage.setItem('pendingAccountType', currentType);
                     window.location.href = data.checkoutUrl;
                 } else {
                     alert(data.error || 'Erro ao processar checkout. Tente novamente.');

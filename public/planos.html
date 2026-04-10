@@ -237,13 +237,13 @@
         };
 
         const PERIODS = [
-            { id: '1w', name: '1 Semana', days: 7, discount: 0 },
-            { id: '2w', name: '2 Semanas', days: 14, discount: 0 },
-            { id: '1m', name: '1 Mês', days: 30, discount: 0 },
-            { id: '2m', name: '2 Meses', days: 60, discount: 0.1 },
-            { id: '3m', name: '3 Meses', days: 90, discount: 0.15 },
-            { id: '6m', name: '6 Meses', days: 180, discount: 0.25 },
-            { id: '12m', name: '12 Meses', days: 365, discount: 0.35 }
+            { id: '1w', name: '1 Semana', months: 0.25, days: 7, discount: 0 },
+            { id: '2w', name: '2 Semanas', months: 0.5, days: 14, discount: 0 },
+            { id: '1m', name: '1 Mês', months: 1, days: 30, discount: 0 },
+            { id: '2m', name: '2 Meses', months: 2, days: 60, discount: 0.1 },
+            { id: '3m', name: '3 Meses', months: 3, days: 90, discount: 0.15 },
+            { id: '6m', name: '6 Meses', months: 6, days: 180, discount: 0.25 },
+            { id: '12m', name: '12 Meses', months: 12, days: 365, discount: 0.35 }
         ];
 
         function selectType(type) {
@@ -265,8 +265,12 @@
                 const qty = info.minQty;
                 const basePrice = info.sellPrice;
                 const discount = period.discount;
-                let pricePerUnit = basePrice * (1 - discount);
-                let total = pricePerUnit * qty;
+                const periodMonths = period.months;
+                
+                let subtotal = basePrice * qty * periodMonths;
+                let discountAmount = subtotal * discount;
+                let total = subtotal - discountAmount;
+                let pricePerUnit = total / qty;
                 
                 if (appliedCoupon) {
                     if (appliedCoupon.discount_percent) {
@@ -280,7 +284,7 @@
                     }
                 }
                 
-                const savings = (basePrice * qty * discount).toFixed(2);
+                const savings = (basePrice * qty * periodMonths * discount).toFixed(2);
                 
                 return `
                     <div class="card-hover rounded-2xl ${discount > 0 ? 'gradient-border' : ''} bg-primary p-1">
@@ -290,8 +294,8 @@
                             <h3 class="text-2xl font-bold mt-2">${period.name}</h3>
                             <p class="text-secondary text-sm mb-4">${qty} proxy(s) ${info.name}</p>
                             <div class="mb-4">
-                                <span class="text-4xl font-bold text-accent">R$ ${pricePerUnit.toFixed(2)}</span>
-                                <span class="text-secondary">/por proxy</span>
+                                <span class="text-3xl font-bold text-accent">R$ ${pricePerUnit.toFixed(2)}</span>
+                                <span class="text-secondary text-sm">/por proxy</span>
                             </div>
                             ${discount > 0 ? `<p class="text-green-400 text-sm mb-2">Economia de R$ ${savings}</p>` : ''}
                             ${appliedCoupon ? `<p class="text-blue-400 text-sm mb-2">Cupom: -R$ ${appliedCoupon.discount.toFixed(2)}</p>` : ''}

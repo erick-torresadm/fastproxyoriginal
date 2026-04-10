@@ -24,37 +24,41 @@ router.post('/create-checkout', express.json(), async (req, res) => {
       });
     }
     
-    const { proxyCount, email, whatsapp, period } = req.body;
+    const { email, whatsapp, period, type, proxyCount, couponDiscount } = req.body;
+    const quantity = proxyCount || 1;
     
-    console.log('proxyCount:', proxyCount);
     console.log('email:', email);
     console.log('whatsapp:', whatsapp);
+    console.log('type:', type);
     console.log('period:', period);
+    console.log('quantity:', quantity);
     
     if (!email) {
       return res.status(400).json({ error: 'Email é obrigatório' });
     }
     
-    if (!proxyCount || proxyCount < 1 || proxyCount > 100) {
+    if (!type) {
+      return res.status(400).json({ error: 'Tipo de proxy é obrigatório' });
+    }
+    
+    if (!period) {
+      return res.status(400).json({ error: 'Período é obrigatório' });
+    }
+    
+    if (!quantity || quantity < 1 || quantity > 100) {
       return res.status(400).json({ error: 'Quantidade de proxies inválida (1-100)' });
     }
     
-    if (!Stripe) {
-      return res.status(500).json({ 
-        success: false, 
-        error: 'Stripe não configurado' 
-      });
-    }
-    
-    const priceCalculation = Stripe.calculatePrice(period, proxyCount);
+    const priceCalculation = Stripe.calculatePrice(type, period, quantity, couponDiscount || 0);
     
     if (!priceCalculation) {
-      return res.status(400).json({ error: 'Período inválido' });
+      return res.status(400).json({ error: 'Tipo ou período inválido' });
     }
     
     console.log('Price calculation:');
+    console.log('  - Type:', type);
     console.log('  - Period:', period);
-    console.log('  - Quantity:', proxyCount);
+    console.log('  - Quantity:', quantity);
     console.log('  - Unit price:', priceCalculation.unitAmount / 100);
     console.log('  - Total:', priceCalculation.total / 100);
     
@@ -62,8 +66,10 @@ router.post('/create-checkout', express.json(), async (req, res) => {
     
     const session = await Stripe.createCheckoutSession({
       email: email,
-      proxyCount: proxyCount,
+      type: type,
       period: period,
+      quantity: quantity,
+      couponDiscount: couponDiscount || 0,
       successUrl: `${appUrl}/success.html?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${appUrl}/cancel.html`
     });
@@ -77,8 +83,9 @@ router.post('/create-checkout', express.json(), async (req, res) => {
       sessionId: session.id,
       total: priceCalculation.total / 100,
       currency: 'BRL',
-      quantity: proxyCount,
+      quantity: quantity,
       period: period,
+      type: type,
       pricePerUnit: priceCalculation.unitAmount / 100,
       message: 'Checkout Stripe criado com sucesso'
     });
