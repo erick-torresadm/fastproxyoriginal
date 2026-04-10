@@ -24,10 +24,10 @@
         .plan-card { transition: all 0.3s ease; }
         .plan-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(34, 197, 94, 0.15); }
         .gradient-border { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); padding: 2px; border-radius: 1.25rem; }
-        .popular-tag { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
         .type-btn { transition: all 0.2s ease; }
         .type-btn:hover { transform: scale(1.02); }
         .type-btn.active { transform: scale(1.05); }
+        .terms-content { max-height: 400px; overflow-y: auto; }
     </style>
 </head>
 <body class="min-h-screen">
@@ -126,40 +126,6 @@
         </div>
     </section>
 
-    <!-- Coupon Section -->
-    <section class="container mx-auto px-4 py-8 max-w-lg">
-        <div class="bg-white/5 rounded-2xl p-6">
-            <h3 class="text-xl font-bold mb-4"><i class="fas fa-tag text-accent mr-2"></i>Tem um cupom?</h3>
-            <div class="flex gap-2">
-                <input type="text" id="coupon-input" placeholder="Digite seu cupom" 
-                    class="flex-1 px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-secondary focus:border-accent focus:outline-none uppercase">
-                <button onclick="applyCoupon()" class="px-6 py-3 rounded-xl bg-accent text-black font-semibold hover:bg-green-600 transition">
-                    Aplicar
-                </button>
-            </div>
-            <p id="coupon-message" class="mt-2 text-sm hidden"></p>
-        </div>
-    </section>
-
-    <!-- Terms of Service -->
-    <section class="container mx-auto px-4 py-8 max-w-lg">
-        <div class="bg-white/5 rounded-2xl p-6 border border-yellow-500/30">
-            <div class="flex items-start gap-3 mb-4">
-                <input type="checkbox" id="terms-checkbox" class="mt-1 w-5 h-5 accent-green-500">
-                <label for="terms-checkbox" class="text-sm text-secondary cursor-pointer">
-                    Li e aceito os <a href="/termos.html" target="_blank" class="text-accent hover:underline">Termos de Uso</a> e a 
-                    <a href="/termos.html#privacidade" class="text-accent hover:underline">Política de Privacidade</a>.
-                    <br><br>
-                    <span class="text-yellow-400 text-xs">
-                        <i class="fas fa-exclamation-triangle mr-1"></i>
-                        Importante: Você é responsável pelo uso que fizer dos proxies. 
-                        Atividades ilegais são de sua inteira responsabilidade.
-                    </span>
-                </label>
-            </div>
-        </div>
-    </section>
-
     <!-- Footer -->
     <footer class="border-t border-white/10 py-8">
         <div class="container mx-auto px-4 text-center text-secondary">
@@ -168,12 +134,169 @@
     </footer>
 
     <!-- Toast -->
-    <div id="toast" class="fixed bottom-4 right-4 px-6 py-3 rounded-xl bg-accent text-black font-semibold hidden"></div>
+    <div id="toast" class="fixed bottom-4 right-4 px-6 py-3 rounded-xl bg-accent text-black font-semibold hidden z-50"></div>
+
+    <!-- Terms Modal -->
+    <div id="terms-modal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeTermsModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+            <div class="bg-[#0d1117] border border-white/20 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden pointer-events-auto">
+                <div class="p-6 border-b border-white/10">
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-3">
+                        <i class="fas fa-file-contract text-accent"></i>
+                        Termos de Uso e Política de Privacidade
+                    </h2>
+                    <p class="text-secondary text-sm mt-2">Leia atentamente antes de continuar com a compra</p>
+                </div>
+                
+                <div class="terms-content p-6 text-sm text-gray-300 space-y-4">
+                    <div>
+                        <h3 class="font-bold text-white text-lg mb-2">1. Aceitação dos Termos</h3>
+                        <p>Ao utilizar os serviços da FastProxy, você concorda com estes termos de uso. Se você não concordar com qualquer parte destes termos, não deve utilizar nossos serviços.</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-bold text-white text-lg mb-2">2. Descrição do Serviço</h3>
+                        <p>A FastProxy oferece serviços de proxy HTTP/SOCKS5 para navegação anônima, automação e scraping. Nossos proxies são operando exclusivamente no território brasileiro.</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-bold text-white text-lg mb-2">3. Uso Responsável</h3>
+                        <p><strong class="text-yellow-400">Você é o único responsável pelo uso que fizer dos proxies.</strong></p>
+                        <p class="mt-2">É proibido utilizar nossos proxies para:</p>
+                        <ul class="list-disc list-inside mt-2 space-y-1">
+                            <li>Atividades ilegais de qualquer natureza</li>
+                            <li>Spam e envio de emails não solicitados</li>
+                            <li>Ataques DDoS ou hacking</li>
+                            <li>Phishing ou fraudes</li>
+                            <li>Violação de direitos autorais</li>
+                            <li>Qualquer atividade que viole leis brasileiras ou internacionais</li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-bold text-white text-lg mb-2">4. Conformidade com o Marco Civil da Internet (Lei 12.965/2014)</h3>
+                        <p>Nós mantemos registros de logs de acesso e atribuição conforme exigido pela legislação brasileira. Estes registros são mantidos por 1 ano conforme determina a lei.</p>
+                        <p class="mt-2">Ao aceitar estes termos, você reconhece que:</p>
+                        <ul class="list-disc list-inside mt-2 space-y-1">
+                            <li>Seus dados de acesso podem ser solicitados por autoridades legais</li>
+                            <li>Você é responsável por manter seus dados de acesso seguros</li>
+                            <li>Você deve utilizar os serviços apenas para fins lícitos</li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-bold text-white text-lg mb-2">5. Política de Privacidade</h3>
+                        <p>Coletamos e armazenamos os seguintes dados:</p>
+                        <ul class="list-disc list-inside mt-2 space-y-1">
+                            <li>Dados pessoais (nome, email, CPF, telefone)</li>
+                            <li>Endereço IP de acesso</li>
+                            <li>Logs de uso dos proxies</li>
+                            <li>Histórico de compras</li>
+                        </ul>
+                        <p class="mt-2">Seus dados são protegidos e não são vendidos a terceiros, exceto quando exigido por lei.</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-bold text-white text-lg mb-2">6. Garantia e Reembolso</h3>
+                        <p>Oferecemos reposição gratuita de proxies com defeito. Reembolsos são analisados caso a caso e podem ser concedidos dentro de 7 dias da compra, mediante avaliação.</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-bold text-white text-lg mb-2">7. Limitação de Responsabilidade</h3>
+                        <p><strong class="text-red-400">A FastProxy não se responsabiliza por atividades ilegais praticadas pelo usuário.</strong> Você é o único responsável pelo uso que fizer dos proxies. Qualquer consequência legal decorrente do uso indevido é de inteira responsabilidade do cliente.</p>
+                    </div>
+                    
+                    <div class="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-4 mt-6">
+                        <p class="text-yellow-300 font-semibold flex items-start gap-2">
+                            <i class="fas fa-exclamation-triangle mt-1"></i>
+                            <span>Importante: Ao clicar em "Aceito e Continuar", você confirma que leu, compreendeu e aceita integralmente estes termos. Você assume total responsabilidade pelo uso que fizer dos nossos serviços.</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="p-6 border-t border-white/10 bg-[#0d1117]">
+                    <label class="flex items-start gap-3 cursor-pointer mb-4">
+                        <input type="checkbox" id="terms-checkbox" class="mt-1 w-5 h-5 accent-green-500">
+                        <span class="text-sm text-gray-300">Li e aceito integralmente os Termos de Uso e a Política de Privacidade acima. <span class="text-red-400">Estou ciente de que sou o único responsável pelo uso que fizer dos proxies.</span></span>
+                    </label>
+                    
+                    <div class="flex gap-4">
+                        <button onclick="closeTermsModal()" class="flex-1 py-3 rounded-xl border border-white/20 text-white hover:bg-white/10 transition">
+                            Cancelar
+                        </button>
+                        <button onclick="acceptTermsAndContinue()" id="continue-btn" class="flex-1 py-3 rounded-xl bg-accent text-black font-bold hover:bg-green-600 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            Aceito e Continuar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Buyer Info Modal -->
+    <div id="buyer-modal" class="fixed inset-0 z-[110] hidden">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+            <div class="bg-[#0d1117] border border-white/20 rounded-2xl w-full max-w-md pointer-events-auto">
+                <div class="p-6 border-b border-white/10">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-3">
+                        <i class="fas fa-user text-accent"></i>
+                        Dados do Comprador
+                    </h2>
+                </div>
+                
+                <form id="buyer-form" class="p-6 space-y-4">
+                    <input type="hidden" id="buyer-type" value="">
+                    <input type="hidden" id="buyer-period" value="">
+                    <input type="hidden" id="buyer-quantity" value="">
+                    
+                    <div>
+                        <label class="block text-sm text-secondary mb-2">Nome Completo *</label>
+                        <input type="text" id="buyer-name" required
+                            class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-secondary focus:border-accent focus:outline-none"
+                            placeholder="Seu nome completo">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm text-secondary mb-2">CPF/CNPJ *</label>
+                        <input type="text" id="buyer-document" required
+                            class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-secondary focus:border-accent focus:outline-none"
+                            placeholder="000.000.000-00">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm text-secondary mb-2">WhatsApp *</label>
+                        <input type="tel" id="buyer-whatsapp" required
+                            class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-secondary focus:border-accent focus:outline-none"
+                            placeholder="(11) 99999-9999">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm text-secondary mb-2">Endereço (Cidade - UF)</label>
+                        <input type="text" id="buyer-address"
+                            class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-secondary focus:border-accent focus:outline-none"
+                            placeholder="São Paulo - SP">
+                    </div>
+                    
+                    <div class="flex gap-4 pt-4">
+                        <button type="button" onclick="backToTerms()" class="flex-1 py-3 rounded-xl border border-white/20 text-white hover:bg-white/10 transition">
+                            Voltar
+                        </button>
+                        <button type="submit" class="flex-1 py-3 rounded-xl bg-accent text-black font-bold hover:bg-green-600 transition">
+                            <i class="fas fa-credit-card mr-2"></i>Finalizar Compra
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <script>
         const API_URL = '';
         let currentType = 'ipv6';
-        let appliedCoupon = null;
+        let pendingPurchase = null;
+        let buyerInfo = null;
         
         const PRICING = {
             ipv6: {
@@ -215,9 +338,9 @@
         };
 
         const DISPLAY_PERIODS = [
-            { id: '1m', name: '1 Mês', months: 1, badge: null },
-            { id: '6m', name: '6 Meses', months: 6, badge: '-25%' },
-            { id: '12m', name: '12 Meses', months: 12, badge: '-35%' }
+            { id: '1m', name: '1 Mês', months: 1, discount: 0 },
+            { id: '6m', name: '6 Meses', months: 6, discount: 0.25 },
+            { id: '12m', name: '12 Meses', months: 12, discount: 0.35 }
         ];
 
         function selectType(type) {
@@ -244,25 +367,15 @@
             const basePrice = info.sellPrice;
             
             grid.innerHTML = DISPLAY_PERIODS.map((period, index) => {
-                const periodMonths = period.months;
-                const discount = period.id === '1m' ? 0 : (period.id === '6m' ? 0.25 : 0.35);
+                const discount = period.discount;
                 
-                let subtotal = basePrice * qty * periodMonths;
-                let discountAmount = subtotal * discount;
-                let total = subtotal - discountAmount;
-                let pricePerProxy = total / qty;
-                
-                if (appliedCoupon) {
-                    if (appliedCoupon.discount_percent) {
-                        const cupomDiscount = total * (appliedCoupon.discount_percent / 100);
-                        total -= cupomDiscount;
-                        pricePerProxy = total / qty;
-                    } else if (appliedCoupon.discount_amount) {
-                        const cupomDiscount = Math.min(appliedCoupon.discount_amount, total);
-                        total -= cupomDiscount;
-                        pricePerProxy = total / qty;
-                    }
-                }
+                // Preço: por proxy por mês, sem multiplicar por período
+                // Total = preço mensal * quantidade
+                // Desconto no TOTAL do período (não multiplica meses)
+                let total = basePrice * qty;
+                let discountAmount = total * discount;
+                let finalTotal = total - discountAmount;
+                let pricePerProxy = basePrice;
                 
                 const isPopular = index === 1;
                 const savings = discountAmount > 0 ? discountAmount.toFixed(2) : null;
@@ -279,13 +392,13 @@
                             
                             <div class="mb-4">
                                 <span class="text-4xl font-bold text-accent">R$ ${pricePerProxy.toFixed(2).replace('.', ',')}</span>
-                                <span class="text-secondary text-sm block">por proxy</span>
+                                <span class="text-secondary text-sm block">por proxy/mês</span>
                             </div>
                             
                             ${savings ? `<p class="text-green-400 text-sm mb-2"><i class="fas fa-tag mr-1"></i>Economia de R$ ${savings}</p>` : ''}
                             
                             <div class="text-2xl font-bold mb-4 border-t border-white/10 pt-4">
-                                Total: <span class="text-accent">R$ ${total.toFixed(2).replace('.', ',')}</span>
+                                Total: <span class="text-accent">R$ ${finalTotal.toFixed(2).replace('.', ',')}</span>
                             </div>
                             
                             <ul class="text-sm text-secondary mb-6 space-y-2 text-left">
@@ -295,7 +408,7 @@
                                 <li><i class="fas fa-check text-accent mr-2"></i>Entrega imediata</li>
                             </ul>
                             
-                            <button onclick="buyProxy('${currentType}', '${period.id}', ${qty})" 
+                            <button onclick="startPurchase('${currentType}', '${period.id}', ${qty})" 
                                 class="w-full py-3 rounded-xl ${isPopular ? 'bg-accent hover:bg-green-600' : 'bg-white/10 hover:bg-white/20'} text-${isPopular ? 'black' : 'white'} font-bold transition">
                                 <i class="fas fa-shopping-cart mr-2"></i>Comprar Agora
                             </button>
@@ -304,75 +417,78 @@
                 `;
             }).join('');
         }
-        
-        async function applyCoupon() {
-            const code = document.getElementById('coupon-input').value.trim();
-            const message = document.getElementById('coupon-message');
-            
-            if (!code) {
-                message.textContent = 'Digite um código de cupom';
-                message.className = 'mt-2 text-sm text-red-400';
-                message.classList.remove('hidden');
-                return;
-            }
-            
-            const token = localStorage.getItem('fastproxy_token');
-            if (!token) {
-                message.textContent = 'Faça login para usar cupons';
-                message.className = 'mt-2 text-sm text-yellow-400';
-                message.classList.remove('hidden');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${API_URL}/api/coupons/validate`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ code, orderValue: 29.90 })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    appliedCoupon = data.coupon;
-                    message.textContent = data.message;
-                    message.className = 'mt-2 text-sm text-green-400';
-                    loadPlans();
-                } else {
-                    appliedCoupon = null;
-                    message.textContent = data.message;
-                    message.className = 'mt-2 text-sm text-red-400';
-                    loadPlans();
-                }
-                message.classList.remove('hidden');
-            } catch (err) {
-                message.textContent = 'Erro ao validar cupom';
-                message.className = 'mt-2 text-sm text-red-400';
-                message.classList.remove('hidden');
-            }
+
+        function startPurchase(type, period, quantity) {
+            pendingPurchase = { type, period, quantity };
+            openTermsModal();
         }
 
-        async function buyProxy(type, period, quantity) {
-            const token = localStorage.getItem('fastproxy_token');
+        function openTermsModal() {
+            document.getElementById('terms-modal').classList.remove('hidden');
+            document.getElementById('terms-checkbox').checked = false;
+            document.getElementById('continue-btn').disabled = true;
+            document.body.style.overflow = 'hidden';
             
+            document.getElementById('terms-checkbox').addEventListener('change', function() {
+                document.getElementById('continue-btn').disabled = !this.checked;
+            });
+        }
+
+        function closeTermsModal() {
+            document.getElementById('terms-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        function acceptTermsAndContinue() {
+            if (!document.getElementById('terms-checkbox').checked) {
+                showToast('Você precisa aceitar os termos para continuar', 'error');
+                return;
+            }
+            closeTermsModal();
+            setTimeout(() => openBuyerModal(), 300);
+        }
+
+        function openBuyerModal() {
+            document.getElementById('buyer-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('buyer-name').focus();
+        }
+
+        function closeBuyerModal() {
+            document.getElementById('buyer-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        function backToTerms() {
+            closeBuyerModal();
+            setTimeout(() => openTermsModal(), 300);
+        }
+
+        document.getElementById('buyer-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const token = localStorage.getItem('fastproxy_token');
             if (!token) {
                 showToast('Faça login para comprar', 'error');
                 setTimeout(() => window.location.href = '/login.html', 1500);
                 return;
             }
-
-            const termsAccepted = document.getElementById('terms-checkbox').checked;
-            if (!termsAccepted) {
-                showToast('Você precisa aceitar os Termos de Uso', 'error');
+            
+            const name = document.getElementById('buyer-name').value.trim();
+            const document_ = document.getElementById('buyer-document').value.trim();
+            const whatsapp = document.getElementById('buyer-whatsapp').value.trim();
+            const address = document.getElementById('buyer-address').value.trim();
+            
+            if (!name || !document_ || !whatsapp) {
+                showToast('Preencha todos os campos obrigatórios', 'error');
                 return;
             }
-
+            
+            buyerInfo = { name, document: document_, whatsapp, address };
+            
+            showToast('Criando checkout...', 'info');
+            
             try {
-                showToast('Criando checkout...', 'info');
-                
                 const response = await fetch(`${API_URL}/api/checkout/create-checkout-session`, {
                     method: 'POST',
                     headers: {
@@ -380,10 +496,13 @@
                         'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({ 
-                        type, 
-                        period, 
-                        quantity,
-                        couponCode: appliedCoupon?.code,
+                        type: pendingPurchase.type, 
+                        period: pendingPurchase.period, 
+                        quantity: pendingPurchase.quantity,
+                        buyerName: name,
+                        buyerDocument: document_,
+                        buyerWhatsapp: whatsapp,
+                        buyerAddress: address,
                         termsAccepted: true
                     })
                 });
@@ -399,12 +518,13 @@
             } catch (err) {
                 showToast('Erro ao processar compra', 'error');
             }
-        }
+        });
 
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
-            toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-xl font-semibold ${type === 'error' ? 'bg-red-500 text-white' : 'bg-accent text-black'} show`;
+            toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-xl font-semibold ${type === 'error' ? 'bg-red-500 text-white' : 'bg-accent text-black'} show z-50`;
+            toast.classList.remove('hidden');
             setTimeout(() => toast.classList.add('hidden'), 3000);
         }
 

@@ -6,19 +6,77 @@ const { authenticate, isAdmin } = require('./subscription');
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
+// Pricing configuration - prices per proxy per month
+const SELL_PRICES = {
+    ipv6: 29.90,
+    ipv4: 39.90,
+    isp: 49.90,
+    mobile: 79.90
+};
+
+const MIN_QUANTITY = {
+    ipv6: 10,
+    ipv4: 1,
+    isp: 1,
+    mobile: 1
+};
+
+const PERIOD_DISCOUNTS = {
+    '1m': 0,
+    '6m': 0.25,
+    '12m': 0.35
+};
+
+function calculateOrderPrice(type, period, quantity) {
+    const basePrice = SELL_PRICES[type] || 29.90;
+    const minQty = MIN_QUANTITY[type] || 1;
+    const actualQty = Math.max(minQty, quantity);
+    const discount = PERIOD_DISCOUNTS[period] || 0;
+    
+    const subtotal = basePrice * actualQty;
+    const discountAmount = subtotal * discount;
+    const total = subtotal - discountAmount;
+    
+    return {
+        basePrice,
+        quantity: actualQty,
+        discount,
+        discountAmount,
+        subtotal,
+        total,
+        period
+    };
+}
+
 router.post('/create-checkout-session', authenticate, async (req, res) => {
   try {
-    const { type = 'ipv6', period = '1m', quantity = 1, couponCode } = req.body;
+    const { 
+      type = 'ipv6', 
+      period = '1m', 
+      quantity = 1, 
+      couponCode,
+      buyerName,
+      buyerDocument,
+      buyerWhatsapp,
+      buyerAddress,
+      termsAccepted
+    } = req.body;
 
     const proxyType = proxyseller.PROXY_TYPES[type];
     if (!proxyType) {
       return res.status(400).json({ success: false, message: 'Tipo de proxy inválido' });
     }
 
-    const qty = Math.max(proxyType.minQuantity || 1, quantity);
-    const pricing = proxyseller.getPricing(type, period, quantity);
+    if (!termsAccepted) {
+      return res.status(400).json({ success: false, message: 'Você precisa aceitar os termos de uso' });
+    }
+
+    const qty = Math.max(MIN_QUANTITY[type] || 1, quantity);
+    const pricing = calculateOrderPrice(type, period, qty);
     
-    let discount = 0;
+    let couponDiscount = 0;
+    let appliedCoupon = null;
+    
     if (couponCode) {
       const [coupon] = await sql`
         SELECT * FROM coupons 
@@ -26,53 +84,70 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
       `;
       
       if (coupon && (!coupon.valid_until || new Date(coupon.valid_until) > new Date())) {
+        appliedCoupon = coupon;
         if (coupon.discount_percent) {
-          discount = pricing.totalBRL * (coupon.discount_percent / 100);
+          couponDiscount = pricing.total * (coupon.discount_percent / 100);
         } else if (coupon.discount_amount) {
-          discount = Math.min(coupon.discount_amount, pricing.totalBRL);
+          couponDiscount = Math.min(coupon.discount_amount, pricing.total);
         }
       }
     }
 
-    const finalPrice = Math.max(0, pricing.totalBRL - discount);
+    const finalPrice = Math.max(0, pricing.total - couponDiscount);
     const periodDays = proxyseller.getPeriodDays(period);
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + periodDays);
+
+    // Save terms acceptance
+    const termsVersion = '1.0';
+    await sql`
+      INSERT INTO terms_acceptance (user_id, terms_version, ip_address, accepted_at)
+      VALUES (${req.user.id}, ${termsVersion}, ${req.ip || ''}, NOW())
+    `;
 
     const [order] = await sql`
       INSERT INTO proxy_orders (
         user_id, proxy_type, country, country_id, quantity, period, period_days,
         cost_usd, cost_brl, price_sold_brl, profit_margin,
-        status, payment_status, expira_em
+        status, payment_status, expira_em,
+        buyer_name, buyer_document, buyer_whatsapp, buyer_address, buyer_email,
+        terms_accepted, terms_accepted_at
       ) VALUES (
         ${req.user.id}, ${type}, 'Brazil', ${proxyType.countryId}, ${qty},
-        ${period}, ${periodDays}, ${pricing.costUSD}, ${pricing.costBRL},
-        ${finalPrice}, ${finalPrice - pricing.costBRL},
-        'pending', 'pending', ${expiresAt}
+        ${period}, ${periodDays}, 
+        ${0}, ${0},
+        ${finalPrice}, ${finalPrice},
+        'pending', 'pending', ${expiresAt},
+        ${buyerName || null}, ${buyerDocument || null}, ${buyerWhatsapp || null}, ${buyerAddress || null}, ${req.user.email},
+        true, NOW()
       )
       RETURNING *
     `;
 
-    if (couponCode && discount > 0) {
-      const [coupon] = await sql`
-        SELECT * FROM coupons WHERE UPPER(code) = UPPER(${couponCode})
+    if (appliedCoupon && couponDiscount > 0) {
+      await sql`
+        UPDATE coupons SET used_count = used_count + 1 WHERE id = ${appliedCoupon.id}
       `;
-      if (coupon) {
-        await sql`
-          UPDATE coupons SET used_count = used_count + 1 WHERE id = ${coupon.id}
-        `;
-        await sql`
-          INSERT INTO coupon_usage (coupon_id, user_id, order_id, discount_applied)
-          VALUES (${coupon.id}, ${req.user.id}, ${order.id}, ${discount})
-        `;
-      }
+      await sql`
+        INSERT INTO coupon_usage (coupon_id, user_id, order_id, discount_applied)
+        VALUES (${appliedCoupon.id}, ${req.user.id}, ${order.id}, ${couponDiscount})
+      `;
     }
 
-    const productName = `${qty}x Proxy ${proxyType.name} Brasil - ${period} (${periodDays} dias)`;
+    const periodNames = {
+      '1m': '1 Mês',
+      '6m': '6 Meses',
+      '12m': '12 Meses'
+    };
+
+    const productName = `${qty}x Proxy ${proxyType.name} Brasil - ${periodNames[period] || period}`;
     const productDescription = `
 ${proxyType.description}
 País: Brasil 🇧🇷
-Período: ${period} (${periodDays} dias)
+Período: ${periodNames[period] || period} (${periodDays} dias)
+Quantidade: ${qty} proxy(s)
+${pricing.discount > 0 ? `Desconto período: ${pricing.discount * 100}%` : ''}
+${couponDiscount > 0 ? `Cupom aplicado: -R$ ${couponDiscount.toFixed(2)}` : ''}
 Entrega imediata após confirmação de pagamento
     `.trim();
 
@@ -98,7 +173,12 @@ Entrega imediata após confirmação de pagamento
         orderId: order.id.toString(),
         userId: req.user.id.toString(),
         proxyType: type,
-        quantity: qty.toString()
+        quantity: qty.toString(),
+        period: period,
+        buyerName: buyerName || '',
+        buyerDocument: buyerDocument || '',
+        buyerWhatsapp: buyerWhatsapp || '',
+        buyerAddress: buyerAddress || ''
       },
       customer_email: req.user.email
     });
@@ -191,15 +271,16 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
                       expiresAt = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
                     }
 
-                    await sql`
+                    const [savedProxy] = await sql`
                       INSERT INTO proxyseller_proxies (
                         proxy_order_id, user_id, proxyseller_proxy_id, ip, port,
                         protocol, username, password, expires_at, is_assigned
                       ) VALUES (
                         ${orderId}, ${order.user_id}, ${p.id}, ${p.ip_only || p.ip},
                         ${p.port_http || p.port}, ${p.protocol || 'HTTP'},
-                        ${p.login || ''}, ${p.password || ''}, ${expiresAt}, false
+                        ${p.login || ''}, ${p.password || ''}, ${expiresAt}, true
                       )
+                      RETURNING *
                     `;
 
                     // Attribution log - Marco Civil Compliance
@@ -211,11 +292,11 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
                         client_ip, action, action_reason, expires_at,
                         purchased_at, delivered_at
                       ) VALUES (
-                        ${order.user_id}, ${orderId}, ${p.id},
-                        ${order.user_name || ''}, ${order.user_email || ''}, '', ${order.user_whatsapp || ''},
+                        ${order.user_id}, ${orderId}, ${savedProxy.id},
+                        ${order.buyer_name || ''}, ${order.buyer_email || ''}, ${order.buyer_document || ''}, ${order.buyer_whatsapp || ''},
                         ${p.ip_only || p.ip}, ${p.port_http || p.port}, ${p.login || ''}, ${p.password || ''},
                         '', 'DELIVERED', 'Proxy entregue ao cliente', ${expiresAt},
-                        NOW(), NOW()
+                        ${order.created_at}, NOW()
                       )
                     `;
                   }
