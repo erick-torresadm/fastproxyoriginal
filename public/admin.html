@@ -39,14 +39,18 @@
             --bg-secondary: rgba(24, 24, 27, 0.5);
             --bg-card: rgba(24, 24, 27, 0.9);
             --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-muted: rgba(255, 255, 255, 0.4);
             --border-color: rgba(255, 255, 255, 0.08);
         }
         html.light {
-            --bg-primary: #fafafa;
-            --bg-secondary: rgba(255, 255, 255, 0.6);
-            --bg-card: rgba(255, 255, 255, 0.98);
+            --bg-primary: #ffffff;
+            --bg-secondary: #f4f4f5;
+            --bg-card: #ffffff;
             --text-primary: #18181b;
-            --border-color: rgba(0, 0, 0, 0.08);
+            --text-secondary: #52525b;
+            --text-muted: #71717a;
+            --border-color: #e4e4e7;
         }
         * { -webkit-font-smoothing: antialiased; margin: 0; padding: 0; box-sizing: border-box; }
         body { background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', sans-serif; min-height: 100vh; transition: background 0.3s, color 0.3s; }
@@ -60,13 +64,18 @@
         .spin { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         nav { background: var(--bg-card); border-bottom: 1px solid var(--border-color); }
-        .text-white\/60 { color: var(--text-primary); opacity: 0.6; }
-        .text-white\/40 { color: var(--text-primary); opacity: 0.4; }
+        .text-secondary { color: var(--text-secondary); }
+        .text-muted { color: var(--text-muted); }
         .bg-black\/80 { background: var(--bg-card); }
         select.input-field { color: var(--text-primary); }
+        /* Theme toggle button */
         .theme-toggle { position: relative; width: 48px; height: 24px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.3s; }
-        .theme-toggle::after { content: ''; position: absolute; top: 2px; left: 3px; width: 18px; height: 18px; background: var(--text-primary); border-radius: 50%; transition: all 0.3s; }
-        html.light .theme-toggle::after { left: 25px; }
+        .theme-toggle::before { content: '☀️'; position: absolute; left: 6px; top: 50%; transform: translateY(-50%); font-size: 10px; transition: all 0.3s; }
+        .theme-toggle::after { content: '🌙'; position: absolute; right: 6px; top: 50%; transform: translateY(-50%); font-size: 10px; transition: all 0.3s; }
+        html.light .theme-toggle::before { content: '☀️'; right: 6px; left: auto; }
+        html.light .theme-toggle::after { content: '🌙'; left: 6px; right: auto; }
+        /* Labels */
+        label { color: var(--text-secondary); }
     </style>
 </head>
 <body class="bg-zinc-950">
@@ -96,15 +105,15 @@
                         <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                     </div>
                     <h1 class="text-3xl font-bold gradient-text">Painel Admin</h1>
-                    <p class="text-white/50 mt-2">Gerencie seus proxies</p>
+                    <p class="text-secondary mt-2">Gerencie seus proxies</p>
                 </div>
                 <form onsubmit="handleLogin(event)" class="card rounded-2xl p-8 space-y-6">
                     <div>
-                        <label class="block text-sm text-white/50 mb-2">Email</label>
+                        <label class="block text-sm text-secondary mb-2">Email</label>
                         <input type="email" id="login-email" required value="admin@fastproxy.com" class="input-field w-full rounded-xl px-4 py-3 text-white">
                     </div>
                     <div>
-                        <label class="block text-sm text-white/50 mb-2">Senha</label>
+                        <label class="block text-sm text-secondary mb-2">Senha</label>
                         <input type="password" id="login-password" required value="admin123" class="input-field w-full rounded-xl px-4 py-3 text-white">
                     </div>
                     <button type="submit" id="login-btn" class="btn-primary w-full py-3 rounded-xl font-semibold text-white">Entrar</button>
@@ -117,19 +126,19 @@
                 <!-- Stats -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                     <div class="card rounded-xl p-4 border-green-500/20">
-                        <p class="text-white/50 text-sm">Total Proxies</p>
+                        <p class="text-secondary text-sm">Total Proxies</p>
                         <p class="text-2xl font-bold" id="stat-total">0</p>
                     </div>
                     <div class="card rounded-xl p-4 border-green-500/20">
-                        <p class="text-white/50 text-sm">Disponíveis</p>
+                        <p class="text-secondary text-sm">Disponíveis</p>
                         <p class="text-2xl font-bold text-green-400" id="stat-available">0</p>
                     </div>
                     <div class="card rounded-xl p-4 border-blue-500/20">
-                        <p class="text-white/50 text-sm">Ativos</p>
+                        <p class="text-secondary text-sm">Ativos</p>
                         <p class="text-2xl font-bold text-blue-400" id="stat-active">0</p>
                     </div>
                     <div class="card rounded-xl p-4 border-amber-500/20">
-                        <p class="text-white/50 text-sm">Usuários</p>
+                        <p class="text-secondary text-sm">Usuários</p>
                         <p class="text-2xl font-bold text-amber-400" id="stat-users">0</p>
                     </div>
                 </div>
@@ -139,10 +148,10 @@
                     <button onclick="showTab('add')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium bg-green-500/20 text-green-400 whitespace-nowrap">
                         <i class="fas fa-plus mr-2"></i>Adicionar Proxy
                     </button>
-                    <button onclick="showTab('stock')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-white/50 whitespace-nowrap">
+                    <button onclick="showTab('stock')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-secondary whitespace-nowrap">
                         <i class="fas fa-box mr-2"></i>Estoque
                     </button>
-                    <button onclick="showTab('users')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-white/50 whitespace-nowrap">
+                    <button onclick="showTab('users')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-secondary whitespace-nowrap">
                         <i class="fas fa-users mr-2"></i>Usuários
                     </button>
                 </div>
@@ -155,11 +164,11 @@
                         </h2>
                         <form onsubmit="addSingleProxy(event)" class="space-y-4">
                             <div>
-                                <label class="block text-sm text-white/50 mb-2">Proxy (formato: user:pass@ip:port)</label>
+                                <label class="block text-sm text-secondary mb-2">Proxy (formato: user:pass@ip:port)</label>
                                 <input type="text" id="single-proxy" placeholder="fastproxy123:fast123@177.54.146.90:11331" class="input-field w-full rounded-xl px-4 py-3 text-white font-mono" required>
                             </div>
                             <div>
-                                <label class="block text-sm text-white/50 mb-2">Tier</label>
+                                <label class="block text-sm text-secondary mb-2">Tier</label>
                                 <select id="single-tier" class="input-field w-full rounded-xl px-4 py-3 text-white">
                                     <option value="basic">Básico</option>
                                     <option value="premium">Premium</option>
@@ -179,12 +188,12 @@
                         </h2>
                         <form onsubmit="addBulkProxy(event)" class="space-y-4">
                             <div>
-                                <label class="block text-sm text-white/50 mb-2">Proxies (um por linha)</label>
+                                <label class="block text-sm text-secondary mb-2">Proxies (um por linha)</label>
                                 <textarea id="bulk-proxies" rows="8" placeholder="fastproxy123:fast123@177.54.146.90:11331&#10;fastproxy123:fast123@177.54.146.90:11332&#10;fastproxy123:fast123@177.54.146.90:11333" class="input-field w-full rounded-xl px-4 py-3 text-white font-mono text-sm"></textarea>
-                                <p class="text-xs text-white/40 mt-1"><span id="bulk-count">0</span> proxies detectados</p>
+                                <p class="text-xs text-muted mt-1"><span id="bulk-count">0</span> proxies detectados</p>
                             </div>
                             <div>
-                                <label class="block text-sm text-white/50 mb-2">Tier</label>
+                                <label class="block text-sm text-secondary mb-2">Tier</label>
                                 <select id="bulk-tier" class="input-field w-full rounded-xl px-4 py-3 text-white">
                                     <option value="basic">Básico</option>
                                     <option value="premium">Premium</option>
@@ -204,7 +213,7 @@
                         <div class="p-4 border-b border-white/10 flex flex-wrap gap-3 items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <h2 class="font-bold">Proxies em Estoque</h2>
-                                <label class="flex items-center gap-2 text-sm text-white/50 cursor-pointer">
+                                <label class="flex items-center gap-2 text-sm text-secondary cursor-pointer">
                                     <input type="checkbox" id="select-all-proxies" onchange="toggleSelectAll()" class="w-4 h-4 accent-green-500">
                                     Selecionar Todos
                                 </label>
@@ -224,7 +233,7 @@
                         <div class="overflow-x-auto">
                             <table class="w-full">
                                 <thead class="bg-white/5">
-                                    <tr class="text-left text-sm text-white/50">
+                                    <tr class="text-left text-sm text-secondary">
                                         <th class="px-4 py-3 w-10"><input type="checkbox" id="select-all-top" onchange="toggleSelectAll()" class="w-4 h-4 accent-green-500"></th>
                                         <th class="px-4 py-3">Proxy</th>
                                         <th class="px-4 py-3">Tier</th>
@@ -250,7 +259,7 @@
                         <div class="overflow-x-auto">
                             <table class="w-full">
                                 <thead class="bg-white/5">
-                                    <tr class="text-left text-sm text-white/50">
+                                    <tr class="text-left text-sm text-secondary">
                                         <th class="px-4 py-3">Usuário</th>
                                         <th class="px-4 py-3">Plano</th>
                                         <th class="px-4 py-3">Proxies</th>
@@ -278,7 +287,7 @@
         <div class="bg-zinc-900 border border-white/20 rounded-2xl p-6 w-full max-w-md" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold text-white" id="modal-title"></h3>
-                <button onclick="closeModal()" class="text-white/40 hover:text-white"><i class="fas fa-times"></i></button>
+                <button onclick="closeModal()" class="text-muted hover:text-white"><i class="fas fa-times"></i></button>
             </div>
             <div id="modal-content"></div>
         </div>
@@ -326,12 +335,12 @@
         function showTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('bg-green-500/20', 'text-green-400');
-                btn.classList.add('text-white/50');
+                btn.classList.add('text-secondary');
             });
             
             const clickedBtn = document.querySelector(`.tab-btn[onclick="showTab('${tab}')"]`);
             if (clickedBtn) {
-                clickedBtn.classList.remove('text-white/50');
+                clickedBtn.classList.remove('text-secondary');
                 clickedBtn.classList.add('bg-green-500/20', 'text-green-400');
             }
             
@@ -481,7 +490,7 @@
                         <td class="px-4 py-3 text-sm">
                             ${p.user_email ? `<div class="text-white">${p.user_email}</div>` : '<span class="text-white/30">Não vinculado</span>'}
                         </td>
-                        <td class="px-4 py-3 text-sm text-white/50">
+                        <td class="px-4 py-3 text-sm text-secondary">
                             ${new Date(p.created_at).toLocaleDateString('pt-BR')}
                         </td>
                         <td class="px-4 py-3 text-center">
@@ -490,7 +499,7 @@
                         </td>
                     </tr>`).join('');
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-white/40">Nenhum proxy</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-muted">Nenhum proxy</td></tr>';
                 }
             } catch (err) { console.error(err); }
         }
@@ -556,7 +565,7 @@
                 const userList = users.map(u => `<div class="user-option flex items-center justify-between p-3 hover:bg-white/5 rounded-lg cursor-pointer transition" onclick="selectUser('${u._id}', '${u.name}', '${u.email}', '${u.whatsapp || ''}')">
                     <div>
                         <div class="font-medium text-white">${u.name}</div>
-                        <div class="text-sm text-white/50">${u.email}</div>
+                        <div class="text-sm text-secondary">${u.email}</div>
                         ${u.whatsapp ? `<div class="text-xs text-green-400">${u.whatsapp}</div>` : ''}
                     </div>
                     <div class="text-xs text-white/30">${u.proxyCount || 0} proxies</div>
@@ -577,13 +586,13 @@
                             <div class="flex justify-between items-center">
                                 <div>
                                     <div class="font-medium text-white" id="sel-user-name"></div>
-                                    <div class="text-sm text-white/50" id="sel-user-email"></div>
+                                    <div class="text-sm text-secondary" id="sel-user-email"></div>
                                 </div>
-                                <button onclick="clearUser()" class="text-white/50 hover:text-white"><i class="fas fa-times"></i></button>
+                                <button onclick="clearUser()" class="text-secondary hover:text-white"><i class="fas fa-times"></i></button>
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm text-white/50 mb-2">Status</label>
+                            <label class="block text-sm text-secondary mb-2">Status</label>
                             <select id="allocate-status" class="input-field w-full rounded-xl px-4 py-3 text-white">
                                 <option value="active">Ativo</option>
                                 <option value="available">Disponível</option>
@@ -671,7 +680,7 @@
                         </td>
                     </tr>`).join('');
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-white/40">Nenhum usuário</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-muted">Nenhum usuário</td></tr>';
                 }
             } catch (err) { console.error(err); }
         }

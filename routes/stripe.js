@@ -162,4 +162,103 @@ router.get('/prices', async (req, res) => {
   });
 });
 
+// Create swap checkout
+router.post('/create-swap-checkout', express.json(), async (req, res) => {
+  try {
+    const { proxyId, reason, email } = req.body;
+    
+    if (!proxyId) {
+      return res.status(400).json({ success: false, message: 'ID do proxy é obrigatório' });
+    }
+    
+    if (!Stripe || !Stripe.stripe) {
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Stripe não configurado' 
+      });
+    }
+    
+    const { sql } = require('../lib/database');
+    const jwt = require('jsonwebtoken');
+    
+    // Get auth token from header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+    
+    const token = authHeader.split(' ')[1];
+    const JWT_SECRET = process.env.JWT_SECRET || 'fastproxy_secret_key_2024';
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    // Get proxy and subscription info
+    const proxies = await sql`
+      SELECT p.*, s.start_date, s.user_id 
+      FROM proxies p
+      JOIN subscriptions s ON p.subscription_id = s.id
+      WHERE p.id = ${proxyId} AND s.user_id = ${decoded.id}
+    `;
+    
+    if (proxies.length === 0) {
+      return res.status(404).json({ success: false, message: 'Proxy não encontrado' });
+    }
+    
+    const proxy = proxies[0];
+    const startDate = new Date(proxy.start_date);
+    const now = new Date();
+    const daysSinceStart = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
+    
+    // Calculate price based on days
+    let price;
+    if (daysSinceStart <= 3) {
+      price = 1.99;
+    } else if (daysSinceStart <= 7) {
+      price = 5.99;
+    } else {
+      price = 11.99;
+    }
+    
+    const appUrl = process.env.APP_URL || 'https://fastproxyv3.vercel.app';
+    
+    // Create Stripe checkout session for swap
+    const session = await Stripe.stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      customer_email: email || decoded.email,
+      line_items: [
+        {
+          price_data: {
+            currency: 'brl',
+            product_data: {
+              name: 'Troca de Proxy',
+              description: `Troca de proxy - Motivo: ${reason || 'Não informado'}`
+            },
+            unit_amount: Math.round(price * 100),
+          },
+          quantity: 1,
+        }
+      ],
+      metadata: {
+        type: 'swap',
+        proxyId: proxyId.toString(),
+        userId: decoded.id.toString(),
+        reason: reason || 'Não informado'
+      },
+      success_url: `${appUrl}/success-swap.html?session_id={CHECKOUT_SESSION_ID}&proxyId=${proxyId}`,
+      cancel_url: `${appUrl}/portal.html`
+    });
+    
+    res.json({
+      success: true,
+      url: session.url,
+      sessionId: session.id,
+      price: price
+    });
+    
+  } catch (err) {
+    console.error('Swap checkout error:', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 module.exports = router;

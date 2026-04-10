@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Troca de Proxy - FastProxy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { -webkit-font-smoothing: antialiased; margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #09090b; color: #ffffff; font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .card { background: rgba(24, 24, 27, 0.95); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; padding: 48px; text-align: center; max-width: 500px; width: 90%; }
+        .check-icon { width: 80px; height: 80px; background: linear-gradient(135deg, #22c55e, #16a34a); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; animation: scaleIn 0.5s ease both; }
+        @keyframes scaleIn { from { transform: scale(0); } to { transform: scale(1); } }
+        code { background: rgba(34, 197, 94, 0.1); color: #22c55e; padding: 8px 16px; border-radius: 8px; font-family: monospace; display: block; word-break: break-all; margin: 16px 0; }
+        .btn { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; padding: 12px 24px; border-radius: 12px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s; display: inline-block; text-decoration: none; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(34, 197, 94, 0.3); }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div id="loading">
+            <div class="check-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                <svg class="w-10 h-10 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold mb-4">Processando Troca...</h2>
+            <p class="text-white/50">Aguarde enquanto confirmamos seu pagamento.</p>
+        </div>
+
+        <div id="success" class="hidden">
+            <div class="check-icon">
+                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold mb-4">Troca Realizada!</h2>
+            <p class="text-white/50 mb-4">Seu proxy foi trocado com sucesso.</p>
+            <div id="new-proxy"></div>
+            <a href="portal.html" class="btn mt-6">Voltar ao Portal</a>
+        </div>
+
+        <div id="error" class="hidden">
+            <div class="check-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold mb-4">Ops!</h2>
+            <p id="error-message" class="text-white/50 mb-4">Algo deu errado.</p>
+            <a href="portal.html" class="btn">Voltar ao Portal</a>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
+        const proxyId = urlParams.get('proxyId');
+
+        async function processSwap() {
+            if (!sessionId || !proxyId) {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('error').classList.remove('hidden');
+                document.getElementById('error-message').textContent = 'Dados inválidos. Tente novamente.';
+                return;
+            }
+
+            try {
+                // Verify payment
+                const verifyRes = await fetch(`/api/stripe/verify/${sessionId}`);
+                const verifyData = await verifyRes.json();
+
+                if (verifyData.success && verifyData.paymentStatus === 'paid') {
+                    // Payment confirmed, now swap the proxy
+                    const token = localStorage.getItem('fastproxy_token');
+                    
+                    const swapRes = await fetch('/api/subscription/replace-proxy', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ proxyId: parseInt(proxyId), reason: 'Troca via checkout' })
+                    });
+
+                    const swapData = await swapRes.json();
+
+                    if (swapData.success) {
+                        document.getElementById('loading').classList.add('hidden');
+                        document.getElementById('success').classList.remove('hidden');
+                        document.getElementById('new-proxy').innerHTML = `
+                            <p class="text-sm text-white/50 mb-2">Novas credenciais:</p>
+                            <code>${swapData.newProxy.line}</code>
+                        `;
+                        
+                        // Update local storage
+                        const proxies = JSON.parse(localStorage.getItem('fastproxy_proxies') || '[]');
+                        const idx = proxies.findIndex(p => p.id === parseInt(proxyId));
+                        if (idx !== -1) {
+                            proxies[idx] = {
+                                ...proxies[idx],
+                                ip: swapData.newProxy.ip,
+                                port: swapData.newProxy.port,
+                                username: swapData.newProxy.username,
+                                password: swapData.newProxy.password,
+                                line: swapData.newProxy.line
+                            };
+                            localStorage.setItem('fastproxy_proxies', JSON.stringify(proxies));
+                        }
+                    } else {
+                        document.getElementById('loading').classList.add('hidden');
+                        document.getElementById('error').classList.remove('hidden');
+                        document.getElementById('error-message').textContent = swapData.message || 'Erro ao trocar proxy';
+                    }
+                } else {
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('error').classList.remove('hidden');
+                    document.getElementById('error-message').textContent = 'Pagamento não confirmado.';
+                }
+            } catch (err) {
+                console.error('Swap error:', err);
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('error').classList.remove('hidden');
+                document.getElementById('error-message').textContent = 'Erro de conexão. Entre em contato com o suporte.';
+            }
+        }
+
+        processSwap();
+    </script>
+</body>
+</html>
