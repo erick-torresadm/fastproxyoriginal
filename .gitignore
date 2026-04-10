@@ -1,8 +1,14 @@
 node_modules/
 .env
+.env.local
 .vercel/
 *.log
 .DS_Store
 adfast/
 server/node_modules/
 server/dist/
+
+# Scripts de teste (não subir)
+test-*.js
+setup-*.js
+test-email.html
