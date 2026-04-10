@@ -555,7 +555,8 @@
                 sellPrice: 29.90,
                 icon: '🌐',
                 tag: 'POPULAR',
-                tagColor: 'bg-accent text-black'
+                tagColor: 'bg-accent text-black',
+                autoDelivery: false // IPv6 não usa entrega automática
             },
             ipv4: {
                 name: 'IPv4',
@@ -564,7 +565,8 @@
                 sellPrice: 39.90,
                 icon: '🖥️',
                 tag: null,
-                tagColor: ''
+                tagColor: '',
+                autoDelivery: true
             },
             isp: {
                 name: 'ISP',
@@ -573,7 +575,8 @@
                 sellPrice: 49.90,
                 icon: '🏢',
                 tag: 'PREMIUM',
-                tagColor: 'bg-yellow-500 text-black'
+                tagColor: 'bg-yellow-500 text-black',
+                autoDelivery: true
             },
             mobile: {
                 name: 'Mobile 4G/5G',
@@ -582,14 +585,15 @@
                 sellPrice: 79.90,
                 icon: '📱',
                 tag: 'ESPECIAL',
-                tagColor: 'bg-purple-500 text-white'
+                tagColor: 'bg-purple-500 text-white',
+                autoDelivery: true
             }
         };
 
-        const DISPLAY_PERIODS = [
+        const PERIODS = [
             { id: '1m', name: '1 Mês', months: 1, discount: 0 },
-            { id: '6m', name: '6 Meses', months: 6, discount: 0.25 },
-            { id: '12m', name: '12 Meses', months: 12, discount: 0.35 }
+            { id: '6m', name: '6 Meses', months: 6, discount: 0.08 },
+            { id: '12m', name: '12 Meses', months: 12, discount: 0.08 }
         ];
 
         function selectType(type) {
@@ -614,10 +618,12 @@
             const grid = document.getElementById('plans-grid');
             const basePrice = info.sellPrice;
             
-            grid.innerHTML = DISPLAY_PERIODS.map((period, index) => {
+            grid.innerHTML = PERIODS.map((period, index) => {
                 const discount = period.discount;
                 const isPopular = index === 1;
                 const badgeText = discount > 0 ? `-${Math.round(discount * 100)}%` : null;
+                const totalForPeriod = basePrice * period.months;
+                const discountedTotal = totalForPeriod * (1 - discount);
                 
                 return `
                     <div class="plan-card ${isPopular ? 'gradient-border' : ''} p-1 rounded-2xl" id="plan-${period.id}">
@@ -629,9 +635,14 @@
                             <h3 class="text-2xl font-bold mb-1">${period.name}</h3>
                             <p class="text-secondary text-sm mb-4">${info.name}</p>
                             
-                            <div class="mb-4">
-                                <span class="text-4xl font-bold text-accent">R$ ${basePrice.toFixed(2).replace('.', ',')}</span>
-                                <span class="text-secondary text-sm block">por proxy/mês</span>
+                            <div class="mb-2">
+                                <span class="text-3xl font-bold text-accent">R$ ${basePrice.toFixed(2).replace('.', ',')}</span>
+                                <span class="text-secondary text-sm block">por proxy</span>
+                            </div>
+                            
+                            <div class="text-sm text-secondary mb-4">
+                                <span id="period-total-${period.id}">${period.months}x R$ ${basePrice.toFixed(2).replace('.', ',')} = R$ ${totalForPeriod.toFixed(2).replace('.', ',')}</span>
+                                ${discount > 0 ? `<br><span class="text-accent">com ${Math.round(discount * 100)}% OFF: R$ ${discountedTotal.toFixed(2).replace('.', ',')}</span>` : ''}
                             </div>
                             
                             <div class="mb-4">
@@ -640,28 +651,28 @@
                                     <button onclick="changeQty('${period.id}', -1)" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-lg">-</button>
                                     <input type="number" id="qty-${period.id}" value="${info.minQty}" min="${info.minQty}" max="100" 
                                         class="w-16 text-center py-2 rounded-lg bg-white/10 border border-white/20 text-white text-lg font-bold"
-                                        onchange="updatePlanPrice('${period.id}', ${basePrice}, ${discount})">
+                                        onchange="updatePlanPrice('${period.id}', ${basePrice}, ${period.months}, ${discount})">
                                     <button onclick="changeQty('${period.id}', 1)" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-lg">+</button>
                                 </div>
                             </div>
                             
                             <div class="text-lg font-bold mb-2 border-t border-white/10 pt-4">
                                 <span class="text-secondary">Total:</span> 
-                                <span id="total-${period.id}" class="text-accent">R$ ${basePrice.toFixed(2).replace('.', ',')}</span>
+                                <span id="total-${period.id}" class="text-accent">R$ ${discountedTotal.toFixed(2).replace('.', ',')}</span>
                             </div>
                             
                             <p class="text-xs text-secondary mb-4">
-                                Total anual: <span id="annual-${period.id}">R$ ${(basePrice * 12).toFixed(2).replace('.', ',')}</span>
+                                ${info.minQty > 1 ? `Mínimo: ${info.minQty} proxies` : 'Por proxy'} • ${period.name}
                             </p>
                             
                             <ul class="text-sm text-secondary mb-6 space-y-2 text-left">
                                 <li><i class="fas fa-check text-accent mr-2"></i>Alta velocidade</li>
                                 <li><i class="fas fa-check text-accent mr-2"></i>Suporte 24/7</li>
                                 <li><i class="fas fa-check text-accent mr-2"></i>IP do Brasil 🇧🇷</li>
-                                <li><i class="fas fa-check text-accent mr-2"></i>Entrega imediata</li>
+                                <li><i class="fas fa-check text-accent mr-2"></i>${info.autoDelivery ? 'Entrega automática' : 'Ativação manual'}</li>
                             </ul>
                             
-                            <button onclick="startPurchase('${currentType}', '${period.id}')" 
+                            <button onclick="startPurchase('${currentType}', '${period.id}', ${period.months})" 
                                 class="w-full py-3 rounded-xl ${isPopular ? 'bg-accent hover:bg-green-600' : 'bg-white/10 hover:bg-white/20'} text-${isPopular ? 'black' : 'white'} font-bold transition">
                                 <i class="fas fa-shopping-cart mr-2"></i>Comprar Agora
                             </button>
@@ -669,33 +680,36 @@
                     </div>
                 `;
             }).join('');
+            
+            // Initialize prices
+            PERIODS.forEach(period => {
+                updatePlanPrice(period.id, basePrice, period.months, period.discount);
+            });
         }
 
         function changeQty(periodId, delta) {
             const input = document.getElementById(`qty-${periodId}`);
+            const period = PERIODS.find(p => p.id === periodId);
+            const info = PRICING[currentType];
             const newVal = Math.max(parseInt(input.min), parseInt(input.value) + delta);
             input.value = newVal;
             
-            const planCard = document.getElementById(`plan-${periodId}`);
-            const basePrice = parseFloat(planCard.dataset.price || 29.90);
-            const discount = parseFloat(planCard.dataset.discount || 0);
-            
-            updatePlanPrice(periodId, basePrice, discount);
+            updatePlanPrice(periodId, info.sellPrice, period.months, period.discount);
         }
 
-        function updatePlanPrice(periodId, basePrice, discount) {
+        function updatePlanPrice(periodId, basePrice, months, discount) {
             const qty = parseInt(document.getElementById(`qty-${periodId}`).value) || 1;
-            const total = basePrice * qty;
-            const finalTotal = total * (1 - discount);
-            const annualTotal = basePrice * 12 * qty;
+            const totalForPeriod = basePrice * months;
+            const subtotal = totalForPeriod * qty;
+            const discountAmount = subtotal * discount;
+            const finalTotal = subtotal - discountAmount;
             
             document.getElementById(`total-${periodId}`).textContent = `R$ ${finalTotal.toFixed(2).replace('.', ',')}`;
-            document.getElementById(`annual-${periodId}`).textContent = `R$ ${annualTotal.toFixed(2).replace('.', ',')}`;
         }
 
-        function startPurchase(type, period) {
+        function startPurchase(type, period, months) {
             const quantity = parseInt(document.getElementById(`qty-${period}`).value) || 1;
-            pendingPurchase = { type, period, quantity };
+            pendingPurchase = { type, period, quantity, months };
             openTermsModal();
         }
 

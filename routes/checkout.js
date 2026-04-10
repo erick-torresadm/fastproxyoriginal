@@ -6,7 +6,7 @@ const { authenticate, isAdmin } = require('./subscription');
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-// Pricing configuration - prices per proxy per month
+// Pricing configuration - prices per proxy per month (SELL PRICE)
 const SELL_PRICES = {
     ipv6: 29.90,
     ipv4: 39.90,
@@ -14,6 +14,7 @@ const SELL_PRICES = {
     mobile: 79.90
 };
 
+// Minimum quantity per proxy type
 const MIN_QUANTITY = {
     ipv6: 10,
     ipv4: 1,
@@ -21,11 +22,18 @@ const MIN_QUANTITY = {
     mobile: 1
 };
 
+// Period discounts (maximum 8%)
 const PERIOD_DISCOUNTS = {
     '1m': 0,
-    '3m': 0.15,
-    '6m': 0.25,
-    '12m': 0.35
+    '6m': 0.08,
+    '12m': 0.08
+};
+
+// Period months mapping
+const PERIOD_MONTHS = {
+    '1m': 1,
+    '6m': 6,
+    '12m': 12
 };
 
 // Country mapping for ProxySeller
@@ -38,18 +46,24 @@ const COUNTRY_MAP = {
     'br': { id: 'BR', name: 'Brasil' }
 };
 
+// Proxy types that use automatic delivery via ProxySeller API
+const AUTO_DELIVERY_TYPES = ['ipv4', 'isp', 'mobile'];
+
 function calculateOrderPrice(type, period, quantity) {
     const basePrice = SELL_PRICES[type] || 29.90;
     const minQty = MIN_QUANTITY[type] || 1;
     const actualQty = Math.max(minQty, quantity);
+    const months = PERIOD_MONTHS[period] || 1;
     const discount = PERIOD_DISCOUNTS[period] || 0;
     
-    const subtotal = basePrice * actualQty;
+    // Price = base price * months * quantity
+    const subtotal = basePrice * months * actualQty;
     const discountAmount = subtotal * discount;
     const total = subtotal - discountAmount;
     
     return {
         basePrice,
+        months,
         quantity: actualQty,
         discount,
         discountAmount,
@@ -75,8 +89,8 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
       countryName
     } = req.body;
 
-    const proxyType = proxyseller.PROXY_TYPES[type];
-    if (!proxyType) {
+    // Validate type
+    if (!SELL_PRICES[type]) {
       return res.status(400).json({ success: false, message: 'Tipo de proxy inválido' });
     }
 
@@ -107,13 +121,14 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
     }
 
     const finalPrice = Math.max(0, pricing.total - couponDiscount);
-    const periodDays = proxyseller.getPeriodDays(period);
+    const periodDays = pricing.months * 30; // Approximate days per month
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + periodDays);
 
     // Determine country for proxy
     const isInternational = country && country !== 'br';
-    const countryInfo = COUNTRY_MAP[country] || { id: proxyType.countryId, name: countryName || 'Brasil' };
+    const proxyType = proxyseller.PROXY_TYPES[type];
+    const countryInfo = COUNTRY_MAP[country] || { id: proxyType?.countryId || 'BR', name: countryName || 'Brasil' };
     const displayCountryName = countryName || (isInternational ? countryInfo.name : 'Brasil');
     const countryId = countryInfo.id;
 
@@ -155,9 +170,15 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
 
     const periodNames = {
       '1m': '1 Mês',
-      '3m': '3 Meses',
       '6m': '6 Meses',
       '12m': '12 Meses'
+    };
+
+    const typeNames = {
+      'ipv6': 'IPv6',
+      'ipv4': 'IPv4',
+      'isp': 'ISP',
+      'mobile': 'Mobile'
     };
 
     const countryFlag = {
@@ -170,15 +191,15 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
     };
 
     const flag = countryFlag[displayCountryName] || '🌍';
-    const productName = `${qty}x Proxy ${proxyType.name} ${displayCountryName} - ${periodNames[period] || period}`;
+    const deliveryNote = type === 'ipv6' ? ' (Ativação manual em até 24h)' : ' (Entrega automática)';
+    const productName = `${qty}x Proxy ${typeNames[type]} ${displayCountryName} - ${periodNames[period] || period}`;
     const productDescription = `
-${proxyType.description}
-País: ${displayCountryName} ${flag}
-Período: ${periodNames[period] || period} (${periodDays} dias)
+Proxy ${typeNames[type]} - ${displayCountryName} ${flag}
 Quantidade: ${qty} proxy(s)
-${pricing.discount > 0 ? `Desconto período: ${pricing.discount * 100}%` : ''}
-${couponDiscount > 0 ? `Cupom aplicado: -R$ ${couponDiscount.toFixed(2)}` : ''}
-Entrega imediata após confirmação de pagamento
+Período: ${periodNames[period] || period} (${pricing.months} meses)
+Preço por proxy: R$ ${pricing.basePrice.toFixed(2)}/mês
+${pricing.discount > 0 ? `Desconto período (${pricing.discount * 100}%): -R$ ${pricing.discountAmount.toFixed(2)}\n` : ''}${couponDiscount > 0 ? `Cupom aplicado: -R$ ${couponDiscount.toFixed(2)}\n` : ''}Subtotal: R$ ${pricing.subtotal.toFixed(2)}
+Total: R$ ${finalPrice.toFixed(2)}${deliveryNote}
     `.trim();
 
     const session = await stripe.checkout.sessions.create({
@@ -205,10 +226,12 @@ Entrega imediata após confirmação de pagamento
         proxyType: type,
         quantity: qty.toString(),
         period: period,
+        months: pricing.months.toString(),
         country: country || 'br',
         countryId: countryId,
         countryName: displayCountryName,
         isInternational: isInternational ? 'true' : 'false',
+        autoDelivery: AUTO_DELIVERY_TYPES.includes(type) ? 'true' : 'false',
         buyerName: buyerName || '',
         buyerDocument: buyerDocument || '',
         buyerWhatsapp: buyerWhatsapp || '',
@@ -263,95 +286,127 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
           const proxyType = proxyseller.PROXY_TYPES[order.proxy_type];
           const countryId = session.metadata?.countryId || order.country_id || proxyType?.countryId;
           const isInternational = session.metadata?.isInternational === 'true';
+          const autoDelivery = session.metadata?.autoDelivery === 'true';
           
-          const calcResult = await proxyseller.calculateOrder({
-            type: order.proxy_type,
-            countryId: countryId,
-            periodId: order.period,
-            quantity: order.quantity,
-            protocol: 'HTTPS',
-            targetSectionId: proxyType?.targetSectionId,
-            targetId: proxyType?.targetId
-          });
+          // Update order status to paid
+          await sql`
+            UPDATE proxy_orders SET
+              status = 'active',
+              payment_status = 'paid'
+            WHERE id = ${orderId}
+          `;
 
-          if (calcResult.data.balance >= calcResult.data.total) {
-            const orderResult = await proxyseller.makeOrder({
-              type: order.proxy_type,
-              countryId: countryId,
-              periodId: order.period,
-              quantity: order.quantity,
-              protocol: 'HTTPS',
-              targetSectionId: proxyType?.targetSectionId,
-              targetId: proxyType?.targetId
-            });
+          // Award reward points for this purchase
+          try {
+            const rewards = require('./rewards');
+            await rewards.awardPointsForOrder(order.user_id, orderId, order.price_sold_brl);
+          } catch (err) {
+            console.error('Error awarding points:', err);
+          }
 
-            await sql`
-              UPDATE proxy_orders SET
-                status = 'active',
-                payment_status = 'paid',
-                proxyseller_order_id = ${orderResult.data.orderId},
-                proxyseller_order_number = ${orderResult.data.listBaseOrderNumbers?.[0] || orderResult.data.orderId}
-              WHERE id = ${orderId}
-            `;
-
-            // Award reward points for this purchase
+          // Only auto-deliver for non-IPv6 types
+          if (autoDelivery && proxyType) {
             try {
-              const rewards = require('./rewards');
-              await rewards.awardPointsForOrder(order.user_id, orderId, order.price_sold_brl);
-            } catch (err) {
-              console.error('Error awarding points:', err);
-            }
+              const calcResult = await proxyseller.calculateOrder({
+                type: order.proxy_type,
+                countryId: countryId,
+                periodId: order.period,
+                quantity: order.quantity,
+                protocol: 'HTTPS',
+                targetSectionId: proxyType?.targetSectionId,
+                targetId: proxyType?.targetId
+              });
 
-            setTimeout(async () => {
-              try {
-                const proxyList = await proxyseller.getProxyList(order.proxy_type, { orderId: orderResult.data.orderId });
-                const proxyData = proxyList.data?.[order.proxy_type] || proxyList.data?.items || [];
-                
-                if (proxyData.length > 0) {
-                  for (const p of proxyData) {
-                    let expiresAt = null;
-                    if (p.date_end) {
-                      const parts = p.date_end.split('.');
-                      expiresAt = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+              if (calcResult.data.balance >= calcResult.data.total) {
+                const orderResult = await proxyseller.makeOrder({
+                  type: order.proxy_type,
+                  countryId: countryId,
+                  periodId: order.period,
+                  quantity: order.quantity,
+                  protocol: 'HTTPS',
+                  targetSectionId: proxyType?.targetSectionId,
+                  targetId: proxyType?.targetId
+                });
+
+                await sql`
+                  UPDATE proxy_orders SET
+                    proxyseller_order_id = ${orderResult.data.orderId},
+                    proxyseller_order_number = ${orderResult.data.listBaseOrderNumbers?.[0] || orderResult.data.orderId}
+                  WHERE id = ${orderId}
+                `;
+
+                setTimeout(async () => {
+                  try {
+                    const proxyList = await proxyseller.getProxyList(order.proxy_type, { orderId: orderResult.data.orderId });
+                    const proxyData = proxyList.data?.[order.proxy_type] || proxyList.data?.items || [];
+                    
+                    if (proxyData.length > 0) {
+                      for (const p of proxyData) {
+                        let expiresAt = null;
+                        if (p.date_end) {
+                          const parts = p.date_end.split('.');
+                          expiresAt = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                        }
+
+                        const [savedProxy] = await sql`
+                          INSERT INTO proxyseller_proxies (
+                            proxy_order_id, user_id, proxyseller_proxy_id, ip, port,
+                            protocol, username, password, expires_at, is_assigned
+                          ) VALUES (
+                            ${orderId}, ${order.user_id}, ${p.id}, ${p.ip_only || p.ip},
+                            ${p.port_http || p.port}, ${p.protocol || 'HTTP'},
+                            ${p.login || ''}, ${p.password || ''}, ${expiresAt}, true
+                          )
+                          RETURNING *
+                        `;
+
+                        // Attribution log - Marco Civil Compliance
+                        await sql`
+                          INSERT INTO attribution_logs (
+                            user_id, proxy_order_id, proxyseller_proxy_id,
+                            user_name, user_email, user_document, user_whatsapp,
+                            proxy_ip, proxy_port, proxy_username, proxy_password,
+                            client_ip, action, action_reason, expires_at,
+                            purchased_at, delivered_at
+                          ) VALUES (
+                            ${order.user_id}, ${orderId}, ${savedProxy.id},
+                            ${order.buyer_name || ''}, ${order.buyer_email || ''}, ${order.buyer_document || ''}, ${order.buyer_whatsapp || ''},
+                            ${p.ip_only || p.ip}, ${p.port_http || p.port}, ${p.login || ''}, ${p.password || ''},
+                            '', 'DELIVERED', 'Proxy entregue ao cliente', ${expiresAt},
+                            ${order.created_at}, NOW()
+                          )
+                        `;
+                      }
                     }
-
-                    const [savedProxy] = await sql`
-                      INSERT INTO proxyseller_proxies (
-                        proxy_order_id, user_id, proxyseller_proxy_id, ip, port,
-                        protocol, username, password, expires_at, is_assigned
-                      ) VALUES (
-                        ${orderId}, ${order.user_id}, ${p.id}, ${p.ip_only || p.ip},
-                        ${p.port_http || p.port}, ${p.protocol || 'HTTP'},
-                        ${p.login || ''}, ${p.password || ''}, ${expiresAt}, true
-                      )
-                      RETURNING *
-                    `;
-
-                    // Attribution log - Marco Civil Compliance
-                    await sql`
-                      INSERT INTO attribution_logs (
-                        user_id, proxy_order_id, proxyseller_proxy_id,
-                        user_name, user_email, user_document, user_whatsapp,
-                        proxy_ip, proxy_port, proxy_username, proxy_password,
-                        client_ip, action, action_reason, expires_at,
-                        purchased_at, delivered_at
-                      ) VALUES (
-                        ${order.user_id}, ${orderId}, ${savedProxy.id},
-                        ${order.buyer_name || ''}, ${order.buyer_email || ''}, ${order.buyer_document || ''}, ${order.buyer_whatsapp || ''},
-                        ${p.ip_only || p.ip}, ${p.port_http || p.port}, ${p.login || ''}, ${p.password || ''},
-                        '', 'DELIVERED', 'Proxy entregue ao cliente', ${expiresAt},
-                        ${order.created_at}, NOW()
-                      )
-                    `;
+                  } catch (err) {
+                    console.error('Error saving proxies:', err);
                   }
-                }
-              } catch (err) {
-                console.error('Error saving proxies:', err);
-              }
-            }, 5000);
+                }, 5000);
 
+              } else {
+                console.error('Insufficient balance for proxy purchase');
+              }
+            } catch (err) {
+              console.error('Error in auto-delivery:', err);
+            }
           } else {
-            console.error('Insufficient balance for proxy purchase');
+            // IPv6 - manual delivery notification
+            console.log('IPv6 order - manual delivery required');
+            
+            // Create attribution log for manual delivery
+            await sql`
+              INSERT INTO attribution_logs (
+                user_id, proxy_order_id,
+                user_name, user_email, user_document, user_whatsapp,
+                action, action_reason, expires_at,
+                purchased_at, delivered_at
+              ) VALUES (
+                ${order.user_id}, ${orderId},
+                ${order.buyer_name || ''}, ${order.buyer_email || ''}, ${order.buyer_document || ''}, ${order.buyer_whatsapp || ''},
+                'PENDING_MANUAL_DELIVERY', 'IPv6 - entrega manual necessária', ${order.expira_em},
+                ${order.created_at}, NOW()
+              )
+            `;
           }
         }
       } catch (err) {

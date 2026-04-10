@@ -1832,16 +1832,16 @@
 
         // Home Page Type Selector
         const HOME_PRICING = {
-            ipv6: { name: 'IPv6', icon: '🌐', minQty: 10, sellPrice: 29.90, tag: 'POPULAR', tagClass: 'bg-gradient-to-r from-green-500 to-emerald-600 text-white' },
-            ipv4: { name: 'IPv4', icon: '🖥️', minQty: 1, sellPrice: 39.90, tag: null, tagClass: '' },
-            isp: { name: 'ISP', icon: '🏢', minQty: 1, sellPrice: 49.90, tag: 'PREMIUM', tagClass: 'bg-yellow-500 text-black' },
-            mobile: { name: 'Mobile 4G/5G', icon: '📱', minQty: 1, sellPrice: 79.90, tag: 'ESPECIAL', tagClass: 'bg-purple-500 text-white' }
+            ipv6: { name: 'IPv6', icon: '🌐', minQty: 10, sellPrice: 29.90, tag: 'POPULAR', tagClass: 'bg-gradient-to-r from-green-500 to-emerald-600 text-white', autoDelivery: false },
+            ipv4: { name: 'IPv4', icon: '🖥️', minQty: 1, sellPrice: 39.90, tag: null, tagClass: '', autoDelivery: true },
+            isp: { name: 'ISP', icon: '🏢', minQty: 1, sellPrice: 49.90, tag: 'PREMIUM', tagClass: 'bg-yellow-500 text-black', autoDelivery: true },
+            mobile: { name: 'Mobile 4G/5G', icon: '📱', minQty: 1, sellPrice: 79.90, tag: 'ESPECIAL', tagClass: 'bg-purple-500 text-white', autoDelivery: true }
         };
 
         const HOME_PERIODS = [
-            { id: '1m', name: '1 Mês', discount: 0 },
-            { id: '6m', name: '6 Meses', discount: 0.25 },
-            { id: '12m', name: '12 Meses', discount: 0.35 }
+            { id: '1m', name: '1 Mês', months: 1, discount: 0 },
+            { id: '6m', name: '6 Meses', months: 6, discount: 0.08 },
+            { id: '12m', name: '12 Meses', months: 12, discount: 0.08 }
         ];
 
         function selectHomeType(type) {
@@ -1870,6 +1870,8 @@
                 const discount = period.discount;
                 const isPopular = index === 1;
                 const badgeText = discount > 0 ? `-${Math.round(discount * 100)}%` : null;
+                const totalForPeriod = basePrice * period.months;
+                const discountedTotal = totalForPeriod * (1 - discount);
                 
                 return `
                     <div class="plan-card rounded-2xl p-1 ${isPopular ? 'border-2' : ''} transition-all duration-300" id="home-plan-${period.id}" style="${isPopular ? 'border-color: var(--badge-text)' : 'border: 1px solid var(--border-color)'}">
@@ -1881,9 +1883,14 @@
                             <h3 class="text-xl font-bold mb-1" style="color: var(--text-primary)">${period.name}</h3>
                             <p class="text-sm mb-4" style="color: var(--text-zinc)">${info.name}</p>
                             
-                            <div class="mb-4">
+                            <div class="mb-2">
                                 <span class="text-3xl font-bold text-green-500">R$ ${basePrice.toFixed(2).replace('.', ',')}</span>
-                                <span class="text-sm block" style="color: var(--text-muted)">por proxy/mês</span>
+                                <span class="text-sm block" style="color: var(--text-muted)">por proxy</span>
+                            </div>
+                            
+                            <div class="text-sm mb-4" style="color: var(--text-muted)">
+                                <span id="home-period-total-${period.id}">${period.months}x R$ ${basePrice.toFixed(2).replace('.', ',')} = R$ ${totalForPeriod.toFixed(2).replace('.', ',')}</span>
+                                ${discount > 0 ? `<br><span class="text-green-500">com ${Math.round(discount * 100)}% OFF: R$ ${discountedTotal.toFixed(2).replace('.', ',')}</span>` : ''}
                             </div>
                             
                             <div class="mb-4">
@@ -1893,28 +1900,28 @@
                                     <input type="number" id="home-qty-${period.id}" value="${info.minQty}" min="${info.minQty}" max="100" 
                                         class="w-16 text-center py-2 rounded-lg border text-lg font-bold"
                                         style="background: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary)"
-                                        onchange="updateHomePlanPrice('${period.id}', ${basePrice}, ${discount})">
+                                        onchange="updateHomePlanPrice('${period.id}', ${basePrice}, ${period.months}, ${discount})">
                                     <button onclick="changeHomeQty('${period.id}', 1)" class="w-8 h-8 rounded-lg hover:bg-white/20 flex items-center justify-center text-lg" style="background: var(--bg-secondary)">+</button>
                                 </div>
                             </div>
                             
                             <div class="text-lg font-bold mb-2 border-t border-white/10 pt-4" style="color: var(--text-primary)">
                                 <span style="color: var(--text-muted)">Total:</span> 
-                                <span id="home-total-${period.id}" class="text-green-500">R$ ${basePrice.toFixed(2).replace('.', ',')}</span>
+                                <span id="home-total-${period.id}" class="text-green-500">R$ ${discountedTotal.toFixed(2).replace('.', ',')}</span>
                             </div>
                             
                             <p class="text-xs mb-4" style="color: var(--text-muted)">
-                                Total anual: <span id="home-annual-${period.id}">R$ ${(basePrice * 12).toFixed(2).replace('.', ',')}</span>
+                                ${info.minQty > 1 ? `Mínimo: ${info.minQty} proxies` : 'Por proxy'} • ${period.name}
                             </p>
                             
                             <ul class="text-sm mb-6 space-y-2 text-left" style="color: var(--text-zinc)">
                                 <li><span class="text-green-500">✓</span> Alta velocidade</li>
                                 <li><span class="text-green-500">✓</span> Suporte 24/7</li>
                                 <li><span class="text-green-500">✓</span> IP do Brasil 🇧🇷</li>
-                                <li><span class="text-green-500">✓</span> Entrega imediata</li>
+                                <li><span class="text-green-500">✓</span> ${info.autoDelivery ? 'Entrega automática' : 'Ativação manual'}</li>
                             </ul>
                             
-                            <button onclick="startHomePurchase('${currentType}', '${period.id}')" 
+                            <button onclick="startHomePurchase('${currentType}', '${period.id}', ${period.months})" 
                                 class="w-full py-3 rounded-xl font-bold transition-all ${isPopular ? 'bg-green-500 text-black hover:bg-green-600' : 'border-2 border-green-500 text-green-500 hover:bg-green-500/10'}">
                                 <i class="fas fa-shopping-cart mr-2"></i>Comprar Agora
                             </button>
@@ -1922,35 +1929,37 @@
                     </div>
                 `;
             }).join('');
+            
+            // Initialize prices
+            HOME_PERIODS.forEach(period => {
+                updateHomePlanPrice(period.id, info.sellPrice, period.months, period.discount);
+            });
         }
 
         function changeHomeQty(periodId, delta) {
             const input = document.getElementById(`home-qty-${periodId}`);
+            const period = HOME_PERIODS.find(p => p.id === periodId);
             const newVal = Math.max(parseInt(input.min), parseInt(input.value) + delta);
             input.value = newVal;
             
-            const planCard = document.getElementById(`home-plan-${periodId}`);
-            const basePrice = parseFloat(planCard.dataset.price || 29.90);
-            const discount = parseFloat(planCard.dataset.discount || 0);
-            
-            updateHomePlanPrice(periodId, basePrice, discount);
+            updateHomePlanPrice(periodId, HOME_PRICING[currentType].sellPrice, period.months, period.discount);
         }
 
-        function updateHomePlanPrice(periodId, basePrice, discount) {
+        function updateHomePlanPrice(periodId, basePrice, months, discount) {
             const qty = parseInt(document.getElementById(`home-qty-${periodId}`).value) || 1;
-            const total = basePrice * qty;
-            const finalTotal = total * (1 - discount);
-            const annualTotal = basePrice * 12 * qty;
+            const totalForPeriod = basePrice * months;
+            const subtotal = totalForPeriod * qty;
+            const discountAmount = subtotal * discount;
+            const finalTotal = subtotal - discountAmount;
             
             document.getElementById(`home-total-${periodId}`).textContent = `R$ ${finalTotal.toFixed(2).replace('.', ',')}`;
-            document.getElementById(`home-annual-${periodId}`).textContent = `R$ ${annualTotal.toFixed(2).replace('.', ',')}`;
         }
 
         let homePendingPurchase = null;
 
-        function startHomePurchase(type, period) {
+        function startHomePurchase(type, period, months) {
             const quantity = parseInt(document.getElementById(`home-qty-${period}`).value) || 1;
-            homePendingPurchase = { type, period, quantity };
+            homePendingPurchase = { type, period, quantity, months };
             openHomeTermsModal();
         }
 
