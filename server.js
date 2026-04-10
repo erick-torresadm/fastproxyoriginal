@@ -105,6 +105,16 @@ app.get('/debug/routes', (req, res) => {
   res.json({ routes, stackLength: app._router ? app._router.stack.length : 0 });
 });
 
+app.get('/debug/mongodb', (req, res) => {
+  const states = ['disconnected', 'connected', 'connecting', 'disconnecting'];
+  res.json({
+    mongooseReadyState: mongoose.connection.readyState,
+    mongooseStateText: states[mongoose.connection.readyState] || 'unknown',
+    mongooseConnected: mongooseConnected,
+    hasMongoose: typeof mongoose !== 'undefined'
+  });
+});
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
