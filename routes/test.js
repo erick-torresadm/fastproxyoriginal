@@ -216,37 +216,54 @@ router.post('/test-email', async (req, res) => {
     
     console.log('=== TEST EMAIL ===');
     console.log('RESEND_API_KEY configured:', !!process.env.RESEND_API_KEY);
+    console.log('RESEND_API_KEY prefix:', process.env.RESEND_API_KEY?.substring(0, 5));
     console.log('Sending to:', email);
     
-    // Test basic email
-    const result = await sendEmail({
+    // Import Resend directly for more control
+    const { Resend } = require('resend');
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    
+    const result = await resend.emails.send({
+      from: 'onboarding@resend.dev',
       to: email,
-      subject: 'Teste - FastProxy Email',
+      subject: '✅ Teste FastProxy - Email Funcionando!',
       html: `
-        <h1>Teste de Email</h1>
-        <p>Este é um email de teste do FastProxy.</p>
-        <p>Se você está lendo isso, o sistema de email está funcionando!</p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #22c55e, #16a34a); padding: 30px; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0;">🛡️ FastProxy</h1>
+          </div>
+          <div style="background: #f5f5f5; padding: 30px; border-radius: 0 0 10px 10px;">
+            <h2 style="color: #22c55e;">Teste de Email - FUNCIONANDO!</h2>
+            <p>Se você está lendo isso, o sistema de emails do FastProxy está configurado corretamente.</p>
+            <p><strong>Data:</strong> ${new Date().toLocaleString('pt-BR')}</p>
+          </div>
+        </div>
       `
     });
     
-    if (result.success) {
-      res.json({
-        success: true,
-        message: 'Email de teste enviado! Verifique sua caixa de entrada.',
-        data: result.data
-      });
-    } else {
+    console.log('Email result:', JSON.stringify(result));
+    
+    if (result.error) {
+      console.error('Email error:', result.error);
       res.json({
         success: false,
         message: 'Erro ao enviar email',
-        error: result.error,
-        hint: 'Verifique se RESEND_API_KEY está configurado corretamente no .env'
+        error: result.error.message,
+        errorDetails: result.error
+      });
+    } else {
+      console.log('✅ Email sent successfully!');
+      res.json({
+        success: true,
+        message: 'Email de teste enviado! Verifique sua caixa de entrada (incluindo spam).',
+        data: result.data,
+        id: result.data?.id
       });
     }
     
   } catch (err) {
     console.error('Test email error:', err);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: err.message, stack: err.stack });
   }
 });
 
