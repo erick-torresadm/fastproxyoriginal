@@ -86,7 +86,8 @@ app.get('/debug/env', (req, res) => {
     STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY ? 'set' : 'missing',
     STRIPE_TEST_MODE: process.env.STRIPE_TEST_MODE,
     DATABASE_URL: process.env.DATABASE_URL ? 'set' : 'missing',
-    APP_URL: process.env.APP_URL
+    APP_URL: process.env.APP_URL,
+    RESEND_API_KEY: process.env.RESEND_API_KEY ? `set (${process.env.RESEND_API_KEY.substring(0, 10)}...)` : 'missing'
   });
 });
 
