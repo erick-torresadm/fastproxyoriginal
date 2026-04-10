@@ -177,4 +177,22 @@ router.post('/setup', async (req, res) => {
   }
 });
 
+router.get('/check-email/:email', async (req, res) => {
+  try {
+    const { email } = req.params;
+    
+    const users = await sql`
+      SELECT id FROM users WHERE email = ${email.toLowerCase()}
+    `;
+    
+    res.json({
+      exists: users.length > 0,
+      email: email.toLowerCase()
+    });
+  } catch (err) {
+    console.error('Check email error:', err);
+    res.status(500).json({ exists: false, error: err.message });
+  }
+});
+
 module.exports = router;

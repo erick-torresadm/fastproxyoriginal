@@ -306,22 +306,47 @@
                     
                     const period = data.metadata?.period || 'monthly';
                     const proxyCount = parseInt(data.metadata?.proxy_count) || 1;
+                    const email = data.customerEmail || localStorage.getItem('pendingAccountEmail') || '';
                     
                     document.getElementById('order-details').innerHTML = `
                         <div class="space-y-2">
                             <p class="font-semibold" style="color: var(--green)">✅ Pedido Confirmado!</p>
-                            <p class="text-sm" style="color: var(--text-secondary)">Email: ${data.customerEmail || 'Não informado'}</p>
+                            <p class="text-sm" style="color: var(--text-secondary)">Email: ${email || 'Não informado'}</p>
                             <p class="text-sm" style="color: var(--text-secondary)">Valor: R$ ${data.amountTotal || '0'}</p>
                             <p class="text-sm" style="color: var(--text-secondary)">Plano: ${period === 'annual' ? 'Anual' : 'Mensal'}</p>
                             <p class="text-sm" style="color: var(--text-secondary)">Proxies: ${proxyCount}</p>
                         </div>
                     `;
                     
-                    // Show account creation form
-                    setTimeout(() => {
+                    // Check if email already exists
+                    setTimeout(async () => {
                         document.getElementById('payment-section').classList.add('hidden');
-                        document.getElementById('account-section').classList.remove('hidden');
-                        document.getElementById('reg-email').value = data.customerEmail || localStorage.getItem('pendingAccountEmail') || '';
+                        
+                        if (email) {
+                            try {
+                                const checkRes = await fetch(`/api/auth/check-email/${encodeURIComponent(email)}`);
+                                const checkData = await checkRes.json();
+                                
+                                if (checkData.exists) {
+                                    // Email existe - mostrar seção de login
+                                    document.getElementById('account-section').classList.add('hidden');
+                                    document.getElementById('success-section').classList.add('hidden');
+                                    document.getElementById('login-section').classList.remove('hidden');
+                                    document.getElementById('login-email').value = email;
+                                    document.getElementById('login-email-readonly').textContent = email;
+                                } else {
+                                    // Email não existe - mostrar cadastro
+                                    document.getElementById('account-section').classList.remove('hidden');
+                                    document.getElementById('reg-email').value = email;
+                                }
+                            } catch (e) {
+                                // Se falhar, mostrar cadastro por padrão
+                                document.getElementById('account-section').classList.remove('hidden');
+                                document.getElementById('reg-email').value = email;
+                            }
+                        } else {
+                            document.getElementById('account-section').classList.remove('hidden');
+                        }
                     }, 1500);
                 } else {
                     document.getElementById('order-details').innerHTML = `

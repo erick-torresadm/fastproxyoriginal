@@ -282,8 +282,8 @@
             try {
                 const data = await api('/api/auth/login', 'POST', { email, password });
                 if (data.success) {
-                    token = data.data.token;
-                    currentUser = data.data.user;
+                    token = data.token;
+                    currentUser = data.user;
                     localStorage.setItem('fastproxy_token', token);
                     showMain();
                 } else {
@@ -301,8 +301,11 @@
             try {
                 const data = await api('/api/auth/register', 'POST', { name, email, password, whatsapp });
                 if (data.success) {
-                    showSuccess('Conta criada! Faça login para continuar.');
-                    showTab('login');
+                    token = data.token;
+                    currentUser = data.user;
+                    localStorage.setItem('fastproxy_token', token);
+                    showSuccess('Conta criada! Redirecionando...');
+                    showMain();
                 } else { showError(data.message || 'Erro ao criar conta'); }
             } catch (err) { showError('Erro de conexão'); }
         }
