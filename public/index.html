@@ -1737,6 +1737,27 @@
                 spinner.classList.add('hidden');
             }
         }
+
+        // Check URL params on load - for "buy more proxies" from portal
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            if (urlParams.get('checkout') === 'true') {
+                const count = parseInt(urlParams.get('count')) || 1;
+                const email = urlParams.get('email') || '';
+                
+                // Clear localStorage params
+                localStorage.removeItem('buyMoreProxies');
+                localStorage.removeItem('buyMoreCount');
+                localStorage.removeItem('buyMoreEmail');
+                
+                // Open checkout with pre-filled data
+                openCheckoutModal('monthly', 29.90);
+                document.getElementById('proxy-count').value = count;
+                document.getElementById('checkout-email').value = decodeURIComponent(email);
+                updateTotal();
+            }
+        });
     </script>
 </body>
 </html>

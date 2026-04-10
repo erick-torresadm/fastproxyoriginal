@@ -236,7 +236,7 @@
                                 <option value="5">+5 proxies</option>
                                 <option value="10">+10 proxies</option>
                             </select>
-                            <button onclick="addProxies()" class="btn-primary px-4 py-2 rounded-lg font-semibold">Adicionar</button>
+                            <button onclick="buyMoreProxies()" class="btn-primary px-4 py-2 rounded-lg font-semibold">Comprar</button>
                         </div>
                     </div>
 
@@ -562,32 +562,17 @@
             showToast('Proxies atualizados!', 'success');
         }
 
-        async function addProxies() {
+        function buyMoreProxies() {
             const count = parseInt(document.getElementById('add-count').value);
+            const email = currentUser?.email || localStorage.getItem('fastproxy_user')?.email || '';
             
-            try {
-                const res = await fetch(`${API_URL}/api/subscription/add-proxies`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ additionalCount: count })
-                });
-                
-                const data = await res.json();
-                
-                if (data.success) {
-                    currentProxies = [...currentProxies, ...data.proxies];
-                    localStorage.setItem('fastproxy_proxies', JSON.stringify(currentProxies));
-                    renderProxies();
-                    showToast(`${data.addedCount} proxies adicionados!`, 'success');
-                } else {
-                    showToast(data.message || 'Erro ao adicionar proxies', 'error');
-                }
-            } catch (err) {
-                showToast('Erro de conexão', 'error');
-            }
+            // Redirect to index with checkout open and quantity pre-filled
+            localStorage.setItem('buyMoreProxies', 'true');
+            localStorage.setItem('buyMoreCount', count);
+            localStorage.setItem('buyMoreEmail', email);
+            
+            // Redirect to homepage with checkout modal open
+            window.location.href = `/?checkout=true&count=${count}&email=${encodeURIComponent(email)}`;
         }
 
         function openReplaceModal(proxyId) {
