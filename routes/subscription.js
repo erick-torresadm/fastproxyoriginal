@@ -3,6 +3,7 @@ const router = express.Router();
 const { sql } = require('../lib/database');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { sendWelcomeEmail, sendProxyCredentials } = require('../lib/email');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fastproxy_secret_key_2024';
 const JWT_EXPIRE = process.env.JWT_EXPIRE || '7d';
@@ -121,6 +122,20 @@ router.post('/register-after-payment', async (req, res) => {
     // Generate JWT token
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: JWT_EXPIRE });
 
+    // Send welcome email (async - don't wait)
+    const proxiesData = proxies.map(p => ({
+      id: p.id,
+      ip: p.ip,
+      port: p.port,
+      username: p.username,
+      password: p.password,
+      line: `${p.username}:${p.password}@${p.ip}:${p.port}`
+    }));
+
+    sendWelcomeEmail(user.email, user.name, proxiesData).catch(err => {
+      console.error('Failed to send welcome email:', err);
+    });
+
     res.status(201).json({
       success: true,
       isNewUser,
@@ -139,14 +154,7 @@ router.post('/register-after-payment', async (req, res) => {
         startDate: subscription.start_date,
         endDate: subscription.end_date
       },
-      proxies: proxies.map(p => ({
-        id: p.id,
-        ip: p.ip,
-        port: p.port,
-        username: p.username,
-        password: p.password,
-        line: `${p.username}:${p.password}@${p.ip}:${p.port}`
-      }))
+      proxies: proxiesData
     });
 
   } catch (err) {
@@ -374,11 +382,12 @@ router.post('/replace-proxy', async (req, res) => {
       return res.status(400).json({ success: false, message: 'ID do proxy é obrigatório' });
     }
 
-    // Get current proxy
+    // Get current proxy with user info
     const proxies = await sql`
-      SELECT p.*, s.start_date, s.id as sub_id
+      SELECT p.*, s.start_date, s.id as sub_id, u.email as user_email, u.name as user_name
       FROM proxies p
       JOIN subscriptions s ON p.subscription_id = s.id
+      JOIN users u ON p.user_id = u.id
       WHERE p.id = ${proxyId} AND p.user_id = ${decoded.id}
     `;
 
@@ -427,6 +436,19 @@ router.post('/replace-proxy', async (req, res) => {
     `;
 
     const newProxy = updated[0];
+
+    // Send email about proxy change
+    const newProxyData = [{
+      ip: newProxy.ip,
+      port: newProxy.port,
+      username: newProxy.username,
+      password: newProxy.password,
+      line: `${newProxy.username}:${newProxy.password}@${newProxy.ip}:${newProxy.port}`
+    }];
+
+    sendProxyCredentials(oldProxy.user_email, oldProxy.user_name, newProxyData, `Seu proxy foi trocado. Preço cobrado: R$ ${price.toFixed(2).replace('.', ',')}`).catch(err => {
+      console.error('Failed to send proxy replacement email:', err);
+    });
 
     res.json({
       success: true,
