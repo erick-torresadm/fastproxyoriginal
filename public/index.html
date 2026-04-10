@@ -1425,7 +1425,7 @@
                 
                 <div class="p-6 border-t border-white/10">
                     <label class="flex items-start gap-3 cursor-pointer mb-4">
-                        <input type="checkbox" id="home-terms-checkbox" class="mt-1 w-5 h-5 accent-green-500">
+                        <input type="checkbox" id="home-terms-checkbox" onchange="toggleHomeTermsCheckbox()" class="mt-1 w-5 h-5 accent-green-500 cursor-pointer">
                         <span class="text-sm text-gray-300">Li e aceito os Termos de Uso. <span class="text-red-400">Estou ciente de que sou o único responsável pelo uso dos proxies.</span></span>
                     </label>
                     
@@ -1781,6 +1781,11 @@
             document.body.style.overflow = 'hidden';
             document.getElementById('home-terms-checkbox').checked = false;
             document.getElementById('home-continue-btn').disabled = true;
+        }
+
+        function toggleHomeTermsCheckbox() {
+            const checked = document.getElementById('home-terms-checkbox').checked;
+            document.getElementById('home-continue-btn').disabled = !checked;
         }
 
         function closeHomeTermsModal() {

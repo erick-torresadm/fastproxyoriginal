@@ -114,6 +114,14 @@ try {
   console.error('❌ Error loading Access Logs routes:', err.message);
 }
 
+try {
+  const rewardsRoutes = require('./routes/rewards');
+  app.use('/api/rewards', rewardsRoutes);
+  console.log('✅ Rewards routes registered');
+} catch (err) {
+  console.error('❌ Error loading Rewards routes:', err.message);
+}
+
 app.get('/test', (req, res) => {
   res.json({ 
     message: 'FastProxy API running', 

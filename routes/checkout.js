@@ -258,6 +258,14 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
               WHERE id = ${orderId}
             `;
 
+            // Award reward points for this purchase
+            try {
+              const rewards = require('./rewards');
+              await rewards.awardPointsForOrder(order.user_id, orderId, order.price_sold_brl);
+            } catch (err) {
+              console.error('Error awarding points:', err);
+            }
+
             setTimeout(async () => {
               try {
                 const proxyList = await proxyseller.getProxyList(order.proxy_type, { orderId: orderResult.data.orderId });
