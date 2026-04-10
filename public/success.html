@@ -243,6 +243,44 @@
             </p>
         </div>
 
+        <!-- Login Section -->
+        <div id="login-section" class="hidden fade-in">
+            <div class="check-icon" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
+                <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                </svg>
+            </div>
+            
+            <h2 class="text-2xl font-bold mb-2">Bem-vindo de volta!</h2>
+            <p class="text-sm mb-6" style="color: var(--text-secondary)">
+                Seu pagamento foi aprovado! Informe sua senha para acessar seus proxies.
+            </p>
+            <p class="text-xs mb-4" style="color: var(--text-secondary)">
+                Email: <span id="login-email-readonly" class="font-semibold"></span>
+            </p>
+            
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-left" style="color: var(--text-secondary)">Senha</label>
+                    <input type="password" id="login-password" placeholder="Sua senha" required minlength="6">
+                </div>
+                
+                <div id="login-error" class="error-box hidden"></div>
+                
+                <button type="submit" id="login-btn" class="btn-primary">
+                    <span id="login-btn-text">Entrar</span>
+                    <svg id="login-spinner" class="w-5 h-5 animate-spin hidden mx-auto" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </button>
+            </form>
+            
+            <p class="text-xs mt-4" style="color: var(--text-secondary)">
+                Esqueceu a senha? <a href="portal.html" class="underline" style="color: var(--green)">Recuperar</a>
+            </p>
+        </div>
+
         <!-- Error / Manual Activation -->
         <div id="error-section" class="hidden fade-in">
             <div class="check-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
@@ -363,6 +401,7 @@
         function showError(title, message, sessionId) {
             document.getElementById('payment-section').classList.add('hidden');
             document.getElementById('account-section').classList.add('hidden');
+            document.getElementById('login-section').classList.add('hidden');
             document.getElementById('error-section').classList.remove('hidden');
             
             document.getElementById('error-title').textContent = title;
@@ -372,6 +411,56 @@
                 `Data: ${new Date().toLocaleString('pt-BR')}\n` +
                 `Guarde estas informações para o suporte.`;
         }
+        
+        // Login form
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const errorDiv = document.getElementById('login-error');
+            const btn = document.getElementById('login-btn');
+            const btnText = document.getElementById('login-btn-text');
+            const spinner = document.getElementById('login-spinner');
+            
+            errorDiv.classList.add('hidden');
+            btn.disabled = true;
+            btnText.classList.add('hidden');
+            spinner.classList.remove('hidden');
+            
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    localStorage.setItem('fastproxy_token', data.token);
+                    localStorage.removeItem('pendingAccountEmail');
+                    localStorage.removeItem('pendingAccountPeriod');
+                    localStorage.removeItem('pendingAccountProxies');
+                    
+                    document.getElementById('login-section').classList.add('hidden');
+                    document.getElementById('success-section').classList.remove('hidden');
+                } else {
+                    errorDiv.textContent = data.message || 'Email ou senha incorretos.';
+                    errorDiv.classList.remove('hidden');
+                    btn.disabled = false;
+                    btnText.classList.remove('hidden');
+                    spinner.classList.add('hidden');
+                }
+            } catch (err) {
+                console.error('Erro:', err);
+                showError(
+                    'Erro de Conexão',
+                    'Não foi possível conectar ao servidor.',
+                    sessionId
+                );
+            }
+        });
         
         // Register form
         document.getElementById('register-form').addEventListener('submit', async (e) => {
@@ -425,11 +514,13 @@
                 
                 if (data.success) {
                     localStorage.setItem('token', data.token);
+                    localStorage.setItem('fastproxy_token', data.token);
                     localStorage.removeItem('pendingAccountEmail');
                     localStorage.removeItem('pendingAccountPeriod');
                     localStorage.removeItem('pendingAccountProxies');
                     
                     document.getElementById('account-section').classList.add('hidden');
+                    document.getElementById('login-section').classList.add('hidden');
                     document.getElementById('success-section').classList.remove('hidden');
                 } else {
                     errorDiv.textContent = data.error || 'Erro ao criar conta. Tente novamente.';
