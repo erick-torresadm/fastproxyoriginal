@@ -525,9 +525,109 @@ curl -X POST https://fastproxyv3.vercel.app/api/subscription/admin/create \
 | Serviço | Limite | Melhor Para |
 |---------|--------|------------|
 | **Resend** | 100/dia | Transacionais simples |
-| **Mailgun** | 100/mês | Desenvolvimento |
+| **Mailgun** | 100/mês | desenvolvimento |
 | **SendGrid** | 100/dia | Alto volume |
 | **Postmark** | 25/teste | Confiabilidade |
+
+---
+
+## 🔌 Integração Proxy-Seller (Futuro)
+
+### API Base
+```
+https://proxy-seller.com/personal/api/v1/{API_KEY}/
+```
+
+### Endpoints Principais
+
+#### 1. Listar Proxies Ativos
+```
+GET /proxy/list/ipv6
+```
+Resposta:
+```json
+{
+  "status": "success",
+  "data": {
+    "ipv6": [
+      {
+        "id": "12345",
+        "ip": "2a04:xxxx:xxxx::1",
+        "port": 80,
+        "login": "user1",
+        "password": "pass1",
+        "orderNumber": "3388485_57471911"
+      }
+    ]
+  }
+}
+```
+
+#### 2. Listar Autorizações (Usuários)
+```
+GET /auth/list
+```
+Retorna todos os usuário/senha criados para cada proxy.
+
+#### 3. Criar Autorização (usuário para cliente)
+```
+POST /auth/add
+Body: { "orderNumber": "3388485_57471911" }
+```
+Resposta:
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "66decee1e4b0c423139280d9",
+    "active": true,
+    "login": "cliente_abc",
+    "password": "senha_cliente",
+    "orderNumber": "3388485_57471911"
+  }
+}
+```
+
+#### 4. BLOQUEAR Cliente Específico (INADIMPLENTE)
+```
+POST /auth/change
+Body: { "id": "66decee1e4b0c423139280d9", "active": false }
+```
+**Isso bloqueia SÓ aquele cliente, não afeta os outros!**
+
+#### 5. Desbloquear Cliente
+```
+POST /auth/change
+Body: { "id": "66decee1e4b0c423139280d9", "active": true }
+```
+
+#### 6. Trocar Senha do Cliente
+```
+POST /auth/change
+Body: { "id": "66decee1e4b0c423139280d9", "password": "nova_senha_123" }
+```
+
+#### 7. Deletar Autorização
+```
+POST /auth/delete
+Body: { "id": "66decee1e4b0c423139280d9" }
+```
+
+### Configuração (Futuro)
+
+Adicionar no Vercel:
+```bash
+vercel env add PROXYSELLER_API_KEY production
+# Cole sua API key do proxy-seller.com
+```
+
+### Fluxo de Inadimplência (A Implementar)
+
+1. Assinatura expira → sistema detecta
+2. Chama `POST /auth/change` com `active: false`
+3. Cliente perde acesso ao proxy
+4. Quando pagar, chama `POST /auth/change` com `active: true`
+5. Cliente volta a ter acesso
 
 ---
 
