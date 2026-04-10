@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const helmet = require('helmet');
 
 console.log('=== LOADING SERVER ===');
 console.log('STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY ? 'set' : 'missing');
@@ -10,8 +11,29 @@ console.log('STRIPE_TEST_MODE:', process.env.STRIPE_TEST_MODE || 'false');
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+// Security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.tailwindcss.com", "https://cdnjs.cloudflare.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https:", "blob:"],
+      connectSrc: ["'self'", "https://checkout.stripe.com", "https://api.stripe.com"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+}));
+
+// Trust proxy for rate limiting behind Vercel/CDN
+app.set('trust proxy', 1);
+
+app.use(cors({
+  origin: process.env.APP_URL || '*',
+  credentials: true,
+}));
+app.use(express.json({ limit: '10kb' }));
 
 // Serve static files from public directory
 app.use(express.static(path.join(__dirname, 'public')));

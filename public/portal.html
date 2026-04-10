@@ -447,13 +447,16 @@
                 if (data.success) {
                     currentUser = data.user;
                     currentProxies = data.proxies || [];
-                    currentSubscription = data.subscriptions?.[0] || null;
+                    currentSubscription = data.subscriptions || data.subscription || null;
                     
                     localStorage.setItem('fastproxy_user', JSON.stringify(currentUser));
                     localStorage.setItem('fastproxy_proxies', JSON.stringify(currentProxies));
                     localStorage.setItem('fastproxy_subscription', JSON.stringify(currentSubscription));
                     
                     renderDashboard();
+                } else {
+                    // Token inválido ou expirado
+                    logout();
                 }
             } catch (err) {
                 console.error('Error loading user data:', err);
@@ -464,33 +467,55 @@
             // User name
             document.getElementById('user-name').textContent = currentUser?.name || currentUser?.email?.split('@')[0] || 'Cliente';
             
+            // Find active subscription from subscriptions array
+            const activeSub = currentSubscription?.subscriptions?.find(s => s.isActive);
+            const hasActive = activeSub || currentSubscription?.hasActiveSubscription;
+            
             // Subscription info
-            if (currentSubscription) {
-                const endDate = new Date(currentSubscription.endDate);
+            if (activeSub || (currentSubscription && currentSubscription.status === 'active')) {
+                const sub = activeSub || currentSubscription;
+                const endDate = new Date(sub.endDate);
                 const daysLeft = Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24));
                 
                 document.getElementById('subscription-info').textContent = 
-                    `${currentSubscription.proxyCount} proxies • ${currentSubscription.period === 'monthly' ? 'Mensal' : 'Anual'} • ${daysLeft > 0 ? `${daysLeft} dias restantes` : 'Expirado'}`;
+                    `${sub.proxyCount} proxies • ${sub.period === 'monthly' ? 'Mensal' : 'Anual'} • ${daysLeft > 0 ? `${daysLeft} dias restantes` : 'Expirado'}`;
                 
                 document.getElementById('subscription-details').innerHTML = `
-                    <p><span class="text-muted">Plano:</span> ${currentSubscription.period === 'monthly' ? 'Mensal' : 'Anual'}</p>
-                    <p><span class="text-muted">Proxies:</span> ${currentSubscription.proxyCount}</p>
+                    <p><span class="text-muted">Plano:</span> ${sub.period === 'monthly' ? 'Mensal' : 'Anual'}</p>
+                    <p><span class="text-muted">Proxies:</span> ${sub.proxyCount}</p>
                     <p><span class="text-muted">Vencimento:</span> ${endDate.toLocaleDateString('pt-BR')}</p>
-                    <p><span class="text-muted">Status:</span> <span class="text-green-400">${currentSubscription.status}</span></p>
+                    <p><span class="text-muted">Status:</span> <span class="text-green-400">${sub.status}</span></p>
+                `;
+            } else {
+                document.getElementById('subscription-info').textContent = 'Nenhuma assinatura ativa';
+                document.getElementById('subscription-details').innerHTML = `
+                    <p class="text-red-400">Você ainda não possui uma assinatura ativa.</p>
+                    <a href="/" class="inline-block mt-2 text-green-400 hover:underline">Clique aqui para assinar</a>
                 `;
             }
             
             // Render proxies
-            renderProxies();
+            renderProxies(hasActive);
         }
 
-        function renderProxies() {
+        function renderProxies(hasActive = true) {
             const list = document.getElementById('proxies-list');
             const noProxies = document.getElementById('no-proxies');
             
-            if (!currentProxies || currentProxies.length === 0) {
-                list.innerHTML = '';
-                noProxies.classList.remove('hidden');
+            if (!hasActive || !currentProxies || currentProxies.length === 0) {
+                list.innerHTML = `
+                    <div class="text-center py-8">
+                        <svg class="w-12 h-12 mx-auto mb-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                        <p class="text-secondary mb-4">${hasActive ? 'Nenhum proxy encontrado' : 'Assinatura necessária'}</p>
+                        ${hasActive 
+                            ? '<a href="/" class="text-green-400 hover:underline">Comprar proxies</a>'
+                            : '<a href="/" class="btn-primary px-4 py-2 rounded-lg text-sm">Assine agora</a>'
+                        }
+                    </div>
+                `;
+                noProxies.classList.add('hidden');
                 return;
             }
             

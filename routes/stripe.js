@@ -191,9 +191,9 @@ router.post('/create-swap-checkout', express.json(), async (req, res) => {
     const JWT_SECRET = process.env.JWT_SECRET || 'fastproxy_secret_key_2024';
     const decoded = jwt.verify(token, JWT_SECRET);
     
-    // Get proxy and subscription info
+    // Get proxy and subscription info AND verify subscription is active
     const proxies = await sql`
-      SELECT p.*, s.start_date, s.user_id 
+      SELECT p.*, s.start_date, s.end_date, s.status as sub_status, s.user_id 
       FROM proxies p
       JOIN subscriptions s ON p.subscription_id = s.id
       WHERE p.id = ${proxyId} AND s.user_id = ${decoded.id}
@@ -204,6 +204,12 @@ router.post('/create-swap-checkout', express.json(), async (req, res) => {
     }
     
     const proxy = proxies[0];
+    
+    // Verify subscription is active and not expired
+    if (proxy.sub_status !== 'active' || new Date(proxy.end_date) <= new Date()) {
+      return res.status(403).json({ success: false, message: 'Assinatura expirada. Renove para continuar.' });
+    }
+    
     const startDate = new Date(proxy.start_date);
     const now = new Date();
     const daysSinceStart = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));

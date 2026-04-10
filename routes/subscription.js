@@ -12,6 +12,11 @@ const IP_BASE = process.env.PROXY_IP || '177.54.146.90';
 const PORT_START = parseInt(process.env.PROXY_PORT_START || '11331');
 const PORT_END = parseInt(process.env.PROXY_PORT_END || '11368');
 
+// Rate limiting for login attempts (in-memory, use Redis in production)
+const loginAttempts = new Map();
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOGIN_LOCKOUT_TIME = 15 * 60 * 1000; // 15 minutes
+
 // Alocated ports tracking (in production, this would be in Redis or DB)
 const allocatedPorts = new Set();
 
@@ -167,9 +172,35 @@ router.post('/register-after-payment', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+    const clientIP = req.ip || req.connection.remoteAddress || 'unknown';
+
+    // Rate limiting check
+    const now = Date.now();
+    const userAttempts = loginAttempts.get(email.toLowerCase());
+    
+    if (userAttempts) {
+      if (userAttempts.count >= MAX_LOGIN_ATTEMPTS) {
+        if (now - userAttempts.lastAttempt < LOGIN_LOCKOUT_TIME) {
+          const minutesLeft = Math.ceil((LOGIN_LOCKOUT_TIME - (now - userAttempts.lastAttempt)) / 60000);
+          return res.status(429).json({ 
+            success: false, 
+            message: `Muitas tentativas. Tente novamente em ${minutesLeft} minutos.` 
+          });
+        } else {
+          // Lockout expired, reset attempts
+          loginAttempts.delete(email.toLowerCase());
+        }
+      }
+    }
 
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Email e senha são obrigatórios' });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ success: false, message: 'Email inválido' });
     }
 
     const users = await sql`
@@ -177,6 +208,12 @@ router.post('/login', async (req, res) => {
     `;
 
     if (users.length === 0) {
+      // Record failed attempt
+      const attempts = loginAttempts.get(email.toLowerCase()) || { count: 0, lastAttempt: 0 };
+      loginAttempts.set(email.toLowerCase(), { 
+        count: attempts.count + 1, 
+        lastAttempt: now 
+      });
       return res.status(400).json({ success: false, message: 'Credenciais inválidas' });
     }
 
@@ -184,21 +221,39 @@ router.post('/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
+      // Record failed attempt
+      const attempts = loginAttempts.get(email.toLowerCase()) || { count: 0, lastAttempt: 0 };
+      loginAttempts.set(email.toLowerCase(), { 
+        count: attempts.count + 1, 
+        lastAttempt: now 
+      });
       return res.status(400).json({ success: false, message: 'Credenciais inválidas' });
     }
 
-    // Get active subscription
+    // Clear failed attempts on successful login
+    loginAttempts.delete(email.toLowerCase());
+
+    // Get active subscription (not expired)
     const subscriptions = await sql`
       SELECT * FROM subscriptions 
       WHERE user_id = ${user.id} AND status = 'active'
       ORDER BY created_at DESC LIMIT 1
     `;
 
-    // Get proxies
-    const proxies = await sql`
-      SELECT * FROM proxies 
-      WHERE user_id = ${user.id} AND is_active = true
-    `;
+    // Check if subscription is still valid (not expired)
+    const activeSubscription = subscriptions.find(s => {
+      const endDate = new Date(s.end_date);
+      return endDate > new Date();
+    });
+
+    // Only get proxies if user has an ACTIVE and VALID subscription
+    let proxies = [];
+    if (activeSubscription) {
+      proxies = await sql`
+        SELECT * FROM proxies 
+        WHERE user_id = ${user.id} AND subscription_id = ${activeSubscription.id} AND is_active = true
+      `;
+    }
 
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: JWT_EXPIRE });
 
@@ -211,15 +266,16 @@ router.post('/login', async (req, res) => {
         name: user.name,
         whatsapp: user.whatsapp
       },
-      subscription: subscriptions.length > 0 ? {
-        id: subscriptions[0].id,
-        period: subscriptions[0].period,
-        proxyCount: subscriptions[0].proxy_count,
-        status: subscriptions[0].status,
-        startDate: subscriptions[0].start_date,
-        endDate: subscriptions[0].end_date,
-        autoRenew: subscriptions[0].auto_renew
+      subscription: activeSubscription ? {
+        id: activeSubscription.id,
+        period: activeSubscription.period,
+        proxyCount: activeSubscription.proxy_count,
+        status: activeSubscription.status,
+        startDate: activeSubscription.start_date,
+        endDate: activeSubscription.end_date,
+        autoRenew: activeSubscription.auto_renew
       } : null,
+      hasActiveSubscription: !!activeSubscription,
       proxies: proxies.map(p => ({
         id: p.id,
         ip: p.ip,
@@ -264,16 +320,27 @@ router.get('/me', async (req, res) => {
       ORDER BY created_at DESC
     `;
 
-    // Get proxies
-    const proxies = await sql`
-      SELECT p.*, pr.id as replacement_id, pr.reason, pr.created_at as replaced_at
-      FROM proxies p
-      LEFT JOIN proxy_replacements pr ON p.id = pr.proxy_id AND pr.created_at = (
-        SELECT MAX(created_at) FROM proxy_replacements WHERE proxy_id = p.id
-      )
-      WHERE p.user_id = ${user.id}
-      ORDER BY p.created_at DESC
-    `;
+    // Check for ACTIVE subscription (not expired)
+    const activeSubscription = subscriptions.find(s => {
+      if (s.status !== 'active') return false;
+      const endDate = new Date(s.end_date);
+      return endDate > new Date();
+    });
+
+    let proxies = [];
+    
+    // Only return proxies if user has an ACTIVE subscription
+    if (activeSubscription) {
+      proxies = await sql`
+        SELECT p.*, pr.id as replacement_id, pr.reason, pr.created_at as replaced_at
+        FROM proxies p
+        LEFT JOIN proxy_replacements pr ON p.id = pr.proxy_id AND pr.created_at = (
+          SELECT MAX(created_at) FROM proxy_replacements WHERE proxy_id = p.id
+        )
+        WHERE p.user_id = ${user.id} AND p.subscription_id = ${activeSubscription.id}
+        ORDER BY p.created_at DESC
+      `;
+    }
 
     // Get available discounts
     const discounts = await sql`
@@ -298,7 +365,8 @@ router.get('/me', async (req, res) => {
         status: s.status,
         startDate: s.start_date,
         endDate: s.end_date,
-        autoRenew: s.auto_renew
+        autoRenew: s.auto_renew,
+        isActive: activeSubscription && s.id === activeSubscription.id
       })),
       proxies: proxies.map(p => ({
         id: p.id,
@@ -311,6 +379,7 @@ router.get('/me', async (req, res) => {
         lastReplacedAt: p.replaced_at,
         replacementReason: p.reason
       })),
+      hasActiveSubscription: !!activeSubscription,
       discounts: discounts.map(d => ({
         id: d.id,
         type: d.type,
@@ -382,9 +451,9 @@ router.post('/replace-proxy', async (req, res) => {
       return res.status(400).json({ success: false, message: 'ID do proxy é obrigatório' });
     }
 
-    // Get current proxy with user info
+    // Get current proxy with user info AND verify subscription is active
     const proxies = await sql`
-      SELECT p.*, s.start_date, s.id as sub_id, u.email as user_email, u.name as user_name
+      SELECT p.*, s.start_date, s.end_date, s.status as sub_status, s.id as sub_id, u.email as user_email, u.name as user_name
       FROM proxies p
       JOIN subscriptions s ON p.subscription_id = s.id
       JOIN users u ON p.user_id = u.id
@@ -396,6 +465,12 @@ router.post('/replace-proxy', async (req, res) => {
     }
 
     const oldProxy = proxies[0];
+    
+    // Verify subscription is active and not expired
+    if (oldProxy.sub_status !== 'active' || new Date(oldProxy.end_date) <= new Date()) {
+      return res.status(403).json({ success: false, message: 'Assinatura expirada. Renove para continuar.' });
+    }
+
     const startDate = new Date(oldProxy.start_date);
     const now = new Date();
     const daysSinceStart = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
@@ -729,16 +804,20 @@ router.get('/admin/proxies', async (req, res) => {
     }
 
     const { status, search } = req.query;
-    let query = sql`SELECT p.*, u.email as user_email FROM proxies p LEFT JOIN users u ON p.user_id = u.id`;
     
     let proxies;
     if (search) {
+      // Sanitize search input - only allow alphanumeric, spaces, dots, colons, underscores
+      const sanitizedSearch = search.replace(/[^a-zA-Z0-9\s._-]/g, '').substring(0, 100);
+      const searchPattern = `%${sanitizedSearch}%`;
+      
       proxies = await sql`
         SELECT p.*, u.email as user_email 
         FROM proxies p 
         LEFT JOIN users u ON p.user_id = u.id
-        WHERE p.username ILIKE ${'%' + search + '%'} 
-           OR p.ip::text ILIKE ${'%' + search + '%'}
+        WHERE p.username ILIKE ${searchPattern} 
+           OR p.ip::text ILIKE ${searchPattern}
+           OR u.email ILIKE ${searchPattern}
         ORDER BY p.created_at DESC
       `;
     } else {
@@ -962,6 +1041,151 @@ router.post('/admin/create', async (req, res) => {
   } catch (err) {
     console.error('Admin create error:', err);
     res.status(500).json({ success: false, message: 'Erro ao criar admin', error: err.message });
+  }
+});
+
+// Admin: Cancel user subscription with optional 50% discount
+router.post('/admin/users/:id/cancel', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+
+    const { id } = req.params;
+    const { applyCoupon, discountPercent } = req.body;
+
+    // Get user's active subscription
+    const subscriptions = await sql`
+      SELECT * FROM subscriptions 
+      WHERE user_id = ${id} AND status = 'active'
+      ORDER BY created_at DESC LIMIT 1
+    `;
+
+    if (subscriptions.length === 0) {
+      return res.status(404).json({ success: false, message: 'Nenhuma assinatura ativa encontrada' });
+    }
+
+    const subscription = subscriptions[0];
+
+    // Cancel the subscription
+    await sql`
+      UPDATE subscriptions 
+      SET status = 'cancelled', auto_renew = false, updated_at = NOW()
+      WHERE id = ${subscription.id}
+    `;
+
+    // Deactivate proxies
+    await sql`
+      UPDATE proxies SET is_active = false, updated_at = NOW()
+      WHERE user_id = ${id} AND subscription_id = ${subscription.id}
+    `;
+
+    // If applying coupon, create discount
+    if (applyCoupon && discountPercent) {
+      const validUntil = new Date();
+      validUntil.setDate(validUntil.getDate() + 7); // Valid for 7 days
+
+      await sql`
+        INSERT INTO discounts (user_id, type, discount_percent, valid_until)
+        VALUES (${id}, 'cancellation_50', ${discountPercent}, ${validUntil})
+      `;
+    }
+
+    res.json({ 
+      success: true, 
+      message: applyCoupon 
+        ? `Assinatura cancelada. Cupom de ${discountPercent}% criado.` 
+        : 'Assinatura cancelada sem cupom.' 
+    });
+
+  } catch (err) {
+    console.error('Admin cancel subscription error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao cancelar assinatura', error: err.message });
+  }
+});
+
+// Admin: Update user subscription (extend, add proxies, etc)
+router.put('/admin/users/:id/subscription', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+
+    const { id } = req.params;
+    const { action, days, proxyCount } = req.body;
+
+    // Get user's active subscription
+    const subscriptions = await sql`
+      SELECT * FROM subscriptions 
+      WHERE user_id = ${id} AND status = 'active'
+      ORDER BY created_at DESC LIMIT 1
+    `;
+
+    if (subscriptions.length === 0) {
+      return res.status(404).json({ success: false, message: 'Nenhuma assinatura ativa encontrada' });
+    }
+
+    const subscription = subscriptions[0];
+
+    if (action === 'extend') {
+      const newEndDate = new Date(subscription.end_date);
+      newEndDate.setDate(newEndDate.getDate() + (days || 30));
+      
+      await sql`
+        UPDATE subscriptions 
+        SET end_date = ${newEndDate}, updated_at = NOW()
+        WHERE id = ${subscription.id}
+      `;
+
+      res.json({ success: true, message: `Assinatura extendida por ${days || 30} dias.` });
+    } else if (action === 'addProxies') {
+      const newProxyCount = subscription.proxy_count + (proxyCount || 1);
+      
+      await sql`
+        UPDATE subscriptions 
+        SET proxy_count = ${newProxyCount}, updated_at = NOW()
+        WHERE id = ${subscription.id}
+      `;
+
+      // Generate new proxies
+      for (let i = 0; i < (proxyCount || 1); i++) {
+        const port = getNextPort();
+        if (!port) break;
+        
+        allocatedPorts.add(port);
+        const username = generateUsername();
+        const pwd = generatePassword();
+
+        await sql`
+          INSERT INTO proxies (user_id, subscription_id, ip, port, username, password)
+          VALUES (${id}, ${subscription.id}, ${IP_BASE}, ${port}, ${username}, ${pwd})
+        `;
+      }
+
+      res.json({ success: true, message: `${proxyCount || 1} proxies adicionados.` });
+    } else {
+      res.status(400).json({ success: false, message: 'Ação inválida. Use "extend" ou "addProxies".' });
+    }
+
+  } catch (err) {
+    console.error('Admin update subscription error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao atualizar assinatura', error: err.message });
   }
 });
 
