@@ -50,7 +50,7 @@ function calculateEndDate(period) {
   return now;
 }
 
-// Check if user exists
+// Check if user exists (PUBLIC - no auth needed)
 router.get('/check-email/:email', async (req, res) => {
   try {
     const { email } = req.params;
@@ -64,7 +64,7 @@ router.get('/check-email/:email', async (req, res) => {
   }
 });
 
-// Simple register (no payment, no proxies)
+// Simple register (no payment, no proxies) (PUBLIC)
 router.post('/register', async (req, res) => {
   try {
     const { email, password, name, whatsapp } = req.body;
@@ -123,102 +123,17 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Register user after payment
+// THIS ENDPOINT IS NO LONGER USED - USE /api/stripe/process-payment INSTEAD
+// Keeping for backwards compatibility but it requires a valid Stripe session
 router.post('/register-after-payment', async (req, res) => {
   try {
     const { email, password, name, whatsapp, proxyCount, period, stripeSessionId } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'Email e senha são obrigatórios' });
-    }
-
-    // Check if user already exists
-    const existingUsers = await sql`
-      SELECT id FROM users WHERE email = ${email.toLowerCase()}
-    `;
-
-    let user;
-    let isNewUser = true;
-
-    if (existingUsers.length > 0) {
-      user = existingUsers[0];
-      isNewUser = false;
-    } else {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const newUsers = await sql`
-        INSERT INTO users (email, password, name, whatsapp)
-        VALUES (${email.toLowerCase()}, ${hashedPassword}, ${name || null}, ${whatsapp || null})
-        RETURNING id, email, name, whatsapp
-      `;
-      user = newUsers[0];
-    }
-
-    // Calculate end date based on period
-    const endDate = calculateEndDate(period);
-
-    // Create subscription
-    const subscriptions = await sql`
-      INSERT INTO subscriptions (user_id, stripe_session_id, period, proxy_count, status, end_date, auto_renew)
-      VALUES (${user.id}, ${stripeSessionId || null}, ${period}, ${proxyCount}, 'active', ${endDate}, true)
-      RETURNING *
-    `;
-    const subscription = subscriptions[0];
-
-    // Generate proxies
-    const proxies = [];
-    for (let i = 0; i < proxyCount; i++) {
-      const port = getNextPort();
-      if (!port) break;
-
-      allocatedPorts.add(port);
-
-      const username = generateUsername();
-      const pwd = generatePassword();
-
-      const newProxies = await sql`
-        INSERT INTO proxies (user_id, subscription_id, ip, port, username, password)
-        VALUES (${user.id}, ${subscription.id}, ${IP_BASE}, ${port}, ${username}, ${pwd})
-        RETURNING *
-      `;
-      proxies.push(newProxies[0]);
-    }
-
-    // Generate JWT token
-    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: JWT_EXPIRE });
-
-    // Send welcome email (async - don't wait)
-    const proxiesData = proxies.map(p => ({
-      id: p.id,
-      ip: p.ip,
-      port: p.port,
-      username: p.username,
-      password: p.password,
-      line: `${p.username}:${p.password}@${p.ip}:${p.port}`
-    }));
-
-    sendWelcomeEmail(user.email, user.name, proxiesData).catch(err => {
-      console.error('Failed to send welcome email:', err);
-    });
-
-    res.status(201).json({
-      success: true,
-      isNewUser,
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        whatsapp: user.whatsapp
-      },
-      subscription: {
-        id: subscription.id,
-        period: subscription.period,
-        proxyCount: subscription.proxy_count,
-        status: subscription.status,
-        startDate: subscription.start_date,
-        endDate: subscription.end_date
-      },
-      proxies: proxiesData
+    // SECURITY: This endpoint ONLY works with a valid Stripe session
+    // The process-payment endpoint in stripe.js handles the actual payment verification
+    return res.status(403).json({ 
+      success: false, 
+      message: 'Use /api/stripe/process-payment instead' 
     });
 
   } catch (err) {
@@ -454,12 +369,22 @@ router.get('/me', async (req, res) => {
 });
 
 // Get proxy replacement price based on subscription age
+// SECURITY: Requires auth AND must be the subscription owner
 router.get('/replacement-price/:subscriptionId', async (req, res) => {
   try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
     const { subscriptionId } = req.params;
 
+    // SECURITY: Must verify the subscription belongs to this user
     const subscriptions = await sql`
-      SELECT * FROM subscriptions WHERE id = ${subscriptionId} AND status = 'active'
+      SELECT * FROM subscriptions WHERE id = ${subscriptionId} AND user_id = ${decoded.id} AND status = 'active'
     `;
 
     if (subscriptions.length === 0) {
@@ -608,6 +533,7 @@ router.post('/replace-proxy', async (req, res) => {
 });
 
 // Add more proxies to existing subscription
+// SECURITY: Requires active subscription AND creates payment requirement
 router.post('/add-proxies', async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
@@ -624,7 +550,7 @@ router.post('/add-proxies', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Quantidade inválida' });
     }
 
-    // Get active subscription
+    // SECURITY: Must have ACTIVE and NOT EXPIRED subscription
     const subscriptions = await sql`
       SELECT * FROM subscriptions 
       WHERE user_id = ${decoded.id} AND status = 'active'
@@ -632,50 +558,21 @@ router.post('/add-proxies', async (req, res) => {
     `;
 
     if (subscriptions.length === 0) {
-      return res.status(400).json({ success: false, message: 'Nenhuma assinatura ativa encontrada' });
+      return res.status(403).json({ success: false, message: 'Nenhuma assinatura ativa. Compre proxies para adicionar mais.' });
     }
 
     const subscription = subscriptions[0];
-    const newProxyCount = subscription.proxy_count + additionalCount;
-
-    // Update subscription proxy count
-    await sql`
-      UPDATE subscriptions SET proxy_count = ${newProxyCount}, updated_at = NOW()
-      WHERE id = ${subscription.id}
-    `;
-
-    // Generate new proxies
-    const newProxies = [];
-    for (let i = 0; i < additionalCount; i++) {
-      const port = getNextPort();
-      if (!port) break;
-
-      allocatedPorts.add(port);
-
-      const username = generateUsername();
-      const pwd = generatePassword();
-
-      const created = await sql`
-        INSERT INTO proxies (user_id, subscription_id, ip, port, username, password)
-        VALUES (${decoded.id}, ${subscription.id}, ${IP_BASE}, ${port}, ${username}, ${pwd})
-        RETURNING *
-      `;
-      newProxies.push(created[0]);
+    
+    // SECURITY: Check if subscription is not expired
+    if (new Date(subscription.end_date) <= new Date()) {
+      return res.status(403).json({ success: false, message: 'Assinatura expirada. Renove para adicionar mais proxies.' });
     }
 
-    res.json({
-      success: true,
-      message: `${newProxies.length} proxies adicionados!`,
-      newProxyCount,
-      addedCount: newProxies.length,
-      proxies: newProxies.map(p => ({
-        id: p.id,
-        ip: p.ip,
-        port: p.port,
-        username: p.username,
-        password: p.password,
-        line: `${p.username}:${p.password}@${p.ip}:${p.port}`
-      }))
+    // SECURITY: Return instructions to purchase more via Stripe
+    // This endpoint no longer adds proxies directly - user must pay
+    return res.status(403).json({ 
+      success: false, 
+      message: 'Para adicionar mais proxies, você precisa comprar novamente através do site.' 
     });
 
   } catch (err) {
@@ -684,8 +581,8 @@ router.post('/add-proxies', async (req, res) => {
   }
 });
 
-// Create 50% discount for renewal after payment failure
-router.post('/create-renewal-discount', async (req, res) => {
+// Get user's discount (read only) - discounts are created by admin or system only
+router.get('/my-discounts', async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -695,44 +592,26 @@ router.post('/create-renewal-discount', async (req, res) => {
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    // Check if user already has a valid discount
-    const existingDiscounts = await sql`
-      SELECT * FROM discounts 
-      WHERE user_id = ${decoded.id} AND type = 'renewal_50' AND used = false AND valid_until > NOW()
-    `;
-
-    if (existingDiscounts.length > 0) {
-      return res.json({
-        success: true,
-        discount: existingDiscounts[0],
-        message: 'Você já tem um cupom de 50% de desconto disponível!'
-      });
-    }
-
-    // Create 50% discount valid for 7 days
-    const validUntil = new Date();
-    validUntil.setDate(validUntil.getDate() + 7);
-
+    // SECURITY: Only READ user's discounts - no creation allowed
+    // Discounts can ONLY be created by admin or during expiration check
     const discounts = await sql`
-      INSERT INTO discounts (user_id, type, discount_percent, valid_until)
-      VALUES (${decoded.id}, 'renewal_50', 50, ${validUntil})
-      RETURNING *
+      SELECT * FROM discounts 
+      WHERE user_id = ${decoded.id} AND used = false AND (valid_until IS NULL OR valid_until > NOW())
     `;
 
     res.json({
       success: true,
-      discount: {
-        id: discounts[0].id,
-        type: discounts[0].type,
-        discountPercent: parseFloat(discounts[0].discount_percent),
-        validUntil: discounts[0].valid_until
-      },
-      message: 'Cupom de 50% de desconto criado! Válido por 7 dias.'
+      discounts: discounts.map(d => ({
+        id: d.id,
+        type: d.type,
+        discountPercent: parseFloat(d.discount_percent),
+        validUntil: d.valid_until
+      }))
     });
 
   } catch (err) {
-    console.error('Create renewal discount error:', err);
-    res.status(500).json({ success: false, message: 'Erro ao criar desconto' });
+    console.error('Get discounts error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao buscar descontos' });
   }
 });
 
@@ -1110,8 +989,22 @@ router.get('/admin/users', async (req, res) => {
 });
 
 // Admin: Create admin user
+// SECURITY: Requires admin auth
 router.post('/admin/create', async (req, res) => {
   try {
+    // SECURITY: Check admin auth
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado - Apenas admins' });
+    }
+
     const { email, password, name } = req.body;
 
     if (!email || !password) {
@@ -1385,8 +1278,27 @@ router.get('/admin/stock', async (req, res) => {
 });
 
 // Admin setup - creates admin user if not exists
+// SECURITY: Requires admin auth OR can only be used if NO admin exists (for initial setup)
 router.post('/admin/setup', async (req, res) => {
   try {
+    // First check if any admin exists
+    const adminCheck = await sql`SELECT id FROM users WHERE role = 'admin' LIMIT 1`;
+    
+    // If admin exists, this endpoint requires admin auth
+    if (adminCheck.length > 0) {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ success: false, message: 'Token não fornecido' });
+      }
+
+      const token = authHeader.split(' ')[1];
+      const decoded = jwt.verify(token, JWT_SECRET);
+      
+      if (decoded.role !== 'admin') {
+        return res.status(403).json({ success: false, message: 'Acesso negado - Apenas admins' });
+      }
+    }
+    
     const { email, password } = req.body;
     
     if (!email || !password) {
