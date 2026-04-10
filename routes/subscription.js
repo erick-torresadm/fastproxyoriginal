@@ -64,6 +64,65 @@ router.get('/check-email/:email', async (req, res) => {
   }
 });
 
+// Simple register (no payment, no proxies)
+router.post('/register', async (req, res) => {
+  try {
+    const { email, password, name, whatsapp } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Email e senha são obrigatórios' });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ success: false, message: 'Email inválido' });
+    }
+
+    // Check password length
+    if (password.length < 6) {
+      return res.status(400).json({ success: false, message: 'Senha deve ter pelo menos 6 caracteres' });
+    }
+
+    // Check if user already exists
+    const existingUsers = await sql`
+      SELECT id FROM users WHERE email = ${email.toLowerCase()}
+    `;
+
+    if (existingUsers.length > 0) {
+      return res.status(400).json({ success: false, message: 'Email já cadastrado' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUsers = await sql`
+      INSERT INTO users (email, password, name, whatsapp)
+      VALUES (${email.toLowerCase()}, ${hashedPassword}, ${name || null}, ${whatsapp || null})
+      RETURNING id, email, name, whatsapp
+    `;
+
+    const user = newUsers[0];
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: JWT_EXPIRE });
+
+    res.status(201).json({
+      success: true,
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        whatsapp: user.whatsapp
+      },
+      subscription: null,
+      hasActiveSubscription: false,
+      proxies: []
+    });
+
+  } catch (err) {
+    console.error('Register error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao criar conta', error: err.message });
+  }
+});
+
 // Register user after payment
 router.post('/register-after-payment', async (req, res) => {
   try {

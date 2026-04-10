@@ -367,13 +367,14 @@
                 if (data.success) {
                     token = data.token;
                     currentUser = data.user;
-                    currentSubscription = data.subscription;
-                    currentProxies = data.proxies || [];
+                    currentSubscription = null;
+                    currentProxies = [];
                     
+                    // Always use server data, ignore localStorage cache
                     localStorage.setItem('fastproxy_token', token);
                     localStorage.setItem('fastproxy_user', JSON.stringify(currentUser));
-                    localStorage.setItem('fastproxy_subscription', JSON.stringify(currentSubscription));
-                    localStorage.setItem('fastproxy_proxies', JSON.stringify(currentProxies));
+                    localStorage.setItem('fastproxy_subscription', JSON.stringify(null));
+                    localStorage.setItem('fastproxy_proxies', JSON.stringify([]));
                     
                     showDashboard();
                     loadUserData();
@@ -395,10 +396,10 @@
             const errorDiv = document.getElementById('register-error');
             
             try {
-                const res = await fetch(`${API_URL}/api/subscription/register-after-payment`, {
+                const res = await fetch(`${API_URL}/api/subscription/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password, whatsapp, proxyCount: 1, period: 'monthly' })
+                    body: JSON.stringify({ email, password, whatsapp })
                 });
                 
                 const data = await res.json();
@@ -406,16 +407,17 @@
                 if (data.success) {
                     token = data.token;
                     currentUser = data.user;
-                    currentSubscription = data.subscription;
-                    currentProxies = data.proxies || [];
+                    currentSubscription = null;
+                    currentProxies = [];
                     
                     localStorage.setItem('fastproxy_token', token);
                     localStorage.setItem('fastproxy_user', JSON.stringify(currentUser));
-                    localStorage.setItem('fastproxy_subscription', JSON.stringify(currentSubscription));
-                    localStorage.setItem('fastproxy_proxies', JSON.stringify(currentProxies));
+                    localStorage.setItem('fastproxy_subscription', JSON.stringify(null));
+                    localStorage.setItem('fastproxy_proxies', JSON.stringify([]));
                     
-                    showToast('Conta criada com sucesso!', 'success');
+                    showToast('Conta criada! Assine um plano para receber seus proxies.', 'success');
                     showDashboard();
+                    renderDashboard();
                 } else {
                     errorDiv.textContent = data.message || 'Erro ao criar conta';
                     errorDiv.classList.remove('hidden');
