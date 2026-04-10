@@ -320,6 +320,7 @@
         const sessionId = urlParams.get('session_id');
         
         let paymentData = null;
+        let userEmail = '';
         
         async function verifyPayment() {
             if (!sessionId) {
@@ -344,12 +345,12 @@
                     
                     const period = data.metadata?.period || 'monthly';
                     const proxyCount = parseInt(data.metadata?.proxy_count) || 1;
-                    const email = data.customerEmail || localStorage.getItem('pendingAccountEmail') || '';
+                    userEmail = data.customerEmail || localStorage.getItem('pendingAccountEmail') || '';
                     
                     document.getElementById('order-details').innerHTML = `
                         <div class="space-y-2">
                             <p class="font-semibold" style="color: var(--green)">✅ Pedido Confirmado!</p>
-                            <p class="text-sm" style="color: var(--text-secondary)">Email: ${email || 'Não informado'}</p>
+                            <p class="text-sm" style="color: var(--text-secondary)">Email: ${userEmail || 'Não informado'}</p>
                             <p class="text-sm" style="color: var(--text-secondary)">Valor: R$ ${data.amountTotal || '0'}</p>
                             <p class="text-sm" style="color: var(--text-secondary)">Plano: ${period === 'annual' ? 'Anual' : 'Mensal'}</p>
                             <p class="text-sm" style="color: var(--text-secondary)">Proxies: ${proxyCount}</p>
@@ -360,9 +361,9 @@
                     setTimeout(async () => {
                         document.getElementById('payment-section').classList.add('hidden');
                         
-                        if (email) {
+                        if (userEmail) {
                             try {
-                                const checkRes = await fetch(`/api/auth/check-email/${encodeURIComponent(email)}`);
+                                const checkRes = await fetch(`/api/subscription/check-email/${encodeURIComponent(userEmail)}`);
                                 const checkData = await checkRes.json();
                                 
                                 if (checkData.exists) {
@@ -370,17 +371,17 @@
                                     document.getElementById('account-section').classList.add('hidden');
                                     document.getElementById('success-section').classList.add('hidden');
                                     document.getElementById('login-section').classList.remove('hidden');
-                                    document.getElementById('login-email').value = email;
-                                    document.getElementById('login-email-readonly').textContent = email;
+                                    document.getElementById('login-email').value = userEmail;
+                                    document.getElementById('login-email-readonly').textContent = userEmail;
                                 } else {
                                     // Email não existe - mostrar cadastro
                                     document.getElementById('account-section').classList.remove('hidden');
-                                    document.getElementById('reg-email').value = email;
+                                    document.getElementById('reg-email').value = userEmail;
                                 }
                             } catch (e) {
                                 // Se falhar, mostrar cadastro por padrão
                                 document.getElementById('account-section').classList.remove('hidden');
-                                document.getElementById('reg-email').value = email;
+                                document.getElementById('reg-email').value = userEmail;
                             }
                         } else {
                             document.getElementById('account-section').classList.remove('hidden');
@@ -412,7 +413,59 @@
                 `Guarde estas informações para o suporte.`;
         }
         
-        // Login form
+        function showSuccessWithProxies(data, isNewUser = true) {
+            const title = isNewUser ? 'Conta Criada!' : 'Login Realizado!';
+            const subtitle = isNewUser 
+                ? 'Parabéns! Sua conta foi criada e seus proxies estão prontos.'
+                : 'Bem-vindo de volta! Aqui estão seus proxies.';
+            
+            let proxiesListHtml = '';
+            if (data.proxies && data.proxies.length > 0) {
+                const proxiesList = data.proxies.map(p => p.line || `${p.username}:${p.password}@${p.ip}:${p.port}`).join('\n');
+                proxiesListHtml = `
+                    <div class="text-left p-4 rounded-xl mb-6" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2);">
+                        <p class="text-xs mb-2" style="color: var(--text-secondary)">Suas credenciais de proxy:</p>
+                        <pre class="text-sm overflow-x-auto" style="color: #22c55e; white-space: pre-wrap; word-break: break-all;">${proxiesList}</pre>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('success-section').innerHTML = `
+                <div class="check-icon" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
+                    <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold mb-2">${title}</h2>
+                <p class="text-sm mb-6" style="color: var(--text-secondary)">${subtitle}</p>
+                ${proxiesListHtml}
+                <a href="portal.html" class="btn-primary inline-block w-full text-center">
+                    Acessar Painel do Cliente
+                </a>
+                <p class="text-xs mt-4" style="color: var(--text-secondary)">
+                    As credenciais também foram enviadas para seu email.
+                </p>
+            `;
+            
+            // Store data
+            localStorage.setItem('fastproxy_token', data.token);
+            localStorage.setItem('fastproxy_user', JSON.stringify(data.user));
+            localStorage.setItem('fastproxy_subscription', JSON.stringify(data.subscription));
+            localStorage.setItem('fastproxy_proxies', JSON.stringify(data.proxies || []));
+            
+            // Clean up
+            localStorage.removeItem('pendingAccountEmail');
+            localStorage.removeItem('pendingAccountPeriod');
+            localStorage.removeItem('pendingAccountProxies');
+            localStorage.removeItem('pendingAccountName');
+            localStorage.removeItem('pendingAccountWhatsapp');
+            
+            document.getElementById('account-section').classList.add('hidden');
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('success-section').classList.remove('hidden');
+        }
+        
+        // Login form handler
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -429,7 +482,8 @@
             spinner.classList.remove('hidden');
             
             try {
-                const res = await fetch('/api/auth/login', {
+                // Use /api/subscription/login which returns proxies
+                const res = await fetch('/api/subscription/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
@@ -438,13 +492,7 @@
                 const data = await res.json();
                 
                 if (data.success) {
-                    localStorage.setItem('fastproxy_token', data.token);
-                    localStorage.removeItem('pendingAccountEmail');
-                    localStorage.removeItem('pendingAccountPeriod');
-                    localStorage.removeItem('pendingAccountProxies');
-                    
-                    document.getElementById('login-section').classList.add('hidden');
-                    document.getElementById('success-section').classList.remove('hidden');
+                    showSuccessWithProxies(data, false);
                 } else {
                     errorDiv.textContent = data.message || 'Email ou senha incorretos.';
                     errorDiv.classList.remove('hidden');
@@ -462,7 +510,7 @@
             }
         });
         
-        // Register form
+        // Register form handler
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -499,7 +547,6 @@
             spinner.classList.remove('hidden');
             
             try {
-                // Use the new registration endpoint that creates subscription and proxies
                 const res = await fetch('/api/subscription/register-after-payment', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -517,44 +564,7 @@
                 const data = await res.json();
                 
                 if (data.success) {
-                    localStorage.setItem('fastproxy_token', data.token);
-                    localStorage.removeItem('pendingAccountEmail');
-                    localStorage.removeItem('pendingAccountPeriod');
-                    localStorage.removeItem('pendingAccountProxies');
-                    localStorage.removeItem('pendingAccountName');
-                    localStorage.removeItem('pendingAccountWhatsapp');
-                    
-                    // Store user data
-                    localStorage.setItem('fastproxy_user', JSON.stringify(data.user));
-                    localStorage.setItem('fastproxy_subscription', JSON.stringify(data.subscription));
-                    localStorage.setItem('fastproxy_proxies', JSON.stringify(data.proxies));
-                    
-                    // Update success section with proxy info
-                    if (data.proxies && data.proxies.length > 0) {
-                        const proxiesList = data.proxies.map(p => p.line).join('\n');
-                        document.getElementById('success-section').innerHTML = `
-                            <div class="check-icon" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
-                                <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                                </svg>
-                            </div>
-                            <h2 class="text-2xl font-bold mb-2">Conta Criada!</h2>
-                            <p class="text-sm mb-6" style="color: var(--text-secondary)">
-                                Seus proxies estão prontos! Abaixo estão suas credenciais.
-                            </p>
-                            <div class="text-left p-4 rounded-xl mb-6" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2);">
-                                <p class="text-xs mb-2" style="color: var(--text-secondary)">Copie e cole no seu软件:</p>
-                                <pre class="text-sm overflow-x-auto" style="color: #22c55e; white-space: pre-wrap; word-break: break-all;">${proxiesList}</pre>
-                            </div>
-                            <a href="portal.html" class="btn-primary inline-block w-full text-center">
-                                Acessar Painel do Cliente
-                            </a>
-                        `;
-                    }
-                    
-                    document.getElementById('account-section').classList.add('hidden');
-                    document.getElementById('login-section').classList.add('hidden');
-                    document.getElementById('success-section').classList.remove('hidden');
+                    showSuccessWithProxies(data, true);
                 } else {
                     errorDiv.textContent = data.message || 'Erro ao criar conta. Tente novamente.';
                     errorDiv.classList.remove('hidden');
@@ -566,78 +576,9 @@
                 console.error('Erro:', err);
                 showError(
                     'Erro de Conexão',
-                    'Não foi possível criar sua conta. Entre em contato com o suporte com os dados abaixo.',
+                    'Não foi possível criar sua conta. Entre em contato com o suporte.',
                     sessionId
                 );
-            }
-        });
-        
-        // Login form (after payment)
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            const errorDiv = document.getElementById('login-error');
-            const btn = document.getElementById('login-btn');
-            const btnText = document.getElementById('login-btn-text');
-            const spinner = document.getElementById('login-spinner');
-            
-            errorDiv.classList.add('hidden');
-            btn.disabled = true;
-            btnText.classList.add('hidden');
-            spinner.classList.remove('hidden');
-            
-            try {
-                const res = await fetch('/api/subscription/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                
-                const data = await res.json();
-                
-                if (data.success) {
-                    localStorage.setItem('fastproxy_token', data.token);
-                    localStorage.setItem('fastproxy_user', JSON.stringify(data.user));
-                    localStorage.setItem('fastproxy_subscription', JSON.stringify(data.subscription));
-                    localStorage.setItem('fastproxy_proxies', JSON.stringify(data.proxies));
-                    
-                    // Update success section with proxy info
-                    if (data.proxies && data.proxies.length > 0) {
-                        const proxiesList = data.proxies.map(p => p.line).join('\n');
-                        document.getElementById('success-section').innerHTML = `
-                            <div class="check-icon" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
-                                <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                            </div>
-                            <h2 class="text-2xl font-bold mb-2">Login Realizado!</h2>
-                            <p class="text-sm mb-6" style="color: var(--text-secondary)">
-                                Bem-vindo de volta! Aqui estão seus proxies.
-                            </p>
-                            <div class="text-left p-4 rounded-xl mb-6" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2);">
-                                <p class="text-xs mb-2" style="color: var(--text-secondary)">Copie e cole no seu软件:</p>
-                                <pre class="text-sm overflow-x-auto" style="color: #22c55e; white-space: pre-wrap; word-break: break-all;">${proxiesList}</pre>
-                            </div>
-                            <a href="portal.html" class="btn-primary inline-block w-full text-center">
-                                Acessar Painel do Cliente
-                            </a>
-                        `;
-                    }
-                    
-                    document.getElementById('login-section').classList.add('hidden');
-                    document.getElementById('success-section').classList.remove('hidden');
-                } else {
-                    errorDiv.textContent = data.message || 'Email ou senha incorretos.';
-                    errorDiv.classList.remove('hidden');
-                    btn.disabled = false;
-                    btnText.classList.remove('hidden');
-                    spinner.classList.add('hidden');
-                }
-            } catch (err) {
-                console.error('Erro:', err);
-                showError('Erro de Conexão', 'Não foi possível conectar ao servidor.', sessionId);
             }
         });
         

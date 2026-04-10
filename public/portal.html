@@ -149,6 +149,10 @@
                             <input type="password" id="reg-password" required minlength="6" class="input-field w-full rounded-xl px-4 py-3" placeholder="Mínimo 6 caracteres">
                         </div>
                         <div>
+                            <label class="block text-sm mb-2">Confirmar Senha</label>
+                            <input type="password" id="reg-password-confirm" required minlength="6" class="input-field w-full rounded-xl px-4 py-3" placeholder="Repita a senha">
+                        </div>
+                        <div>
                             <label class="block text-sm mb-2">WhatsApp (opcional)</label>
                             <input type="tel" id="reg-whatsapp" class="input-field w-full rounded-xl px-4 py-3" placeholder="(11) 99999-9999">
                         </div>
@@ -392,8 +396,21 @@
             e.preventDefault();
             const email = document.getElementById('reg-email').value;
             const password = document.getElementById('reg-password').value;
+            const passwordConfirm = document.getElementById('reg-password-confirm').value;
             const whatsapp = document.getElementById('reg-whatsapp').value;
             const errorDiv = document.getElementById('register-error');
+            
+            if (password !== passwordConfirm) {
+                errorDiv.textContent = 'As senhas não coincidem.';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+            
+            if (password.length < 6) {
+                errorDiv.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
             
             try {
                 const res = await fetch(`${API_URL}/api/subscription/register`, {

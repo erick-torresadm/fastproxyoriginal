@@ -3,6 +3,7 @@ const router = express.Router();
 const { sql } = require('../lib/database');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { sendEmail, sendWelcomeEmail, sendProxyCredentials } = require('../lib/email');
 
 const IP_BASE = process.env.PROXY_IP || '177.54.146.90';
 const PORT_START = parseInt(process.env.PROXY_PORT_START || '11331');
@@ -200,6 +201,87 @@ router.delete('/test-cleanup', async (req, res) => {
     
   } catch (err) {
     console.error('Test cleanup error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Test email configuration
+router.post('/test-email', async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ success: false, error: 'Email é obrigatório' });
+    }
+    
+    console.log('=== TEST EMAIL ===');
+    console.log('RESEND_API_KEY configured:', !!process.env.RESEND_API_KEY);
+    console.log('Sending to:', email);
+    
+    // Test basic email
+    const result = await sendEmail({
+      to: email,
+      subject: 'Teste - FastProxy Email',
+      html: `
+        <h1>Teste de Email</h1>
+        <p>Este é um email de teste do FastProxy.</p>
+        <p>Se você está lendo isso, o sistema de email está funcionando!</p>
+      `
+    });
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Email de teste enviado! Verifique sua caixa de entrada.',
+        data: result.data
+      });
+    } else {
+      res.json({
+        success: false,
+        message: 'Erro ao enviar email',
+        error: result.error,
+        hint: 'Verifique se RESEND_API_KEY está configurado corretamente no .env'
+      });
+    }
+    
+  } catch (err) {
+    console.error('Test email error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Test welcome email
+router.post('/test-welcome-email', async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ success: false, error: 'Email é obrigatório' });
+    }
+    
+    const testProxies = [
+      { ip: '177.54.146.90', port: 11331, username: 'fp12345', password: 'test1234', line: 'fp12345:test1234@177.54.146.90:11331' },
+      { ip: '177.54.146.90', port: 11332, username: 'fp12346', password: 'test1235', line: 'fp12346:test1235@177.54.146.90:11332' }
+    ];
+    
+    const result = await sendWelcomeEmail(email, 'Cliente Teste', testProxies);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Email de boas-vindas enviado!',
+        proxies: testProxies
+      });
+    } else {
+      res.json({
+        success: false,
+        message: 'Erro ao enviar email',
+        error: result.error
+      });
+    }
+    
+  } catch (err) {
+    console.error('Test welcome email error:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
