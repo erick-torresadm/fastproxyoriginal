@@ -49,8 +49,26 @@ router.post('/register', async (req, res) => {
       }
     });
   } catch (err) {
-    console.error('Register error:', err.message);
-    res.status(500).json({ success: false, message: 'Erro ao criar usuário', error: err.message });
+    console.error('Register error:', err);
+    
+    if (err.message && err.message.includes('buffering timed out')) {
+      return res.status(503).json({ 
+        success: false, 
+        message: 'Servidor temporariamente indisponível. Tente novamente em alguns minutos.' 
+      });
+    }
+    
+    if (err.code === 11000) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Este email já está cadastrado. Tente fazer login.' 
+      });
+    }
+    
+    res.status(500).json({ 
+      success: false, 
+      message: 'Erro ao criar usuário. Tente novamente ou entre em contato com o suporte.' 
+    });
   }
 });
 
