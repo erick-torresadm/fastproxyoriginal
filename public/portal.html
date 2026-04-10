@@ -549,7 +549,21 @@
             }
             
             noProxies.classList.add('hidden');
-            list.innerHTML = currentProxies.map(p => `
+            
+            // Generate all proxies in one line format
+            const allProxiesLine = currentProxies.map(p => `${p.username}:${p.password}@${p.ip}:${p.port}`).join('\n');
+            
+            list.innerHTML = `
+                <div class="proxy-card p-4 mb-4" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3);">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-semibold text-green-400">📋 Copiar todos os proxies</span>
+                        <button onclick="copyAllProxies()" class="bg-green-600 hover:bg-green-500 px-3 py-1 rounded-lg text-sm text-white flex items-center gap-1">
+                            <i class="fas fa-copy"></i> Copiar
+                        </button>
+                    </div>
+                    <pre id="all-proxies-text" class="text-xs text-green-400 break-all whitespace-pre-wrap" style="display: none;">${allProxiesLine}</pre>
+                </div>
+            ` + currentProxies.map(p => `
                 <div class="proxy-card p-4">
                     <div class="flex items-center justify-between">
                         <div class="flex-1">
@@ -559,9 +573,14 @@
                             </div>
                             <code class="text-sm text-green-400 break-all">${p.line || `${p.username}:${p.password}@${p.ip}:${p.port}`}</code>
                         </div>
-                        <button onclick="openReplaceModal(${p.id})" class="btn-secondary px-3 py-1 rounded-lg text-sm ml-4">
-                            Trocar
-                        </button>
+                        <div class="flex gap-2">
+                            <button onclick="copyProxyLine(${JSON.stringify(p).replace(/"/g, '&quot;')})" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded-lg text-sm text-white" title="Copiar">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button onclick="openReplaceModal(${p.id})" class="btn-secondary px-3 py-1 rounded-lg text-sm">
+                                Trocar
+                            </button>
+                        </div>
                     </div>
                 </div>
             `).join('');
@@ -583,6 +602,24 @@
             
             // Redirect to homepage with checkout modal open
             window.location.href = `/?checkout=true&count=${count}&email=${encodeURIComponent(email)}`;
+        }
+
+        function copyAllProxies() {
+            const text = currentProxies.map(p => `${p.username}:${p.password}@${p.ip}:${p.port}`).join('\n');
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Proxies copiados!', 'success');
+            }).catch(() => {
+                showToast('Erro ao copiar', 'error');
+            });
+        }
+        
+        function copyProxyLine(proxy) {
+            const text = proxy.line || `${proxy.username}:${proxy.password}@${proxy.ip}:${proxy.port}`;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Proxy copiado!', 'success');
+            }).catch(() => {
+                showToast('Erro ao copiar', 'error');
+            });
         }
 
         function openReplaceModal(proxyId) {
