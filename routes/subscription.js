@@ -1248,4 +1248,45 @@ router.put('/admin/users/:id/subscription', async (req, res) => {
   }
 });
 
+// Admin setup - creates admin user if not exists
+router.post('/admin/setup', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Email e senha são obrigatórios' });
+    }
+    
+    // Check if user exists
+    const existingUsers = await sql`
+      SELECT id, role FROM users WHERE email = ${email.toLowerCase()}
+    `;
+    
+    if (existingUsers.length > 0) {
+      // Update existing user to admin
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await sql`
+        UPDATE users 
+        SET password = ${hashedPassword}, role = 'admin', updated_at = NOW()
+        WHERE email = ${email.toLowerCase()}
+      `;
+      
+      return res.json({ success: true, message: 'Admin atualizado com sucesso!' });
+    }
+    
+    // Create new admin
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await sql`
+      INSERT INTO users (email, password, name, role)
+      VALUES (${email.toLowerCase()}, ${hashedPassword}, 'Admin', 'admin')
+    `;
+    
+    res.status(201).json({ success: true, message: 'Admin criado com sucesso!' });
+    
+  } catch (err) {
+    console.error('Admin setup error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao criar admin', error: err.message });
+  }
+});
+
 module.exports = router;
