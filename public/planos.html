@@ -34,7 +34,9 @@
     <!-- Header -->
     <header class="border-b border-white/10">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="/" class="text-2xl font-bold text-accent"><i class="fas fa-globe mr-2"></i>FastProxy</a>
+            <a href="/" class="flex items-center gap-3">
+                <img src="img/LOGO%20FAST%20PROXY.png" alt="FastProxy" class="h-9">
+            </a>
             <nav class="flex items-center gap-6">
                 <a href="/" class="hover:text-accent transition">Início</a>
                 <a href="/planos.html" class="text-accent">Planos</a>
@@ -146,84 +148,132 @@
     <div id="countries-modal" class="fixed inset-0 z-[100] hidden">
         <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeCountriesModal()"></div>
         <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
-            <div class="bg-[#0d1117] border border-white/20 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden pointer-events-auto">
+            <div class="bg-[#0d1117] border border-white/20 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden pointer-events-auto">
                 <div class="p-6 border-b border-white/10">
                     <h2 class="text-xl font-bold text-white flex items-center gap-3">
                         <i class="fas fa-globe text-accent"></i>
                         Proxies de Outros Países
                     </h2>
-                    <p class="text-secondary text-sm mt-2">Escolha o país e quantidade desejada</p>
+                    <p class="text-secondary text-sm mt-2">Escolha o país, tipo, quantidade e período</p>
                 </div>
                 
-                <div class="p-6 overflow-y-auto max-h-[50vh]">
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-                        <button onclick="selectCountry('us', '🇺🇸 Estados Unidos', 2.50)" class="country-btn p-4 rounded-xl border border-white/20 hover:border-accent hover:bg-accent/10 transition text-left">
-                            <div class="text-2xl mb-2">🇺🇸</div>
-                            <div class="font-bold text-sm">Estados Unidos</div>
-                            <div class="text-xs text-secondary">R$ 2,50/proxy</div>
-                        </button>
-                        <button onclick="selectCountry('de', '🇩🇪 Alemanha', 2.80)" class="country-btn p-4 rounded-xl border border-white/20 hover:border-accent hover:bg-accent/10 transition text-left">
-                            <div class="text-2xl mb-2">🇩🇪</div>
-                            <div class="font-bold text-sm">Alemanha</div>
-                            <div class="text-xs text-secondary">R$ 2,80/proxy</div>
-                        </button>
-                        <button onclick="selectCountry('uk', '🇬🇧 Reino Unido', 3.00)" class="country-btn p-4 rounded-xl border border-white/20 hover:border-accent hover:bg-accent/10 transition text-left">
-                            <div class="text-2xl mb-2">🇬🇧</div>
-                            <div class="font-bold text-sm">Reino Unido</div>
-                            <div class="text-xs text-secondary">R$ 3,00/proxy</div>
-                        </button>
-                        <button onclick="selectCountry('fr', '🇫🇷 França', 2.70)" class="country-btn p-4 rounded-xl border border-white/20 hover:border-accent hover:bg-accent/10 transition text-left">
-                            <div class="text-2xl mb-2">🇫🇷</div>
-                            <div class="font-bold text-sm">França</div>
-                            <div class="text-xs text-secondary">R$ 2,70/proxy</div>
-                        </button>
-                        <button onclick="selectCountry('nl', '🇳🇱 Holanda', 2.90)" class="country-btn p-4 rounded-xl border border-white/20 hover:border-accent hover:bg-accent/10 transition text-left">
-                            <div class="text-2xl mb-2">🇳🇱</div>
-                            <div class="font-bold text-sm">Holanda</div>
-                            <div class="text-xs text-secondary">R$ 2,90/proxy</div>
-                        </button>
-                        <button onclick="selectCountry('br', '🇧🇷 Brasil', 1.80)" class="country-btn p-4 rounded-xl border border-white/20 hover:border-accent hover:bg-accent/10 transition text-left">
-                            <div class="text-2xl mb-2">🇧🇷</div>
-                            <div class="font-bold text-sm">Brasil</div>
-                            <div class="text-xs text-secondary">R$ 1,80/proxy</div>
-                        </button>
+                <div class="p-6 overflow-y-auto max-h-[60vh]">
+                    <!-- Step 1: Select Country -->
+                    <div id="country-step-1" class="mb-6">
+                        <h3 class="font-bold text-white mb-4 flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full bg-accent text-black flex items-center justify-center text-sm font-bold">1</span>
+                            Selecione o país
+                        </h3>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <button onclick="selectCountry('us', '🇺🇸 Estados Unidos', 2.50)" class="country-btn p-3 rounded-xl border border-white/20 hover:border-accent hover:bg-accent/10 transition text-left">
+                                <div class="text-xl mb-1">🇺🇸</div>
+                                <div class="font-bold text-sm">Estados Unidos</div>
+                                <div class="text-xs text-secondary">HTTP/SOCKS5</div>
+                            </button>
+                            <button onclick="selectCountry('de', '🇩🇪 Alemanha', 2.80)" class="country-btn p-3 rounded-xl border border-white/20 hover:border-accent hover:bg-accent/10 transition text-left">
+                                <div class="text-xl mb-1">🇩🇪</div>
+                                <div class="font-bold text-sm">Alemanha</div>
+                                <div class="text-xs text-secondary">HTTP/SOCKS5</div>
+                            </button>
+                            <button onclick="selectCountry('uk', '🇬🇧 Reino Unido', 3.00)" class="country-btn p-3 rounded-xl border border-white/20 hover:border-accent hover:bg-accent/10 transition text-left">
+                                <div class="text-xl mb-1">🇬🇧</div>
+                                <div class="font-bold text-sm">Reino Unido</div>
+                                <div class="text-xs text-secondary">HTTP/SOCKS5</div>
+                            </button>
+                            <button onclick="selectCountry('fr', '🇫🇷 França', 2.70)" class="country-btn p-3 rounded-xl border border-white/20 hover:border-accent hover:bg-accent/10 transition text-left">
+                                <div class="text-xl mb-1">🇫🇷</div>
+                                <div class="font-bold text-sm">França</div>
+                                <div class="text-xs text-secondary">HTTP/SOCKS5</div>
+                            </button>
+                            <button onclick="selectCountry('nl', '🇳🇱 Holanda', 2.90)" class="country-btn p-3 rounded-xl border border-white/20 hover:border-accent hover:bg-accent/10 transition text-left">
+                                <div class="text-xl mb-1">🇳🇱</div>
+                                <div class="font-bold text-sm">Holanda</div>
+                                <div class="text-xs text-secondary">HTTP/SOCKS5</div>
+                            </button>
+                            <button onclick="selectCountry('br', '🇧🇷 Brasil', 1.80)" class="country-btn p-3 rounded-xl border border-white/20 hover:border-accent hover:bg-accent/10 transition text-left">
+                                <div class="text-xl mb-1">🇧🇷</div>
+                                <div class="font-bold text-sm">Brasil</div>
+                                <div class="text-xs text-secondary">HTTP/SOCKS5</div>
+                            </button>
+                        </div>
                     </div>
                     
-                    <div id="country-selected" class="hidden">
+                    <!-- Step 2: Select Type -->
+                    <div id="country-step-2" class="mb-6 hidden">
+                        <h3 class="font-bold text-white mb-4 flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full bg-accent text-black flex items-center justify-center text-sm font-bold">2</span>
+                            Selecione o tipo de proxy
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="selectIntlType('ipv4')" class="intl-type-btn p-4 rounded-xl border border-white/20 hover:border-accent hover:bg-accent/10 transition text-left">
+                                <div class="text-2xl mb-2">🖥️</div>
+                                <div class="font-bold">IPv4</div>
+                                <div class="text-xs text-secondary">Individual, alta compatibilidade</div>
+                                <div class="text-sm text-accent mt-1">R$ 39,90/mês</div>
+                            </button>
+                            <button onclick="selectIntlType('isp')" class="intl-type-btn p-4 rounded-xl border border-white/20 hover:border-accent hover:bg-accent/10 transition text-left">
+                                <div class="text-2xl mb-2">🏢</div>
+                                <div class="font-bold">ISP</div>
+                                <div class="text-xs text-secondary">IP de provedor dedicado</div>
+                                <div class="text-sm text-accent mt-1">R$ 49,90/mês</div>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3: Quantity and Period -->
+                    <div id="country-step-3" class="hidden">
+                        <h3 class="font-bold text-white mb-4 flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full bg-accent text-black flex items-center justify-center text-sm font-bold">3</span>
+                            Quantidade e Período
+                        </h3>
+                        
                         <div class="bg-accent/10 border border-accent/30 rounded-xl p-4 mb-4">
-                            <p class="text-sm text-secondary mb-2">País selecionado:</p>
-                            <p class="font-bold text-accent" id="selected-country-name">-</p>
+                            <p class="text-sm text-secondary">Configuração selecionada:</p>
+                            <p class="font-bold text-accent" id="intl-summary">-</p>
                         </div>
                         
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm text-secondary mb-2">Quantidade de Proxies</label>
-                                <input type="number" id="country-quantity" min="1" value="10"
-                                    class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:border-accent focus:outline-none">
+                                <div class="flex items-center justify-center gap-4">
+                                    <button onclick="changeIntlQty(-1)" class="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-lg">-</button>
+                                    <input type="number" id="intl-quantity" min="1" value="1"
+                                        class="w-20 text-center py-2 rounded-lg bg-white/10 border border-white/20 text-white text-lg font-bold"
+                                        onchange="updateIntlPrice()">
+                                    <button onclick="changeIntlQty(1)" class="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-lg">+</button>
+                                </div>
                             </div>
                             
                             <div>
                                 <label class="block text-sm text-secondary mb-2">Período</label>
-                                <select id="country-period" class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:border-accent focus:outline-none">
-                                    <option value="1m">1 Mês</option>
-                                    <option value="3m">3 Meses (-15%)</option>
-                                    <option value="6m">6 Meses (-25%)</option>
-                                    <option value="12m">12 Meses (-35%)</option>
-                                </select>
+                                <div class="grid grid-cols-4 gap-2">
+                                    <button onclick="selectIntlPeriod('1m', 0)" class="intl-period-btn p-3 rounded-xl border border-white/20 hover:border-accent text-sm" id="period-1m">
+                                        1 Mês
+                                    </button>
+                                    <button onclick="selectIntlPeriod('3m', 0.15)" class="intl-period-btn p-3 rounded-xl border border-white/20 hover:border-accent text-sm" id="period-3m">
+                                        3 Meses<br><span class="text-xs text-green-400">-15%</span>
+                                    </button>
+                                    <button onclick="selectIntlPeriod('6m', 0.25)" class="intl-period-btn p-3 rounded-xl border border-white/20 hover:border-accent text-sm" id="period-6m">
+                                        6 Meses<br><span class="text-xs text-green-400">-25%</span>
+                                    </button>
+                                    <button onclick="selectIntlPeriod('12m', 0.35)" class="intl-period-btn p-3 rounded-xl border border-white/20 hover:border-accent text-sm" id="period-12m">
+                                        12 Meses<br><span class="text-xs text-green-400">-35%</span>
+                                    </button>
+                                </div>
                             </div>
                             
                             <div class="bg-white/5 rounded-xl p-4">
                                 <div class="flex justify-between mb-2">
-                                    <span class="text-secondary">Subtotal:</span>
-                                    <span id="country-subtotal" class="font-bold">R$ 0,00</span>
+                                    <span class="text-secondary">Preço por proxy:</span>
+                                    <span id="intl-price-per-proxy" class="font-bold">R$ 0,00</span>
                                 </div>
-                                <div class="flex justify-between text-sm text-secondary" id="country-discount-row">
-                                    <span>Desconto:</span>
-                                    <span id="country-discount">R$ 0,00</span>
+                                <div class="flex justify-between mb-2 text-sm">
+                                    <span class="text-secondary">Desconto:</span>
+                                    <span id="intl-discount" class="text-green-400">-R$ 0,00</span>
                                 </div>
                                 <div class="flex justify-between text-xl font-bold border-t border-white/10 pt-2 mt-2">
                                     <span>Total:</span>
-                                    <span id="country-total" class="text-accent">R$ 0,00</span>
+                                    <span id="intl-total" class="text-accent">R$ 0,00</span>
                                 </div>
                             </div>
                         </div>
@@ -235,8 +285,8 @@
                         <button onclick="closeCountriesModal()" class="flex-1 py-3 rounded-xl border border-white/20 text-white hover:bg-white/10 transition">
                             Fechar
                         </button>
-                        <button onclick="buyOtherCountry()" id="buy-country-btn" class="flex-1 py-3 rounded-xl bg-accent text-black font-bold hover:bg-green-600 transition disabled:opacity-50" disabled>
-                            <i class="fas fa-shopping-cart mr-2"></i>Comprar
+                        <button onclick="buyIntlProxy()" id="buy-intl-btn" class="flex-1 py-3 rounded-xl bg-accent text-black font-bold hover:bg-green-600 transition disabled:opacity-50" disabled>
+                            <i class="fas fa-shopping-cart mr-2"></i>Finalizar Compra
                         </button>
                     </div>
                 </div>
@@ -730,7 +780,9 @@
                         buyerDocument: document_,
                         buyerWhatsapp: whatsapp,
                         buyerAddress: address,
-                        termsAccepted: true
+                        termsAccepted: true,
+                        country: pendingPurchase.country || null,
+                        countryName: pendingPurchase.countryName || null
                     })
                 });
 
@@ -755,15 +807,49 @@
             setTimeout(() => toast.classList.add('hidden'), 3000);
         }
 
-        // Other Countries functionality
-        let selectedCountry = null;
+        // International Proxy functionality
+        let intlConfig = {
+            country: null,
+            countryName: '',
+            countryPrice: 0,
+            type: null,
+            typeName: '',
+            typePrice: 0,
+            period: '1m',
+            periodDiscount: 0,
+            quantity: 1
+        };
+
+        const INTL_TYPE_PRICES = {
+            'ipv4': { name: 'IPv4', price: 39.90 },
+            'isp': { name: 'ISP', price: 49.90 }
+        };
 
         function openCountriesModal() {
             document.getElementById('countries-modal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
-            selectedCountry = null;
-            document.getElementById('country-selected').classList.add('hidden');
-            document.getElementById('buy-country-btn').disabled = true;
+            
+            intlConfig = {
+                country: null,
+                countryName: '',
+                countryPrice: 0,
+                type: null,
+                typeName: '',
+                typePrice: 0,
+                period: '1m',
+                periodDiscount: 0,
+                quantity: 1
+            };
+            
+            document.getElementById('country-step-1').classList.remove('hidden');
+            document.getElementById('country-step-2').classList.add('hidden');
+            document.getElementById('country-step-3').classList.add('hidden');
+            document.getElementById('buy-intl-btn').disabled = true;
+            
+            document.querySelectorAll('.country-btn').forEach(btn => {
+                btn.classList.remove('border-accent', 'bg-accent/10');
+                btn.classList.add('border-white/20');
+            });
         }
 
         function closeCountriesModal() {
@@ -772,7 +858,9 @@
         }
 
         function selectCountry(code, name, price) {
-            selectedCountry = { code, name, price };
+            intlConfig.country = code;
+            intlConfig.countryName = name;
+            intlConfig.countryPrice = price;
             
             document.querySelectorAll('.country-btn').forEach(btn => {
                 btn.classList.remove('border-accent', 'bg-accent/10');
@@ -782,38 +870,86 @@
             event.currentTarget.classList.remove('border-white/20');
             event.currentTarget.classList.add('border-accent', 'bg-accent/10');
             
-            document.getElementById('selected-country-name').textContent = `${name} - R$ ${price.toFixed(2)}/proxy`;
-            document.getElementById('country-selected').classList.remove('hidden');
-            document.getElementById('buy-country-btn').disabled = false;
+            document.getElementById('country-step-2').classList.remove('hidden');
+            document.getElementById('country-step-3').classList.add('hidden');
             
-            updateCountryPrice();
+            document.querySelectorAll('.intl-type-btn').forEach(btn => {
+                btn.classList.remove('border-accent', 'bg-accent/10');
+                btn.classList.add('border-white/20');
+            });
         }
 
-        function updateCountryPrice() {
-            if (!selectedCountry) return;
+        function selectIntlType(type) {
+            intlConfig.type = type;
+            intlConfig.typeName = INTL_TYPE_PRICES[type].name;
+            intlConfig.typePrice = INTL_TYPE_PRICES[type].price;
             
-            const qty = parseInt(document.getElementById('country-quantity').value) || 1;
-            const period = document.getElementById('country-period').value;
+            document.querySelectorAll('.intl-type-btn').forEach(btn => {
+                btn.classList.remove('border-accent', 'bg-accent/10');
+                btn.classList.add('border-white/20');
+            });
             
-            const periodDiscounts = { '1m': 0, '3m': 0.15, '6m': 0.25, '12m': 0.35 };
-            const discount = periodDiscounts[period] || 0;
+            event.currentTarget.classList.remove('border-white/20');
+            event.currentTarget.classList.add('border-accent', 'bg-accent/10');
             
-            const subtotal = selectedCountry.price * qty;
+            document.getElementById('country-step-3').classList.remove('hidden');
+            document.getElementById('buy-intl-btn').disabled = false;
+            
+            document.getElementById('intl-quantity').value = 1;
+            intlConfig.quantity = 1;
+            selectIntlPeriod('1m', 0);
+            updateIntlSummary();
+        }
+
+        function selectIntlPeriod(period, discount) {
+            intlConfig.period = period;
+            intlConfig.periodDiscount = discount;
+            
+            document.querySelectorAll('.intl-period-btn').forEach(btn => {
+                btn.classList.remove('border-accent', 'bg-accent/10', 'bg-accent/20');
+                btn.classList.add('border-white/20');
+            });
+            
+            document.getElementById(`period-${period}`).classList.remove('border-white/20');
+            document.getElementById(`period-${period}`).classList.add('border-accent', 'bg-accent/20');
+            
+            updateIntlPrice();
+        }
+
+        function changeIntlQty(delta) {
+            const input = document.getElementById('intl-quantity');
+            const newVal = Math.max(1, parseInt(input.value) + delta);
+            input.value = newVal;
+            intlConfig.quantity = newVal;
+            updateIntlPrice();
+        }
+
+        function updateIntlSummary() {
+            document.getElementById('intl-summary').textContent = 
+                `${intlConfig.countryName} • ${intlConfig.typeName}`;
+        }
+
+        function updateIntlPrice() {
+            intlConfig.quantity = parseInt(document.getElementById('intl-quantity').value) || 1;
+            
+            const basePrice = intlConfig.typePrice;
+            const qty = intlConfig.quantity;
+            const discount = intlConfig.periodDiscount;
+            
+            const subtotal = basePrice * qty;
             const discountAmount = subtotal * discount;
             const total = subtotal - discountAmount;
             
-            document.getElementById('country-subtotal').textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
-            document.getElementById('country-discount').textContent = `-R$ ${discountAmount.toFixed(2).replace('.', ',')}`;
-            document.getElementById('country-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-            
-            document.getElementById('country-discount-row').style.display = discount > 0 ? 'flex' : 'none';
+            document.getElementById('intl-price-per-proxy').textContent = `R$ ${basePrice.toFixed(2).replace('.', ',')}`;
+            document.getElementById('intl-discount').textContent = discount > 0 ? `-R$ ${discountAmount.toFixed(2).replace('.', ',')}` : 'R$ 0,00';
+            document.getElementById('intl-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
         }
 
-        document.getElementById('country-quantity')?.addEventListener('change', updateCountryPrice);
-        document.getElementById('country-period')?.addEventListener('change', updateCountryPrice);
-
-        function buyOtherCountry() {
-            if (!selectedCountry) return;
+        function buyIntlProxy() {
+            if (!intlConfig.country || !intlConfig.type) {
+                showToast('Selecione país e tipo de proxy', 'error');
+                return;
+            }
             
             const token = localStorage.getItem('fastproxy_token');
             if (!token) {
@@ -822,7 +958,16 @@
                 return;
             }
             
-            showToast('Países internacionais em breve!', 'info');
+            pendingPurchase = {
+                type: intlConfig.type,
+                period: intlConfig.period,
+                quantity: intlConfig.quantity,
+                country: intlConfig.country,
+                countryName: intlConfig.countryName
+            };
+            
+            closeCountriesModal();
+            openTermsModal();
         }
 
         // Rewards functionality
