@@ -201,6 +201,23 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
                         ${p.login || ''}, ${p.password || ''}, ${expiresAt}, false
                       )
                     `;
+
+                    // Attribution log - Marco Civil Compliance
+                    await sql`
+                      INSERT INTO attribution_logs (
+                        user_id, proxy_order_id, proxyseller_proxy_id,
+                        user_name, user_email, user_document, user_whatsapp,
+                        proxy_ip, proxy_port, proxy_username, proxy_password,
+                        client_ip, action, action_reason, expires_at,
+                        purchased_at, delivered_at
+                      ) VALUES (
+                        ${order.user_id}, ${orderId}, ${p.id},
+                        ${order.user_name || ''}, ${order.user_email || ''}, '', ${order.user_whatsapp || ''},
+                        ${p.ip_only || p.ip}, ${p.port_http || p.port}, ${p.login || ''}, ${p.password || ''},
+                        '', 'DELIVERED', 'Proxy entregue ao cliente', ${expiresAt},
+                        NOW(), NOW()
+                      )
+                    `;
                   }
                 }
               } catch (err) {

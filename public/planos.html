@@ -92,6 +92,25 @@
         </div>
     </section>
 
+    <!-- Terms of Service -->
+    <section class="container mx-auto px-4 py-8 max-w-lg">
+        <div class="bg-white/5 rounded-2xl p-6 border border-yellow-500/30">
+            <div class="flex items-start gap-3 mb-4">
+                <input type="checkbox" id="terms-checkbox" class="mt-1 w-5 h-5 accent-green-500">
+                <label for="terms-checkbox" class="text-sm text-secondary cursor-pointer">
+                    Li e aceito os <a href="/termos.html" target="_blank" class="text-accent hover:underline">Termos de Uso</a> e a 
+                    <a href="/termos.html#privacidade" class="text-accent hover:underline">Política de Privacidade</a>.
+                    <br><br>
+                    <span class="text-yellow-400 text-xs">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                        Importante: Você é responsável pelo uso que fizer dos proxies. 
+                        Atividades ilegais são de sua inteira responsabilidade.
+                    </span>
+                </label>
+            </div>
+        </div>
+    </section>
+
     <!-- Features -->
     <section class="container mx-auto px-4 py-16">
         <h2 class="text-3xl font-bold text-center mb-12">Por que escolher a FastProxy?</h2>
@@ -295,6 +314,12 @@
                 return;
             }
 
+            const termsAccepted = document.getElementById('terms-checkbox').checked;
+            if (!termsAccepted) {
+                showToast('Você precisa aceitar os Termos de Uso para continuar', 'error');
+                return;
+            }
+
             try {
                 showToast('Criando checkout...', 'info');
                 
@@ -308,7 +333,8 @@
                         type, 
                         period, 
                         quantity,
-                        couponCode: appliedCoupon?.code
+                        couponCode: appliedCoupon?.code,
+                        termsAccepted: true
                     })
                 });
 

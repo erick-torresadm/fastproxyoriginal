@@ -4,106 +4,165 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Termos de Uso - FastProxy</title>
-    <meta name="description" content="Termos de Uso do FastProxy - Proxies IPv6 de alta qualidade">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0d1117',
+                        secondary: '#8b949e',
+                        accent: '#22c55e'
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body { font-family: 'Inter', sans-serif; background: #09090b; color: #ffffff; }
-        .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
-        h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1.5rem; background: linear-gradient(135deg, #22c55e, #4ade80); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        h2 { font-size: 1.25rem; font-weight: 600; margin-top: 2rem; margin-bottom: 1rem; color: #22c55e; }
-        p { color: #a1a1aa; line-height: 1.8; margin-bottom: 1rem; }
-        ul { color: #a1a1aa; margin-left: 1.5rem; margin-bottom: 1rem; }
-        li { margin-bottom: 0.5rem; line-height: 1.6; }
-        .last-updated { color: #71717a; font-size: 0.875rem; margin-bottom: 2rem; }
-        nav { background: rgba(24, 24, 27, 0.95); border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+        body { background: #0d1117; color: #fff; font-family: system-ui, -apple-system, sans-serif; }
+        .terms-content { max-height: 400px; overflow-y: auto; }
+        .terms-content::-webkit-scrollbar { width: 8px; }
+        .terms-content::-webkit-scrollbar-track { background: #1f2937; }
+        .terms-content::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
     </style>
 </head>
-<body>
-    <nav class="fixed top-0 w-full z-50 backdrop-blur-xl">
-        <div class="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="/" class="flex items-center gap-3">
-                <img src="https://i.ibb.co/SwQ6ksRy/LOGO-FAST-PROXY.png" alt="FastProxy" class="h-9">
-            </a>
-            <a href="/" class="text-sm text-zinc-400 hover:text-white transition">Voltar ao site</a>
+<body class="min-h-screen">
+    <header class="border-b border-white/10">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold text-accent"><i class="fas fa-globe mr-2"></i>FastProxy</a>
         </div>
-    </nav>
+    </header>
 
-    <div class="container pt-24">
-        <h1>Termos de Uso</h1>
-        <p class="last-updated">Última atualização: 10 de Abril de 2026</p>
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+        <h1 class="text-3xl font-bold mb-2">Termos de Uso</h1>
+        <p class="text-secondary mb-6">Última atualização: 10 de Abril de 2026</p>
 
-        <h2>1. Objeto</h2>
-        <p>O presente Termo de Uso regula a utilização dos serviços de proxies IPv6 fornecidos pela FastProxy, doravante denominada "PRESTADORA", em favor do USUÁRIO, pessoa física ou jurídica que aceitar as condições aqui estabelecidas.</p>
-        <p>Ao acessar e utilizar os serviços da FastProxy, o USUÁRIO concorda expressamente com todos os termos e condições deste instrumento.</p>
+        <div class="card rounded-2xl p-6 mb-6">
+            <div class="terms-content text-sm text-secondary leading-relaxed">
+                
+                <h2 class="text-xl font-bold text-white mb-4">1. Objeto</h2>
+                <p class="mb-4">
+                    O presente Termo estabelece as condições gerais para a utilização do serviço de proxy 
+                    fornecido pela FastProxy, doravante denominado "Prestador", ao usuário, doravante 
+                    denominado "Contratante".
+                </p>
 
-        <h2>2. Dos Serviços</h2>
-        <p>A PRESTADORA oferece serviços de proxies IPv6 compartilhados, permitindo ao USUÁRIO navegação anônima na internet, acesso a conteúdos restritos geographicamnete e outras funcionalidades relacionadas.</p>
-        <p>Os proxies são compartilhados entre múltiplos usuários, e a PRESTADORA não garante exclusividade de IP.</p>
+                <h2 class="text-xl font-bold text-white mb-4">2. Do Serviço</h2>
+                <p class="mb-2">
+                    2.1. O Prestador oferece serviços de proxy de internet, permitindo ao Contratante 
+                    rotear seu tráfego de internet através de servidores proxy.
+                </p>
+                <p class="mb-4">
+                    2.2. O serviço é fornecido no estado em que se encontra, sem garantias de 
+                    disponibilidade contínua ou adequação a propósitos específicos.
+                </p>
 
-        <h2>3. Do Cadastro</h2>
-        <p>O USUÁRIO deve fornecer informações verdadeiras, precisas e completas no momento do cadastro, sendo o único responsável pela veracidade dos dados informados.</p>
-        <p>O USUÁRIO é responsável por manter a confidencialidade de sua conta e senha, sendo todos os acessos realizados sob sua exclusiva responsabilidade.</p>
+                <h2 class="text-xl font-bold text-white mb-4">3. Obrigações do Contratante</h2>
+                <p class="mb-2">
+                    3.1. O Contratante se compromete a utilizar o serviço exclusivamente para fins 
+                    lícitos, em conformidade com a legislação brasileira vigente.
+                </p>
+                <p class="mb-2">
+                    3.2. É EXPRESSAMENTE PROIBIDO utilizar o serviço para:
+                </p>
+                <ul class="list-disc list-inside mb-4 ml-4">
+                    <li>Ataques cibernéticos de qualquer natureza</li>
+                    <li>Atividades ilegais ou fraudulentas</li>
+                    <li>Violação de direitos de terceiros</li>
+                    <li>Spam ou envio de mensagens não solicitadas</li>
+                    <li>Clonagem de cartões de crédito ou débito</li>
+                    <li>Qualquer atividade criminosa prevista no Código Penal Brasileiro</li>
+                </ul>
 
-        <h2>4. Da Assinatura e Pagamento</h2>
-        <p>4.1. Os serviços são oferecidos em regime de assinatura mensal ou anual, com renovada automaticamente ao término de cada período, salvo manifestação em contrário pelo USUÁRIO.</p>
-        <p>4.2. Os valores das assinaturas estão disponíveis no site e podem ser alterados mediante aviso prévio de 30 (trinta) dias.</p>
-        <p>4.3. O pagamento é processado pela plataforma Stripe, sendo aplicáveis as regras de pagamento daquela plataforma.</p>
-        <p>4.4. Em caso de inadimplemento, o acesso aos serviços será imediatamente suspenso, sem prejuízo da cobrança dos valores devidos.</p>
+                <h2 class="text-xl font-bold text-white mb-4">4. Responsabilidade</h2>
+                <p class="mb-2">
+                    4.1. O Contratante é o único responsável pelo conteúdo de suas atividades 
+                    realizadas através do serviço de proxy.
+                </p>
+                <p class="mb-2">
+                    4.2. O Prestador NÃO é responsável por quaisquer atos praticados pelo Contratante, 
+                    incluindo, mas não limitado a:
+                </p>
+                <ul class="list-disc list-inside mb-4 ml-4">
+                    <li>Conteúdo transmitido ou acessado</li>
+                    <li>Violação de direitos de propriedade intelectual</li>
+                    <li>Danos causados a terceiros</li>
+                    <li>Atividades ilegais ou fraudulentas</li>
+                </ul>
 
-        <h2>5. Da Política de Uso</h2>
-        <p>É expressamente proibido o uso dos serviços da FastProxy para:</p>
-        <ul>
-            <li>Atividades ilegais de qualquer natureza, conforme legislação brasileira vigente (Lei 12.965/2014 - Marco Civil da Internet);</li>
-            <li>Envio de spam, phishing ou qualquer forma de e-mail não solicitado;</li>
-            <li>Invasão de sistemas informatizados (crime previsto no Art. 154-A do Código Penal);</li>
-            <li>Distribuição de conteúdo malicioso, vírus ou malware;</li>
-            <li>Violação de direitos autorais ou propriedade intelectual de terceiros;</li>
-            <li>Qualquer atividade que viole Termos de Serviço de terceiros.</li>
-        </ul>
+                <h2 class="text-xl font-bold text-white mb-4">5. Registro de Dados - Marco Civil da Internet</h2>
+                <p class="mb-2">
+                    5.1. Em conformidade com o Marco Civil da Internet (Lei nº 12.965/2014), o 
+                    Prestador mantém registros de acesso aos serviços pelo período mínimo de 6 (seis) meses.
+                </p>
+                <p class="mb-2">
+                    5.2. São registrados os seguintes dados:
+                </p>
+                <ul class="list-disc list-inside mb-4 ml-4">
+                    <li>Data e hora da contratação</li>
+                    <li>Dados pessoais do Contratante (nome, email, documento)</li>
+                    <li>Endereço IP utilizado para acesso ao painel</li>
+                    <li>Lista de proxies entregues ao Contratante</li>
+                    <li>Período de utilização de cada proxy</li>
+                </ul>
+                <p class="mb-4">
+                    5.3. Em caso de ordem judicial válida, o Prestador poderá fornecer os registros 
+                    necessários às autoridades competentes.
+                </p>
 
-        <h2>6. Das Responsabilidades</h2>
-        <p>6.1. A PRESTADORA não se responsabiliza por:</p>
-        <ul>
-            <li>Danos causados pelo uso inadequado dos serviços pelo USUÁRIO;</li>
-            <li>Interrupções causadas por força maior ou caso fortuito;</li>
-            <li>Conteúdos acessados ou transmitidos pelo USUÁRIO;</li>
-            <li>Perdas de dados por parte do USUÁRIO;</li>
-            <li>Velocidade de conexão, que pode variar conforme a infraestrutura do USUÁRIO.</li>
-        </ul>
-        <p>6.2. O USUÁRIO é o único responsável pelo uso que faz dos serviços, devendo utilizá-los em conformidade com a lei e os presentes termos.</p>
+                <h2 class="text-xl font-bold text-white mb-4">6. Cancelamento e Reembolso</h2>
+                <p class="mb-2">
+                    6.1. O Contratante pode solicitar cancelamento a qualquer momento, sem direito 
+                    a reembolso proporcional.
+                </p>
+                <p class="mb-4">
+                    6.2. O Prestador reserva-se o direito de cancelar o serviço imediatamente, 
+                    sem reembolso, em caso de violação destes Termos.
+                </p>
 
-        <h2>7. Da Suspensão e Rescisão</h2>
-        <p>7.1. A PRESTADORA poderá suspender ou encerrar o acesso do USUÁRIO imediatamente, sem aviso prévio, em caso de:</p>
-        <ul>
-            <li>Violação destes Termos de Uso;</li>
-            <li>Atividade ilegal praticada pelo USUÁRIO;</li>
-            <li>Não pagamento da assinatura;</li>
-            <li>Comportamento fraudulento ou abusivo.</li>
-        </ul>
-        <p>7.2. O USUÁRIO pode cancelar sua assinatura a qualquer momento, através do painel do cliente ou contato com o suporte.</p>
+                <h2 class="text-xl font-bold text-white mb-4">7. Privacidade e LGPD</h2>
+                <p class="mb-2">
+                    7.1. Os dados pessoais coletados são tratados conforme a Lei Geral de Proteção 
+                    de Dados (Lei nº 13.709/2018 - LGPD).
+                </p>
+                <p class="mb-4">
+                    7.2. O Contratante autoriza o tratamento de seus dados pessoais para fins de 
+                    prestação do serviço e cumprimento de obrigações legais.
+                </p>
 
-        <h2>8. Da Limitação de Responsabilidade</h2>
-        <p>Em conformidade com o Art. 373 do Código Civil, a PRESTADORA não será responsável por danos indiretos, incidentais, especiais ou consequentes, incluindo, mas não limitado a, lucros cessantes, perda de dados ou interrupção de negócios.</p>
+                <h2 class="text-xl font-bold text-white mb-4">8. Disposições Gerais</h2>
+                <p class="mb-2">
+                    8.1. Ao aceitar estes Termos, o Contratante declara ter lido, compreendido e 
+                    concordado com todas as condições aqui estabelecidas.
+                </p>
+                <p class="mb-2">
+                    8.2. Estes Termos podem ser alterados a qualquer momento, sendo necessário novo 
+                    aceite do Contratante.
+                </p>
+                <p class="mb-4">
+                    8.3. Para questões jurisdictionais, fica eleito o foro da Comarca de São Paulo, SP.
+                </p>
 
-        <h2>9. Da Propriedade Intelectual</h2>
-        <p>Todo o conteúdo, design, software e tecnologia utilizados pela PRESTADORA são de sua exclusiva propriedade ou estão licenciadas, sendo proibida a reprodução, distribuição ou modificação sem autorização prévia e por escrito.</p>
+                <h2 class="text-xl font-bold text-white mb-4">9. Contato</h2>
+                <p>
+                    Para dúvidas sobre estes Termos, entre em contato pelo email: contato@fastproxy.com.br
+                </p>
 
-        <h2>10. Das Alterações</h2>
-        <p>A PRESTADORA reserva-se o direito de alterar estes Termos de Uso a qualquer tempo, sendo as alterações comunicadas ao USUÁRIO por meio do e-mail cadastrado ou aviso no site, com antecedência mínima de 30 (trinta) dias.</p>
-        <p>Continuando a utilizar os serviços após as alterações, o USUÁRIO aceita tacitamente os novos termos.</p>
+            </div>
+        </div>
 
-        <h2>11. Do Foro</h2>
-        <p>As partes elegem o Foro da Comarca de São Paulo, Estado de São Paulo, como competente para dirimir quaisquer controvérsias oriundas da utilização dos serviços, com renúncia a qualquer outro, por mais privilegiado que seja.</p>
+        <div class="text-center">
+            <a href="/" class="inline-block px-8 py-3 rounded-xl border border-white/20 hover:bg-white/10 transition">
+                <i class="fas fa-arrow-left mr-2"></i>Voltar ao Início
+            </a>
+        </div>
+    </main>
 
-        <h2>12. Disposições Finais</h2>
-        <p>Estes Termos de Uso constituem o acordo completo entre as partes, substituindo quaisquer acordos ou entendimentos anteriores, verbais ou escritos.</p>
-        <p>A tolerância ou omissão de qualquer das partes não constituirá novação ou renúncia de direitos.</p>
-
-        <p style="margin-top: 3rem;"><strong>FastProxy</strong><br>
-        CNPJ: XX.XXX.XXX/0001-XX<br>
-        E-mail: suporte@fastproxy.com.br</p>
-    </div>
+    <footer class="border-t border-white/10 py-8 mt-16">
+        <div class="container mx-auto px-4 text-center text-secondary">
+            <p>&copy; 2026 FastProxy. CNPJ: XX.XXX.XXX/0001-XX | contato@fastproxy.com.br</p>
+        </div>
+    </footer>
 </body>
 </html>
