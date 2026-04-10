@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Proxy = require('../models/Proxy');
-const User = require('../models/User');
+const { sql } = require('../lib/database');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -10,10 +9,12 @@ const PORT_START = parseInt(process.env.PROXY_PORT_START || '11331');
 const PORT_END = parseInt(process.env.PROXY_PORT_END || '11368');
 const JWT_SECRET = process.env.JWT_SECRET || 'fastproxy_secret_key_2024';
 
-async function getNextPort() {
-  const usedPorts = await Proxy.distinct('port', { status: 'active' });
+// Simple in-memory proxy tracking for testing
+const allocatedPorts = new Set();
+
+function getNextPort() {
   for (let port = PORT_START; port <= PORT_END; port++) {
-    if (!usedPorts.includes(port)) return port;
+    if (!allocatedPorts.has(port)) return port;
   }
   return null;
 }
@@ -31,33 +32,6 @@ function generatePassword() {
   return password;
 }
 
-async function allocateProxies(userId, count, period) {
-  const allocated = [];
-  
-  for (let i = 0; i < count; i++) {
-    const port = await getNextPort();
-    if (!port) break;
-    
-    const username = generateUsername();
-    const password = generatePassword();
-    
-    const proxy = await Proxy.create({
-      ip: IP_BASE,
-      port,
-      username,
-      password,
-      tier: 'premium',
-      status: 'active',
-      userId,
-      assignedAt: new Date()
-    });
-    
-    allocated.push(proxy);
-  }
-  
-  return allocated;
-}
-
 router.post('/test-purchase', async (req, res) => {
   try {
     const { email, proxyCount, period } = req.body;
@@ -68,75 +42,84 @@ router.post('/test-purchase', async (req, res) => {
     console.log('Period:', period);
     
     if (!email) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Email é obrigatório' 
-      });
+      return res.status(400).json({ success: false, error: 'Email é obrigatório' });
     }
     
     const quantity = parseInt(proxyCount) || 1;
     const testPeriod = period || 'monthly';
     
-    // 1. Criar usuário de teste
-    let user = await User.findOne({ email: email.toLowerCase() });
+    // 1. Criar ou atualizar usuário
+    const existingUsers = await sql`
+      SELECT id FROM users WHERE email = ${email.toLowerCase()}
+    `;
     
-    if (!user) {
-      const hashedPassword = await bcrypt.hash('test123456', 10);
-      user = await User.create({
-        email: email.toLowerCase(),
-        password: hashedPassword,
-        subscription: {
-          period: testPeriod,
-          proxyCount: quantity,
-          status: 'active',
-          startDate: new Date()
-        }
-      });
-      console.log('Usuário criado:', user.email);
-    } else {
+    let user;
+    let token;
+    
+    if (existingUsers.length > 0) {
       // Atualizar subscription
-      user.subscription = {
-        period: testPeriod,
-        proxyCount: quantity,
-        status: 'active',
-        startDate: new Date()
-      };
-      await user.save();
-      console.log('Usuário atualizado:', user.email);
+      await sql`
+        UPDATE users SET 
+          subscription_period = ${testPeriod},
+          subscription_proxy_count = ${quantity},
+          subscription_status = 'active',
+          subscription_start_date = CURRENT_TIMESTAMP
+        WHERE email = ${email.toLowerCase()}
+      `;
+      
+      const users = await sql`
+        SELECT * FROM users WHERE email = ${email.toLowerCase()}
+      `;
+      user = users[0];
+    } else {
+      // Criar usuário
+      const hashedPassword = await bcrypt.hash('test123456', 10);
+      
+      const newUsers = await sql`
+        INSERT INTO users (email, password, subscription_period, subscription_proxy_count, subscription_status, subscription_start_date)
+        VALUES (${email.toLowerCase()}, ${hashedPassword}, ${testPeriod}, ${quantity}, 'active', CURRENT_TIMESTAMP)
+        RETURNING *
+      `;
+      user = newUsers[0];
     }
     
-    // 2. Alocar proxies
-    const proxies = await allocateProxies(user._id, quantity, testPeriod);
-    console.log('Proxies alocados:', proxies.length);
+    console.log('User:', user.email);
+    
+    // 2. Gerar tokens de proxy (simulado)
+    const proxies = [];
+    for (let i = 0; i < quantity; i++) {
+      const port = getNextPort();
+      if (!port) break;
+      
+      allocatedPorts.add(port);
+      
+      proxies.push({
+        ip: IP_BASE,
+        port: port,
+        username: generateUsername(),
+        password: generatePassword()
+      });
+    }
+    
+    console.log('Proxies generated:', proxies.length);
     
     // 3. Gerar token
-    const token = jwt.sign(
-      { id: user._id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
     
-    // 4. Preparar resposta
     const proxyLines = proxies.map(p => `${p.username}:${p.password}@${p.ip}:${p.port}`);
     
     res.json({
       success: true,
-      message: 'Teste de compra concluído com sucesso!',
+      message: 'Teste de compra concluído!',
       data: {
-        user: {
-          email: user.email,
-          id: user._id
-        },
+        user: { email: user.email, id: user.id },
         subscription: {
           period: testPeriod,
           proxyCount: quantity,
           status: 'active'
         },
         proxies: proxies.map(p => ({
-          ip: p.ip,
-          port: p.port,
-          username: p.username,
-          password: p.password,
+          ...p,
           line: `${p.username}:${p.password}@${p.ip}:${p.port}`
         })),
         allLines: proxyLines.join('\n'),
@@ -148,15 +131,12 @@ router.post('/test-purchase', async (req, res) => {
         token: token,
         portalUrl: '/portal.html'
       },
-      testNote: 'Este é um teste. Para usar proxies reais, faça uma compra via Stripe.'
+      note: '⚠️ Este é um teste. Para proxies reais, faça uma compra via Stripe.'
     });
     
   } catch (err) {
     console.error('Test purchase error:', err);
-    res.status(500).json({ 
-      success: false, 
-      error: err.message 
-    });
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
@@ -165,60 +145,38 @@ router.post('/test-login', async (req, res) => {
     const { email } = req.body;
     
     if (!email) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Email é obrigatório' 
-      });
+      return res.status(400).json({ success: false, error: 'Email é obrigatório' });
     }
     
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const users = await sql`
+      SELECT * FROM users WHERE email = ${email.toLowerCase()}
+    `;
     
-    if (!user) {
-      return res.status(404).json({ 
-        success: false, 
-        error: 'Usuário não encontrado. Use /api/test/test-purchase primeiro.' 
-      });
+    if (users.length === 0) {
+      return res.status(404).json({ success: false, error: 'Usuário não encontrado. Use /api/test/test-purchase primeiro.' });
     }
     
-    const token = jwt.sign(
-      { id: user._id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const user = users[0];
     
-    const proxies = await Proxy.find({ userId: user._id, status: 'active' });
-    const proxyLines = proxies.map(p => `${p.username}:${p.password}@${p.ip}:${p.port}`);
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
     
     res.json({
       success: true,
       data: {
-        user: {
-          email: user.email,
-          subscription: user.subscription
-        },
-        proxies: proxies.map(p => ({
-          ip: p.ip,
-          port: p.port,
-          username: p.username,
-          password: p.password,
-          line: `${p.username}:${p.password}@${p.ip}:${p.port}`
-        })),
-        allLines: proxyLines.join('\n'),
-        count: proxies.length
+        user: { email: user.email, subscription: {
+          period: user.subscription_period,
+          proxyCount: user.subscription_proxy_count,
+          status: user.subscription_status
+        }},
+        proxies: [],
+        count: 0
       },
-      credentials: {
-        email: email,
-        password: 'test123456',
-        token: token
-      }
+      credentials: { email: email, password: 'test123456', token: token }
     });
     
   } catch (err) {
     console.error('Test login error:', err);
-    res.status(500).json({ 
-      success: false, 
-      error: err.message 
-    });
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
@@ -227,42 +185,22 @@ router.delete('/test-cleanup', async (req, res) => {
     const { email } = req.body;
     
     if (!email) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Email é obrigatório' 
-      });
+      return res.status(400).json({ success: false, error: 'Email é obrigatório' });
     }
     
-    const user = await User.findOne({ email: email.toLowerCase() });
-    
-    if (!user) {
-      return res.status(404).json({ 
-        success: false, 
-        error: 'Usuário não encontrado' 
-      });
-    }
-    
-    // Remover proxies
-    const deletedProxies = await Proxy.deleteMany({ userId: user._id });
-    
-    // Remover usuário
-    await User.findByIdAndDelete(user._id);
+    const result = await sql`
+      DELETE FROM users WHERE email = ${email.toLowerCase()} AND role != 'admin'
+    `;
     
     res.json({
       success: true,
-      message: 'Teste limpo com sucesso',
-      data: {
-        proxiesDeleted: deletedProxies.deletedCount,
-        userDeleted: true
-      }
+      message: 'Usuário de teste removido',
+      deleted: result.count > 0
     });
     
   } catch (err) {
     console.error('Test cleanup error:', err);
-    res.status(500).json({ 
-      success: false, 
-      error: err.message 
-    });
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 

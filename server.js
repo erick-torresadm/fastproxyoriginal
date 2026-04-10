@@ -2,37 +2,11 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const mongoose = require('mongoose');
 
 console.log('=== LOADING SERVER ===');
 console.log('STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY ? 'set' : 'missing');
-console.log('MONGODB_URI:', process.env.MONGODB_URI ? 'set' : 'missing');
-
-// MongoDB Connection
-const MONGODB_URI = process.env.MONGODB_URI;
-let mongooseConnected = false;
-
-async function connectMongo() {
-  if (!MONGODB_URI) {
-    console.warn('⚠️ MONGODB_URI not set - Auth features will not work');
-    return;
-  }
-  
-  try {
-    await mongoose.connect(MONGODB_URI, {
-      serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 30000,
-      maxPoolSize: 5,
-      retryWrites: true
-    });
-    mongooseConnected = true;
-    console.log('✅ MongoDB connected');
-  } catch (err) {
-    console.error('❌ MongoDB connection error:', err.message);
-  }
-}
-
-connectMongo();
+console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'set' : 'missing');
+console.log('STRIPE_TEST_MODE:', process.env.STRIPE_TEST_MODE || 'false');
 
 const app = express();
 
@@ -70,9 +44,9 @@ try {
 
 app.get('/test', (req, res) => {
   res.json({ 
-    message: 'Server is working', 
+    message: 'FastProxy API running', 
     stripeMode: process.env.STRIPE_TEST_MODE === 'true' ? 'TEST' : 'PRODUCTION',
-    mongodb: MONGODB_URI ? 'configured' : 'NOT CONFIGURED'
+    database: process.env.DATABASE_URL ? 'Neon Postgres ✅' : 'NOT CONFIGURED ❌'
   });
 });
 
@@ -81,37 +55,8 @@ app.get('/debug/env', (req, res) => {
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ? 'set' : 'missing',
     STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY ? 'set' : 'missing',
     STRIPE_TEST_MODE: process.env.STRIPE_TEST_MODE,
-    APP_URL: process.env.APP_URL,
-    MONGODB_URI: MONGODB_URI ? 'set' : 'missing',
-    NODE_ENV: process.env.NODE_ENV
-  });
-});
-
-app.get('/debug/routes', (req, res) => {
-  const routes = [];
-  if (app._router) {
-    app._router.stack.forEach(middleware => {
-      if (middleware.route) {
-        routes.push({ path: middleware.route.path, methods: middleware.route.methods });
-      } else if (middleware.name === 'router') {
-        middleware.handle.stack.forEach(handler => {
-          if (handler.route) {
-            routes.push({ path: handler.route.path, methods: handler.route.methods });
-          }
-        });
-      }
-    });
-  }
-  res.json({ routes, stackLength: app._router ? app._router.stack.length : 0 });
-});
-
-app.get('/debug/mongodb', (req, res) => {
-  const states = ['disconnected', 'connected', 'connecting', 'disconnecting'];
-  res.json({
-    mongooseReadyState: mongoose.connection.readyState,
-    mongooseStateText: states[mongoose.connection.readyState] || 'unknown',
-    mongooseConnected: mongooseConnected,
-    hasMongoose: typeof mongoose !== 'undefined'
+    DATABASE_URL: process.env.DATABASE_URL ? 'set' : 'missing',
+    APP_URL: process.env.APP_URL
   });
 });
 
@@ -119,7 +64,6 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Serve index.html for all other routes (SPA support)
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

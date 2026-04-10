@@ -2,25 +2,17 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
-const User = require('../models/User');
-const { auth, admin } = require('../middleware/auth');
+const { sql } = require('../lib/database');
+
+const JWT_SECRET = process.env.JWT_SECRET || 'fastproxy_secret_key_2024';
+const JWT_EXPIRE = process.env.JWT_EXPIRE || '7d';
 
 router.post('/register', async (req, res) => {
   try {
     const { email, password, proxyCount, period } = req.body;
     
-    console.log('Register attempt:', email, proxyCount, period);
+    console.log('Register attempt:', email);
     
-    // Check MongoDB connection
-    if (mongoose.connection.readyState !== 1) {
-      console.error('MongoDB not connected. State:', mongoose.connection.readyState);
-      return res.status(503).json({ 
-        success: false, 
-        message: 'Banco de dados temporariamente indisponível. Tente novamente em alguns minutos.' 
-      });
-    }
-
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Email e senha são obrigatórios' });
     }
@@ -29,58 +21,48 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ success: false, message: 'A senha deve ter pelo menos 6 caracteres' });
     }
 
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
-    if (existingUser) {
+    // Check if user exists
+    const existingUsers = await sql`
+      SELECT id FROM users WHERE email = ${email.toLowerCase()}
+    `;
+    
+    if (existingUsers.length > 0) {
       return res.status(400).json({ success: false, message: 'Este email já está cadastrado. Tente fazer login.' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({
-      email: email.toLowerCase(),
-      password: hashedPassword,
-      subscription: {
-        period: period || 'monthly',
-        proxyCount: proxyCount || 1,
-        status: 'active',
-        startDate: new Date()
-      }
-    });
+    // Create user
+    const newUsers = await sql`
+      INSERT INTO users (email, password, subscription_period, subscription_proxy_count, subscription_status, subscription_start_date)
+      VALUES (${email.toLowerCase()}, ${hashedPassword}, ${period || 'monthly'}, ${proxyCount || 1}, 'active', CURRENT_TIMESTAMP)
+      RETURNING id, email, subscription_period, subscription_proxy_count, subscription_status
+    `;
+    
+    const user = newUsers[0];
+    
+    console.log('User created:', user.email);
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRE || '7d'
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
+      expiresIn: JWT_EXPIRE
     });
 
     res.status(201).json({
       success: true,
       token,
       user: {
-        id: user._id,
+        id: user.id,
         email: user.email,
-        subscription: user.subscription
+        subscription: {
+          period: user.subscription_period,
+          proxyCount: user.subscription_proxy_count,
+          status: user.subscription_status
+        }
       }
     });
   } catch (err) {
     console.error('Register error:', err);
-    
-    if (err.message && err.message.includes('buffering timed out')) {
-      return res.status(503).json({ 
-        success: false, 
-        message: 'Servidor temporariamente indisponível. Tente novamente em alguns minutos.' 
-      });
-    }
-    
-    if (err.code === 11000) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Este email já está cadastrado. Tente fazer login.' 
-      });
-    }
-    
-    res.status(500).json({ 
-      success: false, 
-      message: 'Erro ao criar usuário. Tente novamente ou entre em contato com o suporte.' 
-    });
+    res.status(500).json({ success: false, message: 'Erro ao criar usuário', error: err.message });
   }
 });
 
@@ -92,76 +74,106 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Email e senha são obrigatórios' });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) {
+    const users = await sql`
+      SELECT * FROM users WHERE email = ${email.toLowerCase()}
+    `;
+    
+    if (users.length === 0) {
       return res.status(400).json({ success: false, message: 'Credenciais inválidas' });
     }
 
+    const user = users[0];
     const isMatch = await bcrypt.compare(password, user.password);
+    
     if (!isMatch) {
       return res.status(400).json({ success: false, message: 'Credenciais inválidas' });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRE || '7d'
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
+      expiresIn: JWT_EXPIRE
     });
 
     res.json({
       success: true,
       token,
       user: {
-        id: user._id,
+        id: user.id,
         email: user.email,
-        subscription: user.subscription
+        subscription: {
+          period: user.subscription_period,
+          proxyCount: user.subscription_proxy_count,
+          status: user.subscription_status
+        }
       }
     });
   } catch (err) {
-    console.error('Login error:', err.message);
+    console.error('Login error:', err);
     res.status(500).json({ success: false, message: 'Erro no login', error: err.message });
+  }
+});
+
+router.get('/me', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+    
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    const users = await sql`
+      SELECT id, email, subscription_period, subscription_proxy_count, subscription_status, subscription_start_date, subscription_end_date
+      FROM users WHERE id = ${decoded.id}
+    `;
+    
+    if (users.length === 0) {
+      return res.status(404).json({ success: false, message: 'Usuário não encontrado' });
+    }
+    
+    const user = users[0];
+    
+    res.json({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        subscription: {
+          period: user.subscription_period,
+          proxyCount: user.subscription_proxy_count,
+          status: user.subscription_status,
+          startDate: user.subscription_start_date,
+          endDate: user.subscription_end_date
+        }
+      }
+    });
+  } catch (err) {
+    console.error('Auth check error:', err.message);
+    res.status(401).json({ success: false, message: 'Token inválido ou expirado' });
   }
 });
 
 router.post('/setup', async (req, res) => {
   try {
     const bcrypt = require('bcryptjs');
-    const User = require('../models/User');
     
-    const adminExists = await User.findOne({ email: 'admin@fastproxy.com' });
-    if (adminExists) {
+    const admins = await sql`SELECT id FROM users WHERE email = 'admin@fastproxy.com'`;
+    
+    if (admins.length > 0) {
       return res.json({ success: true, message: 'Admin já existe' });
     }
     
     const hashedPassword = await bcrypt.hash('admin123', 10);
-    await User.create({
-      name: 'Admin',
-      email: 'admin@fastproxy.com',
-      password: hashedPassword,
-      role: 'admin'
-    });
+    
+    await sql`
+      INSERT INTO users (email, password, name, role)
+      VALUES ('admin@fastproxy.com', ${hashedPassword}, 'Admin', 'admin')
+    `;
     
     res.json({ success: true, message: 'Admin criado com sucesso' });
   } catch (err) {
+    console.error('Setup error:', err);
     res.status(500).json({ success: false, message: 'Erro no setup', error: err.message });
-  }
-});
-
-router.get('/me', auth, async (req, res) => {
-  res.json({
-    success: true,
-    user: {
-      id: req.user._id,
-      email: req.user.email,
-      subscription: req.user.subscription
-    }
-  });
-});
-
-router.get('/users', auth, admin, async (req, res) => {
-  try {
-    const users = await User.find().select('-password').sort({ createdAt: -1 });
-    res.json({ success: true, users });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Erro ao buscar usuários', error: err.message });
   }
 });
 
