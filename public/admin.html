@@ -41,32 +41,48 @@
             --text-primary: #ffffff;
             --border-color: rgba(255, 255, 255, 0.08);
         }
+        html.light {
+            --bg-primary: #fafafa;
+            --bg-secondary: rgba(255, 255, 255, 0.6);
+            --bg-card: rgba(255, 255, 255, 0.98);
+            --text-primary: #18181b;
+            --border-color: rgba(0, 0, 0, 0.08);
+        }
         * { -webkit-font-smoothing: antialiased; margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', sans-serif; min-height: 100vh; }
+        body { background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', sans-serif; min-height: 100vh; transition: background 0.3s, color 0.3s; }
         .gradient-text { background: linear-gradient(135deg, #4ade80, #22c55e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .gradient-bg { background: linear-gradient(135deg, #16a34a, #22c55e); }
         .card { background: var(--bg-card); border: 1px solid var(--border-color); }
-        .input-field { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); transition: all 0.3s; }
+        .input-field { background: var(--bg-secondary); border: 1px solid var(--border-color); transition: all 0.3s; color: var(--text-primary); }
         .input-field:focus { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2); outline: none; }
         .btn-primary { background: linear-gradient(135deg, #16a34a, #22c55e); transition: all 0.3s; }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(34, 197, 94, 0.3); }
         .spin { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+        nav { background: var(--bg-card); border-bottom: 1px solid var(--border-color); }
+        .text-white\/60 { color: var(--text-primary); opacity: 0.6; }
+        .text-white\/40 { color: var(--text-primary); opacity: 0.4; }
+        .bg-black\/80 { background: var(--bg-card); }
+        select.input-field { color: var(--text-primary); }
+        .theme-toggle { position: relative; width: 48px; height: 24px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.3s; }
+        .theme-toggle::after { content: ''; position: absolute; top: 2px; left: 3px; width: 18px; height: 18px; background: var(--text-primary); border-radius: 50%; transition: all 0.3s; }
+        html.light .theme-toggle::after { left: 25px; }
     </style>
 </head>
 <body class="bg-zinc-950">
     <!-- Navbar -->
-    <nav class="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-xl border-b border-white/10">
+    <nav class="fixed top-0 w-full z-50 backdrop-blur-xl">
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <a href="/" class="flex items-center gap-3">
-                    <img src="https://i.ibb.co/SwQ6ksRy/LOGO-FAST-PROXY.png" alt="FastProxy" class="h-10">
+                    <img id="admin-logo" src="https://i.ibb.co/SwQ6ksRy/LOGO-FAST-PROXY.png" alt="FastProxy" class="h-10">
                 </a>
                 <span class="text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400">Admin</span>
             </div>
             <div class="flex items-center gap-4">
-                <span id="admin-name" class="text-white/60 text-sm"></span>
-                <button onclick="logout()" class="text-sm text-white/40 hover:text-white">Sair</button>
+                <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme"></button>
+                <span id="admin-name" class="text-sm"></span>
+                <button onclick="logout()" class="text-sm opacity-60 hover:opacity-100">Sair</button>
             </div>
         </div>
     </nav>
@@ -272,6 +288,41 @@
         const API_URL = '';
         let token = localStorage.getItem('fastproxy_admin_token');
 
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = !html.classList.contains('light');
+            const logo = document.getElementById('admin-logo');
+            
+            if (isDark) {
+                html.classList.add('light');
+                localStorage.setItem('theme', 'light');
+                if (logo) logo.src = 'https://i.ibb.co/ymxkPNS0/LOGO-FAST-PROXY-black.png';
+            } else {
+                html.classList.remove('light');
+                localStorage.setItem('theme', 'dark');
+                if (logo) logo.src = 'https://i.ibb.co/SwQ6ksRy/LOGO-FAST-PROXY.png';
+            }
+        }
+
+        // Init theme on load
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const html = document.documentElement;
+            const logo = document.getElementById('admin-logo');
+            
+            if (savedTheme === 'light') {
+                html.classList.add('light');
+                if (logo) logo.src = 'https://i.ibb.co/ymxkPNS0/LOGO-FAST-PROXY-black.png';
+            } else if (savedTheme === 'dark') {
+                html.classList.remove('light');
+            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                html.classList.add('light');
+                if (logo) logo.src = 'https://i.ibb.co/ymxkPNS0/LOGO-FAST-PROXY-black.png';
+            }
+        }
+        initTheme();
+
         function showTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('bg-green-500/20', 'text-green-400');
@@ -314,16 +365,16 @@
             btn.innerHTML = '<i class="fas fa-spinner spin mr-2"></i>Entrando...';
             
             try {
-                const data = await api('/api/auth/login', 'POST', {
+                const data = await api('/api/subscription/admin/login', 'POST', {
                     email: document.getElementById('login-email').value,
                     password: document.getElementById('login-password').value
                 });
-                if (data.success && data.data.user.role === 'admin') {
-                    token = data.data.token;
+                if (data.success && data.user.role === 'admin') {
+                    token = data.token;
                     localStorage.setItem('fastproxy_admin_token', token);
                     document.getElementById('login-section').classList.add('hidden');
                     document.getElementById('dashboard').classList.remove('hidden');
-                    document.getElementById('admin-name').textContent = data.data.user.name;
+                    document.getElementById('admin-name').textContent = data.user.name;
                     loadStats();
                 } else {
                     document.getElementById('login-error').textContent = data.message || 'Credenciais inválidas';
@@ -346,13 +397,18 @@
         async function loadStats() {
             try {
                 const [pData, uData] = await Promise.all([
-                    api('/api/proxies/stats'),
-                    api('/api/auth/users')
+                    api('/api/subscription/admin/proxies'),
+                    api('/api/subscription/admin/users')
                 ]);
-                document.getElementById('stat-total').textContent = pData.data?.total || 0;
-                document.getElementById('stat-available').textContent = pData.data?.available || 0;
-                document.getElementById('stat-active').textContent = pData.data?.active || 0;
-                document.getElementById('stat-users').textContent = uData.data?.users?.length || 0;
+                const proxies = pData.data?.proxies || [];
+                const users = uData.data?.users || [];
+                const activeProxies = proxies.filter(p => p.is_active).length;
+                const availableProxies = proxies.filter(p => !p.user_id).length;
+                
+                document.getElementById('stat-total').textContent = proxies.length;
+                document.getElementById('stat-available').textContent = availableProxies;
+                document.getElementById('stat-active').textContent = activeProxies;
+                document.getElementById('stat-users').textContent = users.length;
             } catch (err) { console.error(err); }
         }
 
@@ -374,11 +430,12 @@
             }
             
             try {
-                const data = await api('/api/proxies', 'POST', { ...proxy, tier });
+                const data = await api('/api/subscription/admin/proxies', 'POST', { ...proxy, tier });
                 if (data.success) {
                     showToast('Proxy adicionado!');
                     document.getElementById('single-proxy').value = '';
                     loadStats();
+                    loadProxies();
                 } else {
                     showToast(data.message || 'Erro', 'error');
                 }
@@ -397,12 +454,13 @@
             }
             
             try {
-                const data = await api('/api/proxies/bulk', 'POST', { proxies, tier });
+                const data = await api('/api/subscription/admin/proxies/bulk', 'POST', { proxies, tier });
                 if (data.success) {
                     showToast(`${data.data?.count || proxies.length} proxies importados!`);
                     document.getElementById('bulk-proxies').value = '';
                     document.getElementById('bulk-count').textContent = '0';
                     loadStats();
+                    loadProxies();
                 } else {
                     showToast(data.message || 'Erro', 'error');
                 }
@@ -411,27 +469,24 @@
 
         async function loadProxies() {
             try {
-                const data = await api('/api/proxies');
+                const data = await api('/api/subscription/admin/proxies');
                 const proxies = data.data?.proxies || [];
                 const tbody = document.getElementById('proxies-table');
-                const tierColors = { basic: 'bg-green-500/20 text-green-400', premium: 'bg-purple-500/20 text-purple-400', master: 'bg-amber-500/20 text-amber-400' };
                 
                 if (proxies.length > 0) {
                     tbody.innerHTML = proxies.map(p => `<tr class="border-t border-white/5 hover:bg-white/5">
-                        <td class="px-4 py-3 w-10"><input type="checkbox" class="proxy-checkbox w-4 h-4 accent-green-500" value="${p._id}"></td>
+                        <td class="px-4 py-3 w-10"><input type="checkbox" class="proxy-checkbox w-4 h-4 accent-green-500" value="${p.id}"></td>
                         <td class="px-4 py-3 font-mono text-sm">${p.username}:${p.password}@${p.ip}:${p.port}</td>
-                        <td class="px-4 py-3"><span class="px-2 py-1 rounded text-xs ${tierColors[p.tier] || 'bg-gray-500/20 text-gray-400'}">${p.tier || 'basic'}</span></td>
-                        <td class="px-4 py-3 text-sm ${p.status === 'available' ? 'text-green-400' : 'text-blue-400'}">${p.status === 'available' ? 'Disponível' : p.status === 'active' ? 'Ativo' : 'Expirado'}</td>
+                        <td class="px-4 py-3 text-sm ${p.is_active ? 'text-green-400' : 'text-red-400'}">${p.is_active ? 'Ativo' : 'Inativo'}</td>
                         <td class="px-4 py-3 text-sm">
-                            ${p.userId ? `<div class="text-white">${p.userId.name || 'Usuário'}</div><div class="text-white/50 text-xs">${p.userId.email || ''}</div>` : '<span class="text-white/30">-</span>'}
+                            ${p.user_email ? `<div class="text-white">${p.user_email}</div>` : '<span class="text-white/30">Não vinculado</span>'}
                         </td>
-                        <td class="px-4 py-3 text-sm ${p.expiresAt ? (new Date(p.expiresAt) < new Date() ? 'text-red-400' : 'text-white/50') : 'text-white/30'}">
-                            ${p.expiresAt ? new Date(p.expiresAt).toLocaleDateString('pt-BR') : '-'}
+                        <td class="px-4 py-3 text-sm text-white/50">
+                            ${new Date(p.created_at).toLocaleDateString('pt-BR')}
                         </td>
                         <td class="px-4 py-3 text-center">
-                            <button onclick="allocateThisProxy('${p._id}', '${p.username}:${p.password}@${p.ip}:${p.port}')" class="text-green-400 hover:text-green-300 mr-2" title="Vincular"><i class="fas fa-link"></i></button>
-                            <button onclick="editProxyStatus('${p._id}', '${p.status}')" class="text-blue-400 hover:text-blue-300 mr-2" title="Status"><i class="fas fa-edit"></i></button>
-                            <button onclick="deleteProxy('${p._id}')" class="text-red-400 hover:text-red-300" title="Excluir"><i class="fas fa-trash"></i></button>
+                            ${!p.user_id ? `<button onclick="allocateThisProxy('${p.id}', '${p.username}:${p.password}@${p.ip}:${p.port}')" class="text-green-400 hover:text-green-300 mr-2" title="Vincular"><i class="fas fa-link"></i></button>` : ''}
+                            <button onclick="deleteProxy('${p.id}')" class="text-red-400 hover:text-red-300" title="Excluir"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>`).join('');
                 } else {
@@ -475,12 +530,16 @@
         async function deleteProxy(id) {
             if (!confirm('Excluir proxy?')) return;
             try {
-                const data = await api(`/api/proxies/${id}`, 'DELETE');
+                const data = await api(`/api/subscription/admin/proxies/${id}`, 'DELETE');
                 if (data.success) {
                     showToast('Proxy excluído');
-                    loadProxies();
                     loadStats();
+                    loadProxies();
+                } else {
+                    showToast(data.message || 'Erro', 'error');
                 }
+            } catch (err) { showToast('Erro de conexão', 'error'); }
+        }
             } catch (err) { showToast('Erro', 'error'); }
         }
 
@@ -564,38 +623,27 @@
         }
 
         async function confirmAllocate(proxyId) {
-            const userId = document.getElementById('allocate-user').value;
-            const status = document.getElementById('allocate-status').value;
+            const userId = document.getElementById('allocate-user-id').value;
+            
+            if (!userId) {
+                showToast('Selecione um usuário', 'error');
+                return;
+            }
             
             try {
-                const data = await api(`/api/proxies/${proxyId}`, 'PUT', {
-                    userId,
-                    status
+                const data = await api('/api/subscription/admin/proxies/allocate', 'POST', {
+                    proxyId,
+                    userId
                 });
                 if (data.success) {
-                    showToast('Proxy vinculadas!');
+                    showToast('Proxy vinculado!');
                     closeModal();
                     loadProxies();
                     loadStats();
-                    loadUsers();
                 } else {
                     showToast(data.message || 'Erro', 'error');
                 }
-            } catch (err) { showToast('Erro', 'error'); }
-        }
-
-        async function editProxyStatus(proxyId, currentStatus) {
-            const newStatus = prompt('Status atual: ' + currentStatus + '\nNovo status (available/active/expired):');
-            if (!newStatus || !['available', 'active', 'expired'].includes(newStatus)) return;
-            
-            try {
-                const data = await api(`/api/proxies/${proxyId}`, 'PUT', { status: newStatus });
-                if (data.success) {
-                    showToast('Status atualizado!');
-                    loadProxies();
-                    loadStats();
-                }
-            } catch (err) { showToast('Erro', 'error'); }
+            } catch (err) { showToast('Erro de conexão', 'error'); }
         }
 
         function closeModal() {
@@ -604,23 +652,22 @@
 
         async function loadUsers() {
             try {
-                const data = await api('/api/auth/users');
+                const data = await api('/api/subscription/admin/users');
                 const users = data.data?.users || [];
                 const tbody = document.getElementById('users-table');
                 
                 if (users.length > 0) {
                     tbody.innerHTML = users.map(u => `<tr class="border-t border-white/5 hover:bg-white/5">
                         <td class="px-4 py-3">
-                            <div class="font-medium">${u.name}</div>
-                            <div class="text-xs text-white/50">${u.email}</div>
+                            <div class="font-medium">${u.name || 'N/A'}</div>
+                            <div class="text-xs opacity-50">${u.email}</div>
                         </td>
-                        <td class="px-4 py-3 text-sm">-</td>
-                        <td class="px-4 py-3 text-sm">${u.proxyCount || 0}</td>
-                        <td class="px-4 py-3"><span class="px-2 py-1 rounded text-xs ${u.isActive ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}">${u.isActive ? 'Ativo' : 'Inativo'}</span></td>
-                        <td class="px-4 py-3 text-sm text-white/50">-</td>
+                        <td class="px-4 py-3 text-sm">${u.whatsapp || '-'}</td>
+                        <td class="px-4 py-3 text-sm">${u.proxy_count || 0}</td>
+                        <td class="px-4 py-3"><span class="px-2 py-1 rounded text-xs bg-green-500/20 text-green-400">Ativo</span></td>
+                        <td class="px-4 py-3 text-sm opacity-50">${new Date(u.created_at).toLocaleDateString('pt-BR')}</td>
                         <td class="px-4 py-3 text-center">
-                            <button onclick="viewUserProxies('${u._id}')" class="text-green-400 hover:text-green-300 mr-2"><i class="fas fa-eye"></i></button>
-                            <button onclick="allocateProxy('${u._id}')" class="text-blue-400 hover:text-blue-300"><i class="fas fa-plus"></i></button>
+                            <button onclick="allocateProxy('${u.id}', '${u.email}')" class="text-blue-400 hover:text-blue-300"><i class="fas fa-plus"></i></button>
                         </td>
                     </tr>`).join('');
                 } else {
@@ -633,8 +680,13 @@
             showToast('Funcionalidade em desenvolvimento');
         }
 
-        function allocateProxy(userId) {
-            showToast('Funcionalidade em desenvolvimento - vinculada à API de pagamentos');
+        function allocateProxy(userId, userEmail) {
+            document.getElementById('allocate-user-id').value = userId;
+            document.getElementById('sel-user-name').textContent = userEmail;
+            document.getElementById('user-list').classList.add('hidden');
+            document.getElementById('selected-user').classList.remove('hidden');
+            loadProxies();
+            showToast('Selecione um proxy disponível para vincular ao usuário');
         }
 
         document.getElementById('bulk-proxies').addEventListener('input', function() {
@@ -642,14 +694,18 @@
             document.getElementById('bulk-count').textContent = count;
         });
 
+        // Load admin check on page load
         if (token) {
-            api('/api/auth/me').then(data => {
-                if (data.success && data.data.user.role === 'admin') {
+            api('/api/subscription/me').then(data => {
+                if (data.success && data.user) {
                     document.getElementById('login-section').classList.add('hidden');
                     document.getElementById('dashboard').classList.remove('hidden');
-                    document.getElementById('admin-name').textContent = data.data.user.name;
+                    document.getElementById('admin-name').textContent = data.user.name || data.user.email;
                     loadStats();
                 }
+            }).catch(() => {
+                localStorage.removeItem('fastproxy_admin_token');
+                token = null;
             });
         }
     </script>

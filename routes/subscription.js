@@ -651,4 +651,296 @@ router.get('/check-expiration', async (req, res) => {
   }
 });
 
+// ============ ADMIN ROUTES ============
+
+// Admin login
+router.post('/admin/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Email e senha são obrigatórios' });
+    }
+
+    const users = await sql`
+      SELECT * FROM users WHERE email = ${email.toLowerCase()} AND role = 'admin'
+    `;
+
+    if (users.length === 0) {
+      return res.status(400).json({ success: false, message: 'Credenciais inválidas' });
+    }
+
+    const user = users[0];
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: 'Credenciais inválidas' });
+    }
+
+    const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
+
+    res.json({
+      success: true,
+      token,
+      user: { id: user.id, email: user.email, name: user.name, role: user.role }
+    });
+
+  } catch (err) {
+    console.error('Admin login error:', err);
+    res.status(500).json({ success: false, message: 'Erro no login', error: err.message });
+  }
+});
+
+// Admin: Get all proxies
+router.get('/admin/proxies', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+
+    const { status, search } = req.query;
+    let query = sql`SELECT p.*, u.email as user_email FROM proxies p LEFT JOIN users u ON p.user_id = u.id`;
+    
+    let proxies;
+    if (search) {
+      proxies = await sql`
+        SELECT p.*, u.email as user_email 
+        FROM proxies p 
+        LEFT JOIN users u ON p.user_id = u.id
+        WHERE p.username ILIKE ${'%' + search + '%'} 
+           OR p.ip::text ILIKE ${'%' + search + '%'}
+        ORDER BY p.created_at DESC
+      `;
+    } else {
+      proxies = await sql`
+        SELECT p.*, u.email as user_email 
+        FROM proxies p 
+        LEFT JOIN users u ON p.user_id = u.id
+        ORDER BY p.created_at DESC
+      `;
+    }
+
+    res.json({ success: true, data: { proxies } });
+
+  } catch (err) {
+    console.error('Admin get proxies error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao buscar proxies' });
+  }
+});
+
+// Admin: Create single proxy (with custom data)
+router.post('/admin/proxies', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+
+    const { ip, port, username, password } = req.body;
+
+    if (!ip || !port || !username || !password) {
+      return res.status(400).json({ success: false, message: 'Todos os campos são obrigatórios' });
+    }
+
+    // Check if port is already in use
+    const existing = await sql`SELECT id FROM proxies WHERE port = ${port}`;
+    if (existing.length > 0) {
+      return res.status(400).json({ success: false, message: 'Porta já está em uso' });
+    }
+
+    allocatedPorts.add(port);
+
+    const newProxies = await sql`
+      INSERT INTO proxies (ip, port, username, password, is_active)
+      VALUES (${ip}, ${port}, ${username}, ${password}, true)
+      RETURNING *
+    `;
+
+    res.status(201).json({ success: true, data: { proxy: newProxies[0] } });
+
+  } catch (err) {
+    console.error('Admin create proxy error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao criar proxy', error: err.message });
+  }
+});
+
+// Admin: Create bulk proxies
+router.post('/admin/proxies/bulk', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+
+    const { proxies } = req.body;
+
+    if (!proxies || !Array.isArray(proxies)) {
+      return res.status(400).json({ success: false, message: 'Lista de proxies inválida' });
+    }
+
+    let created = 0;
+    for (const p of proxies) {
+      const existing = await sql`SELECT id FROM proxies WHERE port = ${p.port}`;
+      if (existing.length === 0) {
+        await sql`
+          INSERT INTO proxies (ip, port, username, password, is_active)
+          VALUES (${p.ip}, ${p.port}, ${p.username}, ${p.password}, true)
+        `;
+        allocatedPorts.add(p.port);
+        created++;
+      }
+    }
+
+    res.status(201).json({ success: true, data: { count: created } });
+
+  } catch (err) {
+    console.error('Admin bulk create proxies error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao criar proxies', error: err.message });
+  }
+});
+
+// Admin: Allocate proxy to user
+router.post('/admin/proxies/allocate', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+
+    const { proxyId, userId } = req.body;
+
+    await sql`
+      UPDATE proxies SET user_id = ${userId}, updated_at = NOW()
+      WHERE id = ${proxyId}
+    `;
+
+    res.json({ success: true, message: 'Proxy alocado com sucesso' });
+
+  } catch (err) {
+    console.error('Admin allocate proxy error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao alocar proxy' });
+  }
+});
+
+// Admin: Delete proxy
+router.delete('/admin/proxies/:id', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+
+    const { id } = req.params;
+
+    const proxies = await sql`SELECT port FROM proxies WHERE id = ${id}`;
+    if (proxies.length > 0) {
+      allocatedPorts.delete(proxies[0].port);
+    }
+
+    await sql`DELETE FROM proxies WHERE id = ${id}`;
+
+    res.json({ success: true, message: 'Proxy excluído' });
+
+  } catch (err) {
+    console.error('Admin delete proxy error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao excluir proxy' });
+  }
+});
+
+// Admin: Get all users
+router.get('/admin/users', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+
+    const users = await sql`
+      SELECT u.*, 
+        (SELECT COUNT(*) FROM proxies p WHERE p.user_id = u.id AND p.is_active = true) as proxy_count
+      FROM users u
+      ORDER BY u.created_at DESC
+    `;
+
+    res.json({ success: true, data: { users } });
+
+  } catch (err) {
+    console.error('Admin get users error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao buscar usuários' });
+  }
+});
+
+// Admin: Create admin user
+router.post('/admin/create', async (req, res) => {
+  try {
+    const { email, password, name } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Email e senha são obrigatórios' });
+    }
+
+    const existing = await sql`SELECT id FROM users WHERE email = ${email.toLowerCase()}`;
+    if (existing.length > 0) {
+      return res.status(400).json({ success: false, message: 'Email já existe' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUsers = await sql`
+      INSERT INTO users (email, password, name, role)
+      VALUES (${email.toLowerCase()}, ${hashedPassword}, ${name || 'Admin'}, 'admin')
+      RETURNING id, email, name, role
+    `;
+
+    res.status(201).json({ success: true, data: { user: newUsers[0] } });
+
+  } catch (err) {
+    console.error('Admin create error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao criar admin', error: err.message });
+  }
+});
+
 module.exports = router;
