@@ -676,7 +676,8 @@
                         <td class="px-4 py-3"><span class="px-2 py-1 rounded text-xs bg-green-500/20 text-green-400">Ativo</span></td>
                         <td class="px-4 py-3 text-sm opacity-50">${new Date(u.created_at).toLocaleDateString('pt-BR')}</td>
                         <td class="px-4 py-3 text-center">
-                            <button onclick="allocateProxy('${u.id}', '${u.email}')" class="text-blue-400 hover:text-blue-300"><i class="fas fa-plus"></i></button>
+                            <button onclick="allocateProxy('${u.id}', '${u.email}')" class="text-blue-400 hover:text-blue-300 mr-2"><i class="fas fa-plus"></i></button>
+                            <button onclick="cancelSubscription('${u.id}', '${u.email}')" class="text-red-400 hover:text-red-300" title="Cancelar assinatura"><i class="fas fa-ban"></i></button>
                         </td>
                     </tr>`).join('');
                 } else {
@@ -687,6 +688,67 @@
 
         function viewUserProxies(userId) {
             showToast('Funcionalidade em desenvolvimento');
+        }
+
+        async function cancelSubscription(userId, userEmail) {
+            const confirmed = confirm(`Tem certeza que deseja cancelar a assinatura de ${userEmail}?\n\nClique OK para oferecer cupom de 50% de desconto ou Cancelar para cancelar sem desconto.`);
+            
+            if (!confirmed) {
+                try {
+                    await api(`/api/subscription/admin/users/${userId}/cancel`, 'POST', { applyCoupon: false });
+                    showToast('Assinatura cancelada');
+                    loadUsers();
+                } catch (err) {
+                    showToast('Erro ao cancelar', 'error');
+                }
+                return;
+            }
+            
+            const modalContent = `
+                <div class="space-y-4">
+                    <div class="p-4 rounded-xl bg-green-500/10 border border-green-500/30">
+                        <p class="text-white font-medium mb-2">Deseja aplicar um cupom de <span class="text-green-400 font-bold">50% de desconto</span>?</p>
+                        <p class="text-sm text-secondary">Isso reduz o valor da próxima renovação pela metade.</p>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button onclick="applyCancellationCoupon('${userId}', true)" class="flex-1 py-3 rounded-xl font-semibold bg-green-600 hover:bg-green-500 text-white transition">
+                            <i class="fas fa-ticket-alt mr-2"></i>Sim, aplicar 50%
+                        </button>
+                        <button onclick="applyCancellationCoupon('${userId}', false)" class="flex-1 py-3 rounded-xl font-semibold bg-red-600 hover:bg-red-500 text-white transition">
+                            <i class="fas fa-times mr-2"></i>Cancelar direto
+                        </button>
+                    </div>
+                    
+                    <button onclick="closeModal()" class="w-full py-2 text-secondary hover:text-white transition text-sm">
+                        Voltar
+                    </button>
+                </div>
+            `;
+            
+            document.getElementById('modal').classList.remove('hidden');
+            document.getElementById('modal').classList.add('items-center');
+            document.getElementById('modal-title').textContent = 'Cancelar Assinatura';
+            document.getElementById('modal-content').innerHTML = modalContent;
+        }
+
+        async function applyCancellationCoupon(userId, applyCoupon) {
+            try {
+                const data = await api(`/api/subscription/admin/users/${userId}/cancel`, 'POST', { 
+                    applyCoupon,
+                    discountPercent: applyCoupon ? 50 : 0
+                });
+                
+                if (data.success) {
+                    showToast(applyCoupon ? 'Cupom 50% aplicado!' : 'Assinatura cancelada');
+                    closeModal();
+                    loadUsers();
+                } else {
+                    showToast(data.message || 'Erro', 'error');
+                }
+            } catch (err) {
+                showToast('Erro de conexão', 'error');
+            }
         }
 
         function allocateProxy(userId, userEmail) {
