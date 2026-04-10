@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planos - FastProxy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0d1117',
+                        secondary: '#8b949e',
+                        accent: '#22c55e'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background: #0d1117; color: #fff; font-family: system-ui, -apple-system, sans-serif; }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(34, 197, 94, 0.2); }
+        .gradient-border { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); padding: 2px; border-radius: 1rem; }
+        .popular-tag { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Header -->
+    <header class="border-b border-white/10">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold text-accent"><i class="fas fa-globe mr-2"></i>FastProxy</a>
+            <nav class="flex items-center gap-6">
+                <a href="/" class="hover:text-accent transition">Início</a>
+                <a href="/planos.html" class="text-accent">Planos</a>
+                <a href="/tutoriais.html" class="hover:text-accent transition">Tutoriais</a>
+                <a href="/blog.html" class="hover:text-accent transition">Blog</a>
+                <div id="auth-nav"></div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="py-16 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">
+            Escolha seu <span class="text-accent">Plano Proxy</span>
+        </h1>
+        <p class="text-secondary text-lg max-w-2xl mx-auto">
+            Proxies de alta qualidade para suas necessidades. IPv6, IPv4, ISP e Mobile disponíveis.
+        </p>
+    </section>
+
+    <!-- Proxy Types Selection -->
+    <section class="container mx-auto px-4 py-8">
+        <div class="flex flex-wrap justify-center gap-4 mb-12">
+            <button onclick="selectType('ipv6')" id="btn-ipv6" class="proxy-type-btn px-6 py-3 rounded-xl border-2 border-accent bg-accent/20 text-accent font-semibold">
+                <i class="fas fa-network-wired mr-2"></i>IPv6
+            </button>
+            <button onclick="selectType('ipv4')" id="btn-ipv4" class="proxy-type-btn px-6 py-3 rounded-xl border-2 border-white/20 hover:border-accent transition">
+                <i class="fas fa-server mr-2"></i>IPv4
+            </button>
+            <button onclick="selectType('isp')" id="btn-isp" class="proxy-type-btn px-6 py-3 rounded-xl border-2 border-white/20 hover:border-accent transition">
+                <i class="fas fa-building mr-2"></i>ISP
+            </button>
+            <button onclick="selectType('mobile')" id="btn-mobile" class="proxy-type-btn px-6 py-3 rounded-xl border-2 border-white/20 hover:border-accent transition">
+                <i class="fas fa-mobile-alt mr-2"></i>Mobile
+            </button>
+        </div>
+    </section>
+
+    <!-- Plans Grid -->
+    <section class="container mx-auto px-4 py-8">
+        <div id="plans-grid" class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Plans will be loaded here -->
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="container mx-auto px-4 py-16">
+        <h2 class="text-3xl font-bold text-center mb-12">Por que escolher a FastProxy?</h2>
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="text-center p-6 rounded-2xl bg-white/5">
+                <i class="fas fa-bolt text-4xl text-accent mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">Alta Velocidade</h3>
+                <p class="text-secondary">Proxies otimizados para máxima performance e velocidade.</p>
+            </div>
+            <div class="text-center p-6 rounded-2xl bg-white/5">
+                <i class="fas fa-shield-alt text-4xl text-accent mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">99.9% Uptime</h3>
+                <p class="text-secondary">Infraestrutura redundante para disponibilidade máxima.</p>
+            </div>
+            <div class="text-center p-6 rounded-2xl bg-white/5">
+                <i class="fas fa-headset text-4xl text-accent mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">Suporte 24/7</h3>
+                <p class="text-secondary">Equipe técnica disponível para ajudar a qualquer momento.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/10 py-8">
+        <div class="container mx-auto px-4 text-center text-secondary">
+            <p>&copy; 2026 FastProxy. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 px-6 py-3 rounded-xl bg-accent text-black font-semibold hidden"></div>
+
+    <script>
+        const API_URL = '';
+        let currentType = 'ipv6';
+        let currentPeriod = '1m';
+        
+        const PRICING = {
+            ipv6: {
+                name: 'IPv6',
+                description: 'Datacenter IPv6 - Ideal para scraping e automação',
+                minQty: 10,
+                sellPrice: 29.90,
+                icon: 'fa-network-wired'
+            },
+            ipv4: {
+                name: 'IPv4',
+                description: 'Datacenter IPv4 individual - Alta compatibilidade',
+                minQty: 1,
+                sellPrice: 39.90,
+                icon: 'fa-server'
+            },
+            isp: {
+                name: 'ISP',
+                description: 'IP de provedor dedicado - Mistura datacenter + residencial',
+                minQty: 1,
+                sellPrice: 49.90,
+                icon: 'fa-building'
+            },
+            mobile: {
+                name: 'Mobile 4G/5G',
+                description: 'IP de operadoras móveis - Para redes sociais e apps',
+                minQty: 1,
+                sellPrice: 79.90,
+                icon: 'fa-mobile-alt'
+            }
+        };
+
+        const PERIODS = [
+            { id: '1w', name: '1 Semana', days: 7, discount: 0 },
+            { id: '2w', name: '2 Semanas', days: 14, discount: 0 },
+            { id: '1m', name: '1 Mês', days: 30, discount: 0 },
+            { id: '2m', name: '2 Meses', days: 60, discount: 0.1 },
+            { id: '3m', name: '3 Meses', days: 90, discount: 0.15 },
+            { id: '6m', name: '6 Meses', days: 180, discount: 0.25 },
+            { id: '12m', name: '12 Meses', days: 365, discount: 0.35 }
+        ];
+
+        function selectType(type) {
+            currentType = type;
+            document.querySelectorAll('.proxy-type-btn').forEach(btn => {
+                btn.classList.remove('border-accent', 'bg-accent/20', 'text-accent');
+                btn.classList.add('border-white/20');
+            });
+            document.getElementById(`btn-${type}`).classList.remove('border-white/20');
+            document.getElementById(`btn-${type}`).classList.add('border-accent', 'bg-accent/20', 'text-accent');
+            loadPlans();
+        }
+
+        function loadPlans() {
+            const info = PRICING[currentType];
+            const grid = document.getElementById('plans-grid');
+            
+            grid.innerHTML = PERIODS.map(period => {
+                const qty = info.minQty;
+                const basePrice = info.sellPrice;
+                const discount = period.discount;
+                const pricePerUnit = basePrice * (1 - discount);
+                const total = pricePerUnit * qty;
+                const savings = (basePrice * qty * discount).toFixed(2);
+                
+                return `
+                    <div class="card-hover rounded-2xl ${discount > 0 ? 'gradient-border' : ''} bg-primary p-1">
+                        <div class="bg-primary rounded-xl p-6 h-full">
+                            ${discount > 0 ? `<span class="popular-tag text-xs px-3 py-1 rounded-full text-black font-bold">-${(discount * 100).toFixed(0)}% OFF</span>` : ''}
+                            <h3 class="text-2xl font-bold mt-2">${period.name}</h3>
+                            <p class="text-secondary text-sm mb-4">${qty} proxy(s) ${info.name}</p>
+                            <div class="mb-4">
+                                <span class="text-4xl font-bold text-accent">R$ ${pricePerUnit.toFixed(2)}</span>
+                                <span class="text-secondary">/por proxy</span>
+                            </div>
+                            ${discount > 0 ? `<p class="text-green-400 text-sm mb-4">Economia de R$ ${savings}</p>` : ''}
+                            <p class="text-2xl font-bold mb-4">Total: R$ ${total.toFixed(2)}</p>
+                            <ul class="text-sm text-secondary mb-6 space-y-2">
+                                <li><i class="fas fa-check text-accent mr-2"></i>Alta velocidade</li>
+                                <li><i class="fas fa-check text-accent mr-2"></i>Suporte 24/7</li>
+                                <li><i class="fas fa-check text-accent mr-2"></i>IP do Brasil</li>
+                            </ul>
+                            <button onclick="buyProxy('${currentType}', '${period.id}', ${qty})" 
+                                class="w-full py-3 rounded-xl bg-accent hover:bg-green-600 text-black font-bold transition">
+                                <i class="fas fa-shopping-cart mr-2"></i>Comprar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function buyProxy(type, period, quantity) {
+            const token = localStorage.getItem('fastproxy_token');
+            
+            if (!token) {
+                showToast('Faça login para comprar', 'error');
+                setTimeout(() => window.location.href = '/login.html', 1500);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/proxyseller/buy`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ type, period, quantity })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    setTimeout(() => window.location.href = '/portal.html', 2000);
+                } else {
+                    showToast(data.message, 'error');
+                }
+            } catch (err) {
+                showToast('Erro ao processar compra', 'error');
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-xl font-semibold ${type === 'error' ? 'bg-red-500' : 'bg-accent'} text-${type === 'error' ? 'white' : 'black'} show`;
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+
+        function checkAuth() {
+            const token = localStorage.getItem('fastproxy_token');
+            const authNav = document.getElementById('auth-nav');
+            
+            if (token) {
+                authNav.innerHTML = `
+                    <a href="/portal.html" class="px-4 py-2 rounded-xl bg-accent text-black font-semibold hover:bg-green-600 transition">
+                        <i class="fas fa-user mr-2"></i>Portal
+                    </a>
+                `;
+            } else {
+                authNav.innerHTML = `
+                    <a href="/login.html" class="px-4 py-2 rounded-xl border border-accent text-accent hover:bg-accent hover:text-black transition">
+                        Login
+                    </a>
+                    <a href="/login.html" class="px-4 py-2 rounded-xl bg-accent text-black font-semibold hover:bg-green-600 transition">
+                        Cadastrar
+                    </a>
+                `;
+            }
+        }
+
+        checkAuth();
+        loadPlans();
+    </script>
+</body>
+</html>
