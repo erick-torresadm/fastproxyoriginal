@@ -214,17 +214,13 @@ router.post('/test-email', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Email é obrigatório' });
     }
     
-    console.log('=== TEST EMAIL ===');
-    console.log('RESEND_API_KEY configured:', !!process.env.RESEND_API_KEY);
-    console.log('RESEND_API_KEY prefix:', process.env.RESEND_API_KEY?.substring(0, 5));
-    console.log('Sending to:', email);
-    
     // Import Resend directly for more control
     const { Resend } = require('resend');
     const resend = new Resend(process.env.RESEND_API_KEY);
     
+    // Try with verified domain first
     const result = await resend.emails.send({
-      from: 'onboarding@resend.dev',
+      from: 'FastProxy <contato@fastproxy.com.br>',
       to: email,
       subject: '✅ Teste FastProxy - Email Funcionando!',
       html: `
@@ -232,7 +228,7 @@ router.post('/test-email', async (req, res) => {
           <div style="background: linear-gradient(135deg, #22c55e, #16a34a); padding: 30px; border-radius: 10px 10px 0 0;">
             <h1 style="color: white; margin: 0;">🛡️ FastProxy</h1>
           </div>
-          <div style="background: #f5f5f5; padding: 30px; border-radius: 0 0 10px 10px;">
+          <div style="background: #1a1a1a; padding: 30px; border-radius: 0 0 10px 10px; color: white;">
             <h2 style="color: #22c55e;">Teste de Email - FUNCIONANDO!</h2>
             <p>Se você está lendo isso, o sistema de emails do FastProxy está configurado corretamente.</p>
             <p><strong>Data:</strong> ${new Date().toLocaleString('pt-BR')}</p>
@@ -241,10 +237,8 @@ router.post('/test-email', async (req, res) => {
       `
     });
     
-    console.log('Email result:', JSON.stringify(result));
-    
     if (result.error) {
-      console.error('Email error:', result.error);
+      console.error('Email error:', JSON.stringify(result.error, null, 2));
       res.json({
         success: false,
         message: 'Erro ao enviar email',
@@ -256,14 +250,13 @@ router.post('/test-email', async (req, res) => {
       res.json({
         success: true,
         message: 'Email de teste enviado! Verifique sua caixa de entrada (incluindo spam).',
-        data: result.data,
         id: result.data?.id
       });
     }
     
   } catch (err) {
     console.error('Test email error:', err);
-    res.status(500).json({ success: false, error: err.message, stack: err.stack });
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
