@@ -99,6 +99,14 @@ try {
 }
 
 try {
+  const testPricesRoutes = require('./routes/test-prices');
+  app.use('/api/test-prices', testPricesRoutes);
+  console.log('✅ Test Prices routes registered');
+} catch (err) {
+  console.error('❌ Error loading Test Prices routes:', err.message);
+}
+
+try {
   const checkoutRoutes = require('./routes/checkout');
   app.use('/api/checkout', checkoutRoutes);
   console.log('✅ Checkout routes registered');
