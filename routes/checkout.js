@@ -288,12 +288,30 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
           const isInternational = session.metadata?.isInternational === 'true';
           const autoDelivery = session.metadata?.autoDelivery === 'true';
           
+          // Calculate period months from order period
+          const periodMonths = order.period === '12m' ? 12 : order.period === '6m' ? 6 : 1;
+          
           // Update order status to paid
           await sql`
             UPDATE proxy_orders SET
               status = 'active',
               payment_status = 'paid'
             WHERE id = ${orderId}
+          `;
+
+          // Create subscription only AFTER payment confirmed
+          const startDate = new Date();
+          const endDate = new Date();
+          endDate.setMonth(endDate.getMonth() + periodMonths);
+
+          await sql`
+            INSERT INTO subscriptions (
+              user_id, proxy_order_id, status, proxy_type, proxy_count,
+              period, start_date, end_date, auto_renew, created_at
+            ) VALUES (
+              ${order.user_id}, ${orderId}, 'active', ${order.proxy_type}, ${order.quantity},
+              ${order.period}, ${startDate}, ${endDate}, false, NOW()
+            )
           `;
 
           // Award reward points for this purchase
