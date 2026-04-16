@@ -300,9 +300,16 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
           `;
 
           // Create subscription only AFTER payment confirmed
-          const startDate = new Date();
-          const endDate = new Date();
+          const now = new Date();
+          const startDate = now.toISOString();
+          // Add months properly
+          const endDate = new Date(now);
           endDate.setMonth(endDate.getMonth() + periodMonths);
+          // Handle month overflow (e.g., Jan 31 + 1 month = Mar 3)
+          if (endDate.getMonth() !== (now.getMonth() + periodMonths) % 12) {
+            endDate.setDate(0); // Go to last day of previous month
+          }
+          const endDateStr = endDate.toISOString();
 
           await sql`
             INSERT INTO subscriptions (
@@ -310,8 +317,19 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
               period, start_date, end_date, auto_renew, created_at
             ) VALUES (
               ${order.user_id}, ${orderId}, 'active', ${order.proxy_type}, ${order.quantity},
-              ${order.period}, ${startDate}, ${endDate}, false, NOW()
+              ${order.period}, ${startDate}, ${endDateStr}, false, NOW()
             )
+          `;
+
+          // Update user table with subscription info
+          await sql`
+            UPDATE users SET
+              subscription_status = 'active',
+              subscription_period = ${order.period},
+              subscription_proxy_count = ${order.quantity},
+              subscription_start_date = ${startDate},
+              subscription_end_date = ${endDateStr}
+            WHERE id = ${order.user_id}
           `;
 
           // Award reward points for this purchase
