@@ -761,7 +761,7 @@
             const token = localStorage.getItem('fastproxy_token');
             if (!token) {
                 showToast('Faça login para comprar', 'error');
-                setTimeout(() => window.location.href = '/login.html', 1500);
+                setTimeout(() => window.location.href = '/portal.html', 1500);
                 return;
             }
             
@@ -968,7 +968,7 @@
             const token = localStorage.getItem('fastproxy_token');
             if (!token) {
                 showToast('Faça login para comprar', 'error');
-                setTimeout(() => window.location.href = '/login.html', 1500);
+                setTimeout(() => window.location.href = '/portal.html', 1500);
                 return;
             }
             
@@ -1101,10 +1101,10 @@
                 loadRewards();
             } else {
                 authNav.innerHTML = `
-                    <a href="/login.html" class="px-4 py-2 rounded-xl border border-accent text-accent hover:bg-accent hover:text-black transition">
+                    <a href="/portal.html" class="px-4 py-2 rounded-xl border border-accent text-accent hover:bg-accent hover:text-black transition">
                         Login
                     </a>
-                    <a href="/login.html" class="px-4 py-2 rounded-xl bg-accent text-black font-semibold hover:bg-green-600 transition">
+                    <a href="/portal.html" class="px-4 py-2 rounded-xl bg-accent text-black font-semibold hover:bg-green-600 transition">
                         Cadastrar
                     </a>
                 `;

@@ -3,7 +3,7 @@ const router = express.Router();
 const { sql } = require('../lib/database');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { sendWelcomeEmail, sendProxyCredentials } = require('../lib/email');
+const { sendWelcomeEmail, sendProxyCredentials, sendCancellationEmail } = require('../lib/email');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fastproxy_secret_key_2024';
 const JWT_EXPIRE = process.env.JWT_EXPIRE || '7d';
@@ -683,6 +683,91 @@ router.get('/check-expiration', async (req, res) => {
   } catch (err) {
     console.error('Check expiration error:', err);
     res.status(500).json({ success: false, message: 'Erro ao verificar expiração' });
+  }
+});
+
+// Cancel subscription
+router.post('/cancel', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    const { reason, subscriptionId } = req.body;
+
+    // Find the subscription to cancel
+    let subscriptionQuery;
+    if (subscriptionId) {
+      subscriptionQuery = await sql`
+        SELECT s.*, u.email as user_email, u.name as user_name
+        FROM subscriptions s
+        JOIN users u ON s.user_id = u.id
+        WHERE s.id = ${subscriptionId} AND s.user_id = ${decoded.id} AND s.status = 'active'
+      `;
+    } else {
+      // Cancel the most recent active subscription
+      subscriptionQuery = await sql`
+        SELECT s.*, u.email as user_email, u.name as user_name
+        FROM subscriptions s
+        JOIN users u ON s.user_id = u.id
+        WHERE s.user_id = ${decoded.id} AND s.status = 'active'
+        ORDER BY s.created_at DESC
+        LIMIT 1
+      `;
+    }
+
+    if (subscriptionQuery.length === 0) {
+      return res.status(404).json({ success: false, message: 'Nenhuma assinatura ativa encontrada' });
+    }
+
+    const subscription = subscriptionQuery[0];
+
+    // Mark subscription as cancelled
+    await sql`
+      UPDATE subscriptions
+      SET status = 'cancelled', auto_renew = false, updated_at = NOW()
+      WHERE id = ${subscription.id}
+    `;
+
+    // Deactivate proxies immediately on cancellation
+    await sql`
+      UPDATE proxies
+      SET is_active = false, updated_at = NOW()
+      WHERE user_id = ${decoded.id} AND subscription_id = ${subscription.id}
+    `;
+
+    // Send cancellation confirmation email (async, don't block response)
+    sendCancellationEmail(subscription.user_email, subscription.user_name, {
+      period:     subscription.period,
+      proxyCount: subscription.proxy_count,
+      endDate:    subscription.end_date,
+      reason:     reason || 'Não informado'
+    }).catch(err => console.error('Failed to send cancellation email:', err));
+
+    console.log(`✅ Subscription ${subscription.id} cancelled by user ${decoded.id}`);
+
+    res.json({
+      success: true,
+      message: 'Assinatura cancelada com sucesso.',
+      subscription: {
+        id:        subscription.id,
+        status:    'cancelled',
+        endDate:   subscription.end_date,
+        period:    subscription.period,
+        proxyCount: subscription.proxy_count
+      }
+    });
+
+  } catch (err) {
+    if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
+      return res.status(401).json({ success: false, message: 'Token inválido ou expirado' });
+    }
+    console.error('Cancel subscription error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao cancelar assinatura' });
   }
 });
 

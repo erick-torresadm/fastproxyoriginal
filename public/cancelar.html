@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cancelar Assinatura — FastProxy</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #09090b;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem 5rem;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 700px;
+            height: 350px;
+            background: radial-gradient(ellipse, rgba(239,68,68,0.07) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Nav ── */
+        .navbar {
+            position: relative; z-index: 10;
+            width: 100%; max-width: 880px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 20px 0 36px;
+        }
+        .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #fff; font-weight: 800; font-size: 1.2rem; }
+        .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, #22c55e, #16a34a); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+        .nav-back { color: rgba(255,255,255,0.45); text-decoration: none; font-size: 0.88rem; display: flex; align-items: center; gap: 5px; transition: color 0.2s; }
+        .nav-back:hover { color: rgba(255,255,255,0.8); }
+
+        /* ── Content ── */
+        .content { position: relative; z-index: 1; width: 100%; max-width: 880px; }
+
+        .page-title { font-size: 2rem; font-weight: 800; margin-bottom: 6px; }
+        .page-sub { color: rgba(255,255,255,0.45); font-size: 0.95rem; margin-bottom: 36px; }
+
+        .grid { display: grid; grid-template-columns: 1fr 400px; gap: 24px; align-items: start; }
+        @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+
+        /* ── Card ── */
+        .card {
+            background: rgba(24,24,27,0.95);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 20px;
+            padding: 26px;
+        }
+        .card-label {
+            font-size: 0.75rem; font-weight: 700;
+            color: rgba(255,255,255,0.35);
+            text-transform: uppercase; letter-spacing: 0.08em;
+            margin-bottom: 18px;
+            display: flex; align-items: center; gap: 7px;
+        }
+
+        /* ── Sub info rows ── */
+        .info-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.88rem;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-row .lbl { color: rgba(255,255,255,0.4); }
+        .info-row .val { color: rgba(255,255,255,0.88); font-weight: 600; }
+
+        .pill-active {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.22);
+            color: #4ade80; font-size: 0.72rem; font-weight: 700;
+            padding: 3px 10px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .pill-active .dot { width: 5px; height: 5px; border-radius: 50%; background: #22c55e; }
+
+        /* ── Warning list ── */
+        .warn-box {
+            background: rgba(245,158,11,0.07);
+            border: 1px solid rgba(245,158,11,0.18);
+            border-radius: 14px; padding: 16px; margin-bottom: 20px;
+        }
+        .warn-title { font-weight: 700; color: #fbbf24; font-size: 0.85rem; margin-bottom: 10px; }
+        .warn-list { list-style: none; }
+        .warn-list li { color: rgba(255,255,255,0.5); font-size: 0.83rem; line-height: 1.7; }
+        .warn-list li::before { content: '• '; color: #fbbf24; }
+
+        /* ── Form elements ── */
+        .fg { margin-bottom: 16px; }
+        .fg label { display: block; font-size: 0.75rem; font-weight: 700; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 7px; }
+        .fg select, .fg textarea, .fg input {
+            width: 100%; padding: 13px 14px;
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 12px; color: #fff; font-size: 0.9rem; font-family: inherit; outline: none;
+            transition: border-color 0.18s;
+        }
+        .fg select option { background: #1a1a1a; color: #fff; }
+        .fg textarea { resize: vertical; min-height: 88px; line-height: 1.55; }
+        .fg select:focus, .fg textarea:focus, .fg input:focus {
+            border-color: rgba(239,68,68,0.45);
+            box-shadow: 0 0 0 3px rgba(239,68,68,0.07);
+        }
+
+        /* ── Confirm checkbox ── */
+        .chk-wrap {
+            display: flex; align-items: flex-start; gap: 11px;
+            padding: 14px; background: rgba(239,68,68,0.04);
+            border: 1px solid rgba(239,68,68,0.12); border-radius: 12px;
+            margin-bottom: 18px; cursor: pointer;
+        }
+        .chk-wrap input[type=checkbox] { width: 17px; height: 17px; min-width: 17px; accent-color: #ef4444; margin-top: 2px; cursor: pointer; }
+        .chk-wrap span { font-size: 0.83rem; color: rgba(255,255,255,0.55); line-height: 1.55; }
+        .chk-wrap span strong { color: rgba(255,255,255,0.82); }
+
+        /* ── Buttons ── */
+        .btn-cancel {
+            width: 100%; padding: 15px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff; font-weight: 700; font-size: 0.97rem; border: none; border-radius: 12px;
+            cursor: pointer; transition: transform 0.14s, box-shadow 0.14s, opacity 0.14s;
+            box-shadow: 0 4px 16px rgba(239,68,68,0.28);
+            display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px;
+        }
+        .btn-cancel:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(239,68,68,0.38); }
+        .btn-cancel:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .btn-keep {
+            width: 100%; padding: 14px;
+            background: rgba(34,197,94,0.09); border: 1px solid rgba(34,197,94,0.22);
+            color: #4ade80; font-weight: 600; font-size: 0.92rem; border-radius: 12px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+            text-decoration: none; transition: background 0.18s, transform 0.14s;
+        }
+        .btn-keep:hover { background: rgba(34,197,94,0.15); transform: translateY(-1px); }
+
+        .btn-login {
+            width: 100%; padding: 15px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #fff; font-weight: 700; font-size: 0.97rem; border: none; border-radius: 12px;
+            cursor: pointer; transition: transform 0.14s;
+            box-shadow: 0 4px 16px rgba(34,197,94,0.3);
+            display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 6px;
+        }
+        .btn-login:hover:not(:disabled) { transform: translateY(-2px); }
+        .btn-login:disabled { opacity: 0.55; cursor: not-allowed; }
+
+        /* ── Error / Info boxes ── */
+        .err-box {
+            background: rgba(239,68,68,0.09); border: 1px solid rgba(239,68,68,0.25);
+            border-radius: 10px; padding: 11px 13px; font-size: 0.83rem; color: #fca5a5; margin-bottom: 12px;
+        }
+
+        /* ── Spinner ── */
+        @keyframes spinAnim { to { transform: rotate(360deg); } }
+        .spin { animation: spinAnim 0.85s linear infinite; }
+
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-up { animation: fadeUp 0.4s ease both; }
+
+        @keyframes scaleIn {
+            0%   { transform: scale(0) rotate(-18deg); opacity: 0; }
+            65%  { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* ── Success overlay ── */
+        .success-card {
+            position: relative; z-index: 1;
+            background: rgba(24,24,27,0.95);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 24px; padding: 48px 40px;
+            text-align: center; max-width: 480px; width: 100%;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+        }
+        .icon-circle { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 28px; }
+        .icon-circle.red { background: linear-gradient(135deg, #ef4444, #dc2626); box-shadow: 0 8px 24px rgba(239,68,68,0.35); }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- ── Loading ── -->
+    <div id="s-loading" style="margin-top:140px; text-align:center; position:relative; z-index:1;">
+        <svg class="spin" style="display:inline-block; color:#22c55e; width:38px; height:38px;" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+        </svg>
+        <p style="margin-top:14px; color:rgba(255,255,255,0.35); font-size:0.88rem;">Carregando…</p>
+    </div>
+
+    <!-- ── Login required ── -->
+    <div id="s-login" class="card hidden" style="max-width:420px; width:100%; position:relative; z-index:1; margin-top:80px; text-align:center;">
+        <div style="font-size:2.8rem; margin-bottom:14px;">🔒</div>
+        <h2 style="font-size:1.4rem; font-weight:800; margin-bottom:8px;">Acesso necessário</h2>
+        <p style="color:rgba(255,255,255,0.45); font-size:0.88rem; line-height:1.55; margin-bottom:24px;">
+            Entre na sua conta para gerenciar sua assinatura.
+        </p>
+
+        <form id="login-form" novalidate style="text-align:left;">
+            <div class="fg">
+                <label>Email</label>
+                <input type="email" id="l-email" placeholder="seu@email.com" autocomplete="email">
+            </div>
+            <div class="fg">
+                <label>Senha</label>
+                <input type="password" id="l-pass" placeholder="Sua senha" autocomplete="current-password">
+            </div>
+            <div id="l-err" class="err-box hidden"></div>
+            <button type="submit" class="btn-login" id="l-btn">
+                <span id="l-btn-txt">Entrar</span>
+                <svg id="l-spin" class="spin hidden" style="width:17px;height:17px;" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+            </button>
+        </form>
+
+        <p style="margin-top:18px;"><a href="/portal.html" style="color:rgba(255,255,255,0.3); font-size:0.82rem; text-decoration:underline;">← Ir para o painel</a></p>
+    </div>
+
+    <!-- ── No active sub ── -->
+    <div id="s-nosub" class="card hidden" style="max-width:440px; width:100%; position:relative; z-index:1; margin-top:80px; text-align:center;">
+        <div style="font-size:3rem; margin-bottom:14px;">😕</div>
+        <h2 style="font-size:1.4rem; font-weight:800; margin-bottom:8px;">Sem assinatura ativa</h2>
+        <p style="color:rgba(255,255,255,0.45); font-size:0.88rem; line-height:1.55; margin-bottom:24px;">
+            Você não possui nenhuma assinatura ativa para cancelar.
+        </p>
+        <a href="/portal.html" class="btn-keep" style="display:inline-flex; width:auto; padding:12px 24px; justify-content:center;">
+            ← Voltar ao painel
+        </a>
+    </div>
+
+    <!-- ── Main form ── -->
+    <div id="s-main" class="content hidden fade-up">
+
+        <nav class="navbar">
+            <a href="/" class="logo">
+                <div class="logo-icon">🛡️</div>
+                FastProxy
+            </a>
+            <a href="/portal.html" class="nav-back">
+                <svg style="width:15px;height:15px;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                Voltar ao painel
+            </a>
+        </nav>
+
+        <div class="page-title">Cancelar <span style="color:#f87171;">assinatura</span></div>
+        <p class="page-sub">Preencha o formulário abaixo para confirmar o cancelamento da sua assinatura.</p>
+
+        <div class="grid">
+
+            <!-- LEFT: info + consequences -->
+            <div>
+                <!-- Subscription info -->
+                <div class="card" style="margin-bottom:20px;">
+                    <div class="card-label">
+                        <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        Assinatura atual
+                    </div>
+
+                    <div class="info-row"><span class="lbl">Email</span><span class="val" id="i-email">—</span></div>
+                    <div class="info-row"><span class="lbl">Plano</span><span class="val" id="i-period">—</span></div>
+                    <div class="info-row"><span class="lbl">Proxies</span><span class="val" id="i-proxies">—</span></div>
+                    <div class="info-row"><span class="lbl">Vencimento</span><span class="val" id="i-enddate">—</span></div>
+                    <div class="info-row">
+                        <span class="lbl">Status</span>
+                        <span class="pill-active"><span class="dot"></span> Ativo</span>
+                    </div>
+                </div>
+
+                <!-- Consequences -->
+                <div class="card">
+                    <div class="card-label" style="color:#fbbf24;">
+                        <svg style="width:14px;height:14px;color:#fbbf24;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        O que acontece ao cancelar
+                    </div>
+
+                    <div class="warn-box">
+                        <div class="warn-title">⚠️ Efeitos imediatos do cancelamento</div>
+                        <ul class="warn-list">
+                            <li>Seus proxies serão <strong>desativados imediatamente</strong></li>
+                            <li>O acesso ao painel de proxies será encerrado</li>
+                            <li>Não há reembolso para o período já pago</li>
+                            <li>Um email de confirmação será enviado para você</li>
+                        </ul>
+                    </div>
+
+                    <p style="color:rgba(255,255,255,0.35); font-size:0.82rem; line-height:1.6;">
+                        Precisa de ajuda ou quer pausar o serviço?
+                        Entre em contato com o suporte antes de cancelar.
+                    </p>
+                </div>
+            </div>
+
+            <!-- RIGHT: cancel form -->
+            <div class="card" style="position:sticky; top:24px;">
+                <div class="card-label" style="color:#f87171;">
+                    <svg style="width:14px;height:14px;color:#f87171;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    Confirmar cancelamento
+                </div>
+
+                <form id="cancel-form" novalidate>
+
+                    <div class="fg">
+                        <label>Motivo do cancelamento *</label>
+                        <select id="f-reason" required>
+                            <option value="">— Selecione um motivo —</option>
+                            <option value="Preço muito alto">Preço muito alto</option>
+                            <option value="Não preciso mais do serviço">Não preciso mais do serviço</option>
+                            <option value="Problemas técnicos com os proxies">Problemas técnicos com os proxies</option>
+                            <option value="Encontrei um serviço melhor">Encontrei um serviço melhor</option>
+                            <option value="Velocidade insatisfatória">Velocidade insatisfatória</option>
+                            <option value="Dificuldade de usar o painel">Dificuldade de usar o painel</option>
+                            <option value="Cancelei por engano / teste">Cancelei por engano / teste</option>
+                            <option value="Outro">Outro motivo</option>
+                        </select>
+                    </div>
+
+                    <div class="fg">
+                        <label>Comentário (opcional)</label>
+                        <textarea id="f-comment" placeholder="Conte-nos mais — o que podemos melhorar?"></textarea>
+                    </div>
+
+                    <label class="chk-wrap" for="f-check">
+                        <input type="checkbox" id="f-check">
+                        <span>Entendo que meus proxies serão <strong>desativados imediatamente</strong> e que não haverá reembolso.</span>
+                    </label>
+
+                    <div id="f-err" class="err-box hidden"></div>
+
+                    <button type="submit" class="btn-cancel" id="f-btn" disabled>
+                        <svg id="f-spin" class="spin hidden" style="width:17px;height:17px;" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        <span id="f-btn-txt">Cancelar assinatura</span>
+                    </button>
+
+                    <a href="/portal.html" class="btn-keep" style="margin-top:0;">
+                        <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                        Manter minha assinatura
+                    </a>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Success ── -->
+    <div id="s-success" class="success-card hidden fade-up" style="margin-top:80px;">
+        <div class="icon-circle red" style="animation: scaleIn 0.5s ease both">
+            <svg style="width:40px;height:40px;color:#fff;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+            </svg>
+        </div>
+
+        <h1 style="font-size:1.75rem; font-weight:800; margin-bottom:8px; line-height:1.2;">Assinatura cancelada</h1>
+        <p style="color:rgba(255,255,255,0.5); font-size:0.93rem; line-height:1.6; margin-bottom:26px;">
+            Seu cancelamento foi processado com sucesso.<br>
+            Um email de confirmação foi enviado para você.
+        </p>
+
+        <div id="success-summary" style="background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.15); border-radius:12px; padding:16px; margin-bottom:26px; text-align:left;"></div>
+
+        <a href="/" style="display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#22c55e,#16a34a); color:#fff; font-weight:700; padding:14px 28px; border-radius:12px; text-decoration:none; font-size:0.93rem; box-shadow:0 4px 16px rgba(34,197,94,0.28);">
+            Voltar para a home
+        </a>
+    </div>
+
+    <script>
+        // ── State ───────────────────────────────────────────────────────────
+        let token   = null;
+        let user    = null;
+        let sub     = null;
+
+        const PERIOD = {'1m':'1 Mês','6m':'6 Meses','12m':'12 Meses',monthly:'Mensal',annual:'Anual'};
+
+        const STATES = ['s-loading','s-login','s-nosub','s-main','s-success'];
+        function show(id) { STATES.forEach(s => document.getElementById(s)?.classList.add('hidden')); document.getElementById(id)?.classList.remove('hidden'); }
+
+        function fmt(d) { return d ? new Date(d).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—'; }
+
+        // ── Boot ─────────────────────────────────────────────────────────────
+        async function init() {
+            token = localStorage.getItem('fastproxy_token');
+            if (!token) { show('s-login'); return; }
+
+            try {
+                const r = await fetch('/api/subscription/me', { headers: { Authorization: `Bearer ${token}` } });
+                const d = await r.json();
+
+                if (!d.success) { localStorage.removeItem('fastproxy_token'); show('s-login'); return; }
+
+                user = d.user;
+                sub  = (d.subscriptions || []).find(s => s.status === 'active');
+
+                if (!sub) { show('s-nosub'); return; }
+
+                // Fill info
+                document.getElementById('i-email').textContent   = user.email || '—';
+                document.getElementById('i-period').textContent  = PERIOD[sub.period] || sub.period || '—';
+                document.getElementById('i-proxies').textContent = `${sub.proxyCount || sub.proxy_count || 0} proxy(s)`;
+                document.getElementById('i-enddate').textContent = fmt(sub.endDate || sub.end_date);
+
+                show('s-main');
+
+            } catch(e) { show('s-login'); }
+        }
+
+        // ── Login form ───────────────────────────────────────────────────────
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('l-email').value.trim();
+            const pass  = document.getElementById('l-pass').value;
+            const err   = document.getElementById('l-err');
+            err.classList.add('hidden');
+            if (!email || !pass) { err.textContent = 'Preencha email e senha.'; err.classList.remove('hidden'); return; }
+
+            const btn = document.getElementById('l-btn');
+            document.getElementById('l-btn-txt').textContent = 'Entrando…';
+            document.getElementById('l-spin').classList.remove('hidden');
+            btn.disabled = true;
+
+            try {
+                const r = await fetch('/api/subscription/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email, password: pass}) });
+                const d = await r.json();
+                if (d.success) {
+                    localStorage.setItem('fastproxy_token', d.token);
+                    localStorage.setItem('fastproxy_user', JSON.stringify(d.user));
+                    window.location.reload();
+                } else {
+                    err.textContent = d.message || 'Credenciais inválidas.';
+                    err.classList.remove('hidden');
+                    document.getElementById('l-btn-txt').textContent = 'Entrar';
+                    document.getElementById('l-spin').classList.add('hidden');
+                    btn.disabled = false;
+                }
+            } catch(e) {
+                err.textContent = 'Erro de conexão.';
+                err.classList.remove('hidden');
+                document.getElementById('l-btn-txt').textContent = 'Entrar';
+                document.getElementById('l-spin').classList.add('hidden');
+                btn.disabled = false;
+            }
+        });
+
+        // ── Enable cancel button on checkbox ────────────────────────────────
+        document.getElementById('f-check').addEventListener('change', function() {
+            document.getElementById('f-btn').disabled = !this.checked;
+        });
+
+        // ── Cancel form ──────────────────────────────────────────────────────
+        document.getElementById('cancel-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const reason    = document.getElementById('f-reason').value;
+            const comment   = document.getElementById('f-comment').value.trim();
+            const confirmed = document.getElementById('f-check').checked;
+            const err       = document.getElementById('f-err');
+
+            err.classList.add('hidden');
+
+            if (!reason)    { err.textContent = 'Selecione um motivo para o cancelamento.'; err.classList.remove('hidden'); return; }
+            if (!confirmed) { err.textContent = 'Marque a caixa de confirmação para continuar.'; err.classList.remove('hidden'); return; }
+
+            const btn = document.getElementById('f-btn');
+            document.getElementById('f-btn-txt').textContent = 'Processando…';
+            document.getElementById('f-spin').classList.remove('hidden');
+            btn.disabled = true;
+
+            const fullReason = comment ? `${reason} — ${comment}` : reason;
+
+            try {
+                const r = await fetch('/api/subscription/cancel', {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body:    JSON.stringify({ reason: fullReason, subscriptionId: sub?.id })
+                });
+                const d = await r.json();
+
+                if (d.success) {
+                    // Clear cached subscription data
+                    localStorage.removeItem('fastproxy_subscription');
+                    localStorage.removeItem('fastproxy_proxies');
+
+                    // Fill summary
+                    const s = d.subscription || {};
+                    document.getElementById('success-summary').innerHTML = `
+                        <div style="display:flex;justify-content:space-between;font-size:0.83rem;color:rgba(255,255,255,0.45);padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05)"><span>Email</span><strong style="color:rgba(255,255,255,0.82)">${user?.email||'—'}</strong></div>
+                        <div style="display:flex;justify-content:space-between;font-size:0.83rem;color:rgba(255,255,255,0.45);padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05)"><span>Plano</span><strong style="color:rgba(255,255,255,0.82)">${PERIOD[s.period]||s.period||'—'}</strong></div>
+                        <div style="display:flex;justify-content:space-between;font-size:0.83rem;color:rgba(255,255,255,0.45);padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05)"><span>Proxies</span><strong style="color:rgba(255,255,255,0.82)">${s.proxyCount||0}</strong></div>
+                        <div style="display:flex;justify-content:space-between;font-size:0.83rem;color:rgba(255,255,255,0.45);padding:7px 0"><span>Status</span><strong style="color:#f87171">✕ Cancelado</strong></div>
+                    `;
+                    show('s-success');
+                } else {
+                    err.textContent = d.message || d.error || 'Erro ao cancelar. Tente novamente ou fale com o suporte.';
+                    err.classList.remove('hidden');
+                    document.getElementById('f-btn-txt').textContent = 'Cancelar assinatura';
+                    document.getElementById('f-spin').classList.add('hidden');
+                    btn.disabled = false;
+                }
+
+            } catch(e) {
+                err.textContent = 'Erro de conexão. Tente novamente.';
+                err.classList.remove('hidden');
+                document.getElementById('f-btn-txt').textContent = 'Cancelar assinatura';
+                document.getElementById('f-spin').classList.add('hidden');
+                btn.disabled = false;
+            }
+        });
+
+        init();
+    </script>
+</body>
+</html>

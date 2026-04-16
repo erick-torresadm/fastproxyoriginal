@@ -757,6 +757,33 @@
             animation: spin 1s linear infinite;
         }
 
+        /* Plan type comparison cards */
+        .plan-type-card {
+            background: var(--bg-card);
+            border-color: var(--border-color);
+            transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+
+        .plan-type-card:hover {
+            border-color: rgba(34, 197, 94, 0.45) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(34, 197, 94, 0.12);
+        }
+
+        .plan-type-card.selected-type {
+            border-color: #22c55e !important;
+            background: rgba(34, 197, 94, 0.06) !important;
+            box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.2), 0 8px 24px rgba(34, 197, 94, 0.1);
+        }
+
+        .panel-period-btn {
+            transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+        }
+
+        .panel-period-btn:hover {
+            border-color: rgba(34, 197, 94, 0.5) !important;
+        }
+
     </style>
 </head>
 <body>
@@ -1146,58 +1173,169 @@
     <!-- Plans Section -->
     <section id="planos" class="py-20 md:py-28 relative">
         <div class="absolute inset-0 bg-gradient-to-b from-green-950/20 via-transparent to-transparent"></div>
-        
+
         <div class="max-w-6xl mx-auto px-6 relative z-10">
-            <div class="text-center mb-12 reveal">
+            <div class="text-center mb-14 reveal">
                 <span class="text-sm font-semibold uppercase tracking-widest primary-text">ESCOLHA SEU PLANO</span>
                 <h2 class="font-bold text-4xl md:text-5xl mt-4" style="color: var(--text-primary)">Proxy para cada necessidade</h2>
+                <p class="mt-4 text-base max-w-xl mx-auto" style="color: var(--text-secondary)">
+                    Compare os tipos abaixo — cada um tem uma finalidade diferente. Todos com IP do Brasil 🇧🇷 e suporte 24/7.
+                </p>
             </div>
 
-            <!-- Type Selector -->
-            <div class="flex flex-wrap justify-center gap-4 mb-8">
-                <button onclick="selectHomeType('ipv6')" id="home-btn-ipv6" class="type-btn active px-6 py-3 rounded-xl border-2 border-green-500 bg-green-500/20 flex items-center gap-3 transition-all hover:scale-105">
-                    <span class="text-2xl">🌐</span>
-                    <div class="text-left">
-                        <div class="font-bold text-sm">IPv6</div>
-                        <div class="text-xs opacity-70">R$ 29,90/mês</div>
+            <!-- Type comparison cards — click to select -->
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+
+                <!-- IPv6 -->
+                <div class="plan-type-card rounded-2xl p-6 cursor-pointer border-2 relative reveal reveal-delay-1 selected-type"
+                     id="type-card-ipv6" onclick="selectHomeType('ipv6')">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500 text-black text-xs px-3 py-1 rounded-full font-bold whitespace-nowrap">🔥 MAIS POPULAR</div>
+                    <div class="text-4xl mb-3 mt-2">🌐</div>
+                    <h3 class="text-lg font-bold mb-0.5" style="color: var(--text-primary)">IPv6</h3>
+                    <div class="mb-3">
+                        <span class="text-2xl font-bold text-green-500">R$29,90</span>
+                        <span class="text-xs block" style="color: var(--text-muted)">por proxy / mês</span>
                     </div>
-                </button>
-                <button onclick="selectHomeType('ipv4')" id="home-btn-ipv4" class="type-btn px-6 py-3 rounded-xl border border-white/20 flex items-center gap-3 transition-all hover:scale-105" style="background: var(--bg-secondary)">
-                    <span class="text-2xl">🖥️</span>
-                    <div class="text-left">
-                        <div class="font-bold text-sm">IPv4</div>
-                        <div class="text-xs opacity-70">R$ 39,90/mês</div>
+                    <p class="text-xs mb-4 leading-relaxed" style="color: var(--text-zinc)">Entrada no mercado. Entrega do estoque, sem esperar API.</p>
+                    <ul class="text-xs space-y-1.5" style="color: var(--text-zinc)">
+                        <li><span class="text-green-500 mr-1">✓</span>Entrega imediata do estoque</li>
+                        <li><span class="text-green-500 mr-1">✓</span>Compre quantos precisar</li>
+                        <li><span class="text-green-500 mr-1">✓</span>IP do Brasil 🇧🇷</li>
+                        <li><span class="text-green-500 mr-1">✓</span>Reposição garantida</li>
+                        <li><span class="text-green-500 mr-1">✓</span>Suporte 24/7</li>
+                    </ul>
+                </div>
+
+                <!-- IPv4 -->
+                <div class="plan-type-card rounded-2xl p-6 cursor-pointer border reveal reveal-delay-2"
+                     id="type-card-ipv4" onclick="selectHomeType('ipv4')">
+                    <div class="text-4xl mb-3">🖥️</div>
+                    <h3 class="text-lg font-bold mb-0.5" style="color: var(--text-primary)">IPv4</h3>
+                    <div class="mb-3">
+                        <span class="text-2xl font-bold text-green-500">R$39,90</span>
+                        <span class="text-xs block" style="color: var(--text-muted)">por proxy / mês</span>
                     </div>
-                </button>
-                <button onclick="selectHomeType('isp')" id="home-btn-isp" class="type-btn px-6 py-3 rounded-xl border border-white/20 flex items-center gap-3 transition-all hover:scale-105 relative" style="background: var(--bg-secondary)">
-                    <span class="absolute -top-2 -right-2 bg-yellow-500 text-black text-xs px-2 py-0.5 rounded-full font-bold">PREMIUM</span>
-                    <span class="text-2xl">🏢</span>
-                    <div class="text-left">
-                        <div class="font-bold text-sm">ISP</div>
-                        <div class="text-xs opacity-70">R$ 49,90/mês</div>
+                    <p class="text-xs mb-4 leading-relaxed" style="color: var(--text-zinc)">IP dedicado exclusivo. Alta compatibilidade com todas as plataformas.</p>
+                    <ul class="text-xs space-y-1.5" style="color: var(--text-zinc)">
+                        <li><span class="text-green-500 mr-1">✓</span>IP dedicado e exclusivo</li>
+                        <li><span class="text-green-500 mr-1">✓</span>Pode comprar +1 proxy</li>
+                        <li><span class="text-green-500 mr-1">✓</span>Entrega automática via API</li>
+                        <li><span class="text-green-500 mr-1">✓</span>Alta compatibilidade</li>
+                        <li><span class="text-green-500 mr-1">✓</span>Suporte 24/7</li>
+                    </ul>
+                </div>
+
+                <!-- ISP -->
+                <div class="plan-type-card rounded-2xl p-6 cursor-pointer border relative reveal reveal-delay-3"
+                     id="type-card-isp" onclick="selectHomeType('isp')">
+                    <div class="absolute -top-3 right-4 bg-yellow-500 text-black text-xs px-3 py-1 rounded-full font-bold">PREMIUM</div>
+                    <div class="text-4xl mb-3 mt-2">🏢</div>
+                    <h3 class="text-lg font-bold mb-0.5" style="color: var(--text-primary)">ISP</h3>
+                    <div class="mb-3">
+                        <span class="text-2xl font-bold text-green-500">R$49,90</span>
+                        <span class="text-xs block" style="color: var(--text-muted)">por proxy / mês</span>
                     </div>
-                </button>
-                <button onclick="selectHomeType('mobile')" id="home-btn-mobile" class="type-btn px-6 py-3 rounded-xl border border-white/20 flex items-center gap-3 transition-all hover:scale-105 relative" style="background: var(--bg-secondary)">
-                    <span class="absolute -top-2 -right-2 bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">ESPECIAL</span>
-                    <span class="text-2xl">📱</span>
-                    <div class="text-left">
-                        <div class="font-bold text-sm">Mobile 4G/5G</div>
-                        <div class="text-xs opacity-70">R$ 79,90/mês</div>
+                    <p class="text-xs mb-4 leading-relaxed" style="color: var(--text-zinc)">IP de provedor residencial. Bypassa detecções mais exigentes.</p>
+                    <ul class="text-xs space-y-1.5" style="color: var(--text-zinc)">
+                        <li><span class="text-green-500 mr-1">✓</span>IP residencial real</li>
+                        <li><span class="text-green-500 mr-1">✓</span>Máximo bypass de bot</li>
+                        <li><span class="text-green-500 mr-1">✓</span>Ideal para Facebook Ads</li>
+                        <li><span class="text-green-500 mr-1">✓</span>Entrega automática via API</li>
+                        <li><span class="text-green-500 mr-1">✓</span>Suporte 24/7</li>
+                    </ul>
+                </div>
+
+                <!-- Mobile -->
+                <div class="plan-type-card rounded-2xl p-6 cursor-pointer border relative reveal reveal-delay-4"
+                     id="type-card-mobile" onclick="selectHomeType('mobile')">
+                    <div class="absolute -top-3 right-4 bg-purple-500 text-white text-xs px-3 py-1 rounded-full font-bold">ESPECIAL</div>
+                    <div class="text-4xl mb-3 mt-2">📱</div>
+                    <h3 class="text-lg font-bold mb-0.5" style="color: var(--text-primary)">Mobile 4G/5G</h3>
+                    <div class="mb-3">
+                        <span class="text-2xl font-bold text-green-500">R$79,90</span>
+                        <span class="text-xs block" style="color: var(--text-muted)">por proxy / mês</span>
                     </div>
-                </button>
+                    <p class="text-xs mb-4 leading-relaxed" style="color: var(--text-zinc)">Rede móvel real. Máxima anonimidade para automações exigentes.</p>
+                    <ul class="text-xs space-y-1.5" style="color: var(--text-zinc)">
+                        <li><span class="text-green-500 mr-1">✓</span>IP de rede móvel real</li>
+                        <li><span class="text-green-500 mr-1">✓</span>Máxima anonimidade</li>
+                        <li><span class="text-green-500 mr-1">✓</span>Ideal para automação</li>
+                        <li><span class="text-green-500 mr-1">✓</span>Entrega automática via API</li>
+                        <li><span class="text-green-500 mr-1">✓</span>Suporte 24/7</li>
+                    </ul>
+                </div>
             </div>
 
-            <!-- Plans Grid -->
-            <div id="home-plans-grid" class="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-                <!-- Plans will be loaded here -->
+            <!-- Purchase Panel -->
+            <div id="home-purchase-panel" class="max-w-xl mx-auto rounded-2xl p-8 reveal" style="background: var(--bg-card); border: 2px solid rgba(34, 197, 94, 0.3);">
+                <!-- Panel header -->
+                <div class="flex items-center gap-3 mb-6">
+                    <span id="panel-type-icon" class="text-3xl">🌐</span>
+                    <div>
+                        <h3 id="panel-type-name" class="text-xl font-bold" style="color: var(--text-primary)">IPv6</h3>
+                        <p id="panel-type-tag" class="text-xs font-semibold primary-text">R$29,90 por proxy/mês</p>
+                    </div>
+                    <div class="ml-auto">
+                        <span id="panel-delivery-badge" class="text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400 font-semibold">📦 Estoque</span>
+                    </div>
+                </div>
+
+                <!-- Period Selector -->
+                <div class="mb-5">
+                    <label class="block text-sm font-medium mb-3" style="color: var(--text-secondary)">Escolha o período</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <button onclick="selectPanelPeriod('1m')" id="panel-period-1m"
+                            class="panel-period-btn py-3 px-2 rounded-xl text-center border-2 transition-all"
+                            style="border-color: #22c55e; background: rgba(34,197,94,0.1)">
+                            <div class="text-sm font-bold" style="color: var(--text-primary)">1 Mês</div>
+                            <div class="text-xs" style="color: var(--text-muted)">sem desconto</div>
+                        </button>
+                        <button onclick="selectPanelPeriod('6m')" id="panel-period-6m"
+                            class="panel-period-btn py-3 px-2 rounded-xl text-center border-2 transition-all"
+                            style="border-color: var(--border-color)">
+                            <div class="text-sm font-bold" style="color: var(--text-primary)">6 Meses</div>
+                            <div class="text-xs text-green-500 font-semibold">-25% OFF</div>
+                        </button>
+                        <button onclick="selectPanelPeriod('12m')" id="panel-period-12m"
+                            class="panel-period-btn py-3 px-2 rounded-xl text-center border-2 transition-all"
+                            style="border-color: var(--border-color)">
+                            <div class="text-sm font-bold" style="color: var(--text-primary)">12 Meses</div>
+                            <div class="text-xs text-green-500 font-semibold">-35% OFF</div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quantity selector -->
+                <div class="mb-5" id="panel-qty-section">
+                    <label class="block text-sm font-medium mb-3" style="color: var(--text-secondary)">Quantidade de proxies</label>
+                    <div class="flex items-center gap-4">
+                        <button onclick="changePanelQty(-1)" class="w-10 h-10 rounded-xl flex items-center justify-center text-xl font-bold border transition-all hover:border-green-500" style="background: var(--bg-secondary); border-color: var(--border-color)">−</button>
+                        <input type="number" id="panel-qty" value="1" min="1" max="100"
+                            class="w-20 text-center py-2 rounded-xl border text-xl font-bold outline-none"
+                            style="background: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary)"
+                            onchange="updatePanelTotal()">
+                        <button onclick="changePanelQty(1)" class="w-10 h-10 rounded-xl flex items-center justify-center text-xl font-bold border transition-all hover:border-green-500" style="background: var(--bg-secondary); border-color: var(--border-color)">+</button>
+                    </div>
+                </div>
+
+                <!-- Total -->
+                <div class="rounded-xl p-4 mb-5" style="background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.25)">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-sm" style="color: var(--text-secondary)">Total do período:</span>
+                        <span id="panel-total" class="text-2xl font-bold text-green-500">R$ 29,90</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs" style="color: var(--text-muted)">Preço por proxy/mês:</span>
+                        <span id="panel-price-pm" class="text-sm font-semibold" style="color: var(--text-zinc)">R$ 29,90</span>
+                    </div>
+                </div>
+
+                <button onclick="startHomePurchase()" class="w-full py-4 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-green-500 text-black hover:bg-green-400 transition-all" style="box-shadow: 0 4px 20px rgba(34,197,94,0.3)">
+                    <i class="fas fa-shopping-cart"></i>
+                    Comprar Agora
+                </button>
+                <p class="text-center text-xs mt-3" style="color: var(--text-muted)">🔒 Pagamento seguro via Stripe</p>
             </div>
-            
-            <p class="text-center text-sm mt-12" style="color: var(--text-muted)">
-                <span class="inline-flex items-center gap-2">
-                    <svg class="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    Todos os planos incluem suporte 24/7, ativação imediata e reposições
-                </span>
-            </p>
 
             <!-- Other Countries Button -->
             <div class="text-center mt-8">
@@ -1832,134 +1970,107 @@
 
         // Home Page Type Selector
         const HOME_PRICING = {
-            ipv6: { name: 'IPv6', icon: '🌐', minQty: 10, sellPrice: 29.90, tag: 'POPULAR', tagClass: 'bg-gradient-to-r from-green-500 to-emerald-600 text-white', autoDelivery: false },
-            ipv4: { name: 'IPv4', icon: '🖥️', minQty: 1, sellPrice: 39.90, tag: null, tagClass: '', autoDelivery: true },
-            isp: { name: 'ISP', icon: '🏢', minQty: 1, sellPrice: 49.90, tag: 'PREMIUM', tagClass: 'bg-yellow-500 text-black', autoDelivery: true },
-            mobile: { name: 'Mobile 4G/5G', icon: '📱', minQty: 1, sellPrice: 79.90, tag: 'ESPECIAL', tagClass: 'bg-purple-500 text-white', autoDelivery: true }
+            ipv6:   { name: 'IPv6',        icon: '🌐', minQty: 1, sellPrice: 29.90, autoDelivery: false },
+            ipv4:   { name: 'IPv4',        icon: '🖥️', minQty: 1, sellPrice: 39.90, autoDelivery: true  },
+            isp:    { name: 'ISP',         icon: '🏢', minQty: 1, sellPrice: 49.90, autoDelivery: true  },
+            mobile: { name: 'Mobile 4G/5G',icon: '📱', minQty: 1, sellPrice: 79.90, autoDelivery: true  }
         };
 
         const HOME_PERIODS = [
-            { id: '1m', name: '1 Mês', months: 1, discount: 0 },
-            { id: '6m', name: '6 Meses', months: 6, discount: 0.08 },
-            { id: '12m', name: '12 Meses', months: 12, discount: 0.08 }
+            { id: '1m',  name: '1 Mês',    months: 1,  discount: 0    },
+            { id: '6m',  name: '6 Meses',  months: 6,  discount: 0.25 },
+            { id: '12m', name: '12 Meses', months: 12, discount: 0.35 }
         ];
+
+        let panelSelectedPeriod = '1m';
 
         function selectHomeType(type) {
             currentType = type;
-            
-            document.querySelectorAll('.type-btn').forEach(btn => {
-                btn.classList.remove('active', 'border-green-500', 'bg-green-500/20');
-                btn.classList.add('border-white/20');
-                btn.style.background = 'var(--bg-secondary)';
+
+            // Update type card highlights
+            document.querySelectorAll('.plan-type-card').forEach(card => {
+                card.classList.remove('selected-type');
+                card.style.borderColor = 'var(--border-color)';
+                card.style.background  = 'var(--bg-card)';
             });
-            
-            const activeBtn = document.getElementById(`home-btn-${type}`);
-            activeBtn.classList.remove('border-white/20');
-            activeBtn.classList.add('active', 'border-green-500', 'bg-green-500/20');
-            activeBtn.style.background = '';
-            
-            loadHomePlans();
+            const activeCard = document.getElementById(`type-card-${type}`);
+            if (activeCard) activeCard.classList.add('selected-type');
+
+            updatePurchasePanel();
         }
 
-        function loadHomePlans() {
+        function updatePurchasePanel() {
             const info = HOME_PRICING[currentType];
-            const grid = document.getElementById('home-plans-grid');
-            const basePrice = info.sellPrice;
-            
-            grid.innerHTML = HOME_PERIODS.map((period, index) => {
-                const discount = period.discount;
-                const isPopular = index === 1;
-                const badgeText = discount > 0 ? `-${Math.round(discount * 100)}%` : null;
-                const totalForPeriod = basePrice * period.months;
-                const discountedTotal = totalForPeriod * (1 - discount);
-                
-                return `
-                    <div class="plan-card rounded-2xl p-1 ${isPopular ? 'border-2' : ''} transition-all duration-300" id="home-plan-${period.id}" style="${isPopular ? 'border-color: var(--badge-text)' : 'border: 1px solid var(--border-color)'}">
-                        <div class="rounded-xl p-6 h-full text-center relative" style="background: var(--bg-card)">
-                            ${badgeText ? `<span class="absolute top-4 right-4 ${info.tagClass} text-xs px-2 py-1 rounded-full font-bold">${badgeText}</span>` : ''}
-                            ${isPopular ? `<span class="absolute top-4 left-4 bg-green-500 text-black text-xs px-2 py-1 rounded-full font-bold">RECOMENDADO</span>` : ''}
-                            
-                            <div class="text-3xl mb-2">${info.icon}</div>
-                            <h3 class="text-xl font-bold mb-1" style="color: var(--text-primary)">${period.name}</h3>
-                            <p class="text-sm mb-4" style="color: var(--text-zinc)">${info.name}</p>
-                            
-                            <div class="mb-2">
-                                <span class="text-3xl font-bold text-green-500">R$ ${basePrice.toFixed(2).replace('.', ',')}</span>
-                                <span class="text-sm block" style="color: var(--text-muted)">por proxy</span>
-                            </div>
-                            
-                            <div class="text-sm mb-4" style="color: var(--text-muted)">
-                                <span id="home-period-total-${period.id}">${period.months}x R$ ${basePrice.toFixed(2).replace('.', ',')} = R$ ${totalForPeriod.toFixed(2).replace('.', ',')}</span>
-                                ${discount > 0 ? `<br><span class="text-green-500">com ${Math.round(discount * 100)}% OFF: R$ ${discountedTotal.toFixed(2).replace('.', ',')}</span>` : ''}
-                            </div>
-                            
-                            <div class="mb-4">
-                                <label class="text-sm block mb-2" style="color: var(--text-muted)">Quantidade</label>
-                                <div class="flex items-center justify-center gap-2">
-                                    <button onclick="changeHomeQty('${period.id}', -1)" class="w-8 h-8 rounded-lg hover:bg-white/20 flex items-center justify-center text-lg" style="background: var(--bg-secondary)">-</button>
-                                    <input type="number" id="home-qty-${period.id}" value="${info.minQty}" min="${info.minQty}" max="100" 
-                                        class="w-16 text-center py-2 rounded-lg border text-lg font-bold"
-                                        style="background: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary)"
-                                        onchange="updateHomePlanPrice('${period.id}', ${basePrice}, ${period.months}, ${discount})">
-                                    <button onclick="changeHomeQty('${period.id}', 1)" class="w-8 h-8 rounded-lg hover:bg-white/20 flex items-center justify-center text-lg" style="background: var(--bg-secondary)">+</button>
-                                </div>
-                            </div>
-                            
-                            <div class="text-lg font-bold mb-2 border-t border-white/10 pt-4" style="color: var(--text-primary)">
-                                <span style="color: var(--text-muted)">Total:</span> 
-                                <span id="home-total-${period.id}" class="text-green-500">R$ ${discountedTotal.toFixed(2).replace('.', ',')}</span>
-                            </div>
-                            
-                            <p class="text-xs mb-4" style="color: var(--text-muted)">
-                                ${info.minQty > 1 ? `Mínimo: ${info.minQty} proxies` : 'Por proxy'} • ${period.name}
-                            </p>
-                            
-                            <ul class="text-sm mb-6 space-y-2 text-left" style="color: var(--text-zinc)">
-                                <li><span class="text-green-500">✓</span> Alta velocidade</li>
-                                <li><span class="text-green-500">✓</span> Suporte 24/7</li>
-                                <li><span class="text-green-500">✓</span> IP do Brasil 🇧🇷</li>
-                                <li><span class="text-green-500">✓</span> ${info.autoDelivery ? 'Entrega automática' : 'Ativação manual'}</li>
-                            </ul>
-                            
-                            <button onclick="startHomePurchase('${currentType}', '${period.id}', ${period.months})" 
-                                class="w-full py-3 rounded-xl font-bold transition-all ${isPopular ? 'bg-green-500 text-black hover:bg-green-600' : 'border-2 border-green-500 text-green-500 hover:bg-green-500/10'}">
-                                <i class="fas fa-shopping-cart mr-2"></i>Comprar Agora
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            // Initialize prices
-            HOME_PERIODS.forEach(period => {
-                updateHomePlanPrice(period.id, info.sellPrice, period.months, period.discount);
+
+            document.getElementById('panel-type-icon').textContent = info.icon;
+            document.getElementById('panel-type-name').textContent = info.name;
+            document.getElementById('panel-type-tag').textContent  = `R$${info.sellPrice.toFixed(2).replace('.', ',')} por proxy/mês`;
+
+            const badge = document.getElementById('panel-delivery-badge');
+            if (!info.autoDelivery) {
+                badge.textContent  = '📦 Estoque';
+                badge.className    = 'text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400 font-semibold';
+            } else {
+                badge.textContent  = '⚡ API Auto';
+                badge.className    = 'text-xs px-2 py-1 rounded-full bg-blue-500/20 text-blue-400 font-semibold';
+            }
+
+            // Show quantity selector for ALL types
+            const qtySection = document.getElementById('panel-qty-section');
+            qtySection.style.display = 'block';
+            document.getElementById('panel-qty').min   = info.minQty;
+            document.getElementById('panel-qty').value = info.minQty;
+
+            updatePanelTotal();
+        }
+
+        function selectPanelPeriod(periodId) {
+            panelSelectedPeriod = periodId;
+
+            HOME_PERIODS.forEach(p => {
+                const btn = document.getElementById(`panel-period-${p.id}`);
+                if (!btn) return;
+                if (p.id === periodId) {
+                    btn.style.borderColor = '#22c55e';
+                    btn.style.background  = 'rgba(34,197,94,0.1)';
+                } else {
+                    btn.style.borderColor = 'var(--border-color)';
+                    btn.style.background  = '';
+                }
             });
+
+            updatePanelTotal();
         }
 
-        function changeHomeQty(periodId, delta) {
-            const input = document.getElementById(`home-qty-${periodId}`);
-            const period = HOME_PERIODS.find(p => p.id === periodId);
-            const newVal = Math.max(parseInt(input.min), parseInt(input.value) + delta);
-            input.value = newVal;
-            
-            updateHomePlanPrice(periodId, HOME_PRICING[currentType].sellPrice, period.months, period.discount);
+        function changePanelQty(delta) {
+            const input  = document.getElementById('panel-qty');
+            const minVal = parseInt(input.min) || 1;
+            input.value  = Math.max(minVal, parseInt(input.value || 1) + delta);
+            updatePanelTotal();
         }
 
-        function updateHomePlanPrice(periodId, basePrice, months, discount) {
-            const qty = parseInt(document.getElementById(`home-qty-${periodId}`).value) || 1;
-            const totalForPeriod = basePrice * months;
-            const subtotal = totalForPeriod * qty;
-            const discountAmount = subtotal * discount;
-            const finalTotal = subtotal - discountAmount;
-            
-            document.getElementById(`home-total-${periodId}`).textContent = `R$ ${finalTotal.toFixed(2).replace('.', ',')}`;
+        function updatePanelTotal() {
+            const info    = HOME_PRICING[currentType];
+            const period  = HOME_PERIODS.find(p => p.id === panelSelectedPeriod) || HOME_PERIODS[0];
+            const qty     = parseInt(document.getElementById('panel-qty').value) || 1;
+
+            const pricePerMonth = info.sellPrice * (1 - period.discount);
+            const total         = pricePerMonth * period.months * qty;
+
+            document.getElementById('panel-total').textContent    = `R$ ${total.toFixed(2).replace('.', ',')}`;
+            document.getElementById('panel-price-pm').textContent = `R$ ${info.sellPrice.toFixed(2).replace('.', ',')}${period.discount > 0 ? ` (−${Math.round(period.discount * 100)}%)` : ''}`;
         }
 
         let homePendingPurchase = null;
 
-        function startHomePurchase(type, period, months) {
-            const quantity = parseInt(document.getElementById(`home-qty-${period}`).value) || 1;
-            homePendingPurchase = { type, period, quantity, months };
+        function startHomePurchase() {
+            const qty = parseInt(document.getElementById('panel-qty').value) || 1;
+            homePendingPurchase = {
+                type:     currentType,
+                period:   panelSelectedPeriod,
+                quantity: qty,
+                months:   (HOME_PERIODS.find(p => p.id === panelSelectedPeriod) || HOME_PERIODS[0]).months
+            };
             openHomeTermsModal();
         }
 
@@ -1988,7 +2099,12 @@
                 return;
             }
             closeHomeTermsModal();
-            setTimeout(() => openHomeBuyerModal(), 300);
+            // Route through the unauthenticated Stripe checkout modal (email + whatsapp → /api/stripe/create-checkout)
+            setTimeout(() => openCheckoutModalWithData(
+                homePendingPurchase.type,
+                homePendingPurchase.period,
+                homePendingPurchase.quantity
+            ), 300);
         }
 
         function openHomeBuyerModal() {
@@ -2019,10 +2135,10 @@
             const token = localStorage.getItem('fastproxy_token');
             if (!token) {
                 showToast('Faça login para comprar', 'error');
-                setTimeout(() => window.location.href = '/login.html', 1500);
+                setTimeout(() => window.location.href = '/portal.html', 1500);
                 return;
             }
-            
+
             const name = document.getElementById('home-buyer-name').value.trim();
             const document_ = document.getElementById('home-buyer-document').value.trim();
             const whatsapp = document.getElementById('home-buyer-whatsapp').value.trim();
@@ -2075,9 +2191,9 @@
         let periodMonths = 1;
         
         const PRICING = {
-            ipv6: { name: 'IPv6', icon: '🌐', price: 29.90, minQty: 10 },
-            ipv4: { name: 'IPv4', icon: '🖥️', price: 39.90, minQty: 1 },
-            isp: { name: 'ISP', icon: '🏢', price: 49.90, minQty: 1 },
+            ipv6:   { name: 'IPv6',         icon: '🌐', price: 29.90, minQty: 1 },
+            ipv4:   { name: 'IPv4',         icon: '🖥️', price: 39.90, minQty: 1 },
+            isp:    { name: 'ISP',          icon: '🏢', price: 49.90, minQty: 1 },
             mobile: { name: 'Mobile 4G/5G', icon: '📱', price: 79.90, minQty: 1 }
         };
 
@@ -2375,7 +2491,11 @@
 
         // Check URL params on load - for "buy more proxies" from portal
         document.addEventListener('DOMContentLoaded', () => {
-            loadHomePlans();
+            // Init pricing panel
+            currentType          = 'ipv6';
+            panelSelectedPeriod  = '1m';
+            updatePurchasePanel();
+            selectPanelPeriod('1m');
             
             const urlParams = new URLSearchParams(window.location.search);
             
@@ -2561,26 +2681,19 @@
         }
 
         function buyHomeIntlProxy() {
-            const token = localStorage.getItem('fastproxy_token');
-            if (!token) {
-                showToast('Faça login para comprar', 'error');
-                setTimeout(() => window.location.href = '/login.html', 1500);
-                return;
-            }
-            
             if (!intlConfig.country || !intlConfig.type) {
                 showToast('Complete todas as etapas', 'error');
                 return;
             }
-            
+
             homePendingPurchase = {
-                type: intlConfig.type,
-                period: intlConfig.period,
-                quantity: intlConfig.quantity,
-                country: intlConfig.country,
+                type:        intlConfig.type,
+                period:      intlConfig.period,
+                quantity:    intlConfig.quantity,
+                country:     intlConfig.country,
                 countryName: intlConfig.countryName
             };
-            
+
             closeIntlModal();
             openHomeTermsModal();
         }

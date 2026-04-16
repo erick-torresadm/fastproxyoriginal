@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/Erick/Documents/opencode/projetos/fastproxyv3 - Copia/**)",
+      "Bash(node -e \"require\\('./server.js'\\)\")",
+      "Bash(node -e ' *)",
+      "Bash(node --check /tmp/test_script_1.js)",
+      "Bash(node --check \"public/test_script.js\")",
+      "Bash(del \"C:\\\\Users\\\\Erick\\\\Documents\\\\opencode\\\\projetos\\\\fastproxyv3 - Copia\\\\public\\\\test_script.js\")",
+      "Bash(vercel --prod)",
+      "Bash(curl -s -X POST https://fastproxyv3.vercel.app/api/stripe/create-checkout -H 'Content-Type: application/json' -d '{\"email\":\"test@test.com\",\"type\":\"ipv6\",\"period\":\"1m\",\"proxyCount\":1}')",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('success:', d.get\\('success'\\)\\); print\\('error:', d.get\\('error',''\\)\\); print\\('checkoutUrl:', \\(d.get\\('checkoutUrl'\\) or ''\\)[:60]\\)\")",
+      "Bash(curl -s -X POST https://fastproxyv3.vercel.app/api/stripe/create-checkout -H 'Content-Type: application/json' -d '{\"email\":\"test@test.com\",\"type\":\"ipv4\",\"period\":\"6m\",\"proxyCount\":2}')"
+    ]
+  }
+}

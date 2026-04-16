@@ -1,501 +1,646 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="scroll-smooth dark" id="html-root">
+<html lang="pt-BR" class="dark" id="html-root">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pagamento Aprovado - FastProxy</title>
-    <meta name="description" content="Pagamento aprovado - FastProxy">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+    <title>Pagamento Confirmado — FastProxy</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✅</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#faf5ff',
-                            100: '#f3e8ff',
-                            200: '#e9d5ff',
-                            300: '#d8b4fe',
-                            400: '#c084fc',
-                            500: '#a855f7',
-                            600: '#9333ea',
-                            700: '#7e22ce',
-                            800: '#6b21a8',
-                            900: '#581c87',
-                            950: '#2e1065',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-primary: #09090b;
-            --bg-secondary: rgba(24, 24, 27, 0.5);
-            --bg-card: rgba(24, 24, 27, 0.95);
-            --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --border-color: rgba(255, 255, 255, 0.08);
-            --green: #22c55e;
-        }
-
-        * {
-            -webkit-font-smoothing: antialiased;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
 
         body {
-            background: var(--bg-primary);
-            color: var(--text-primary);
             font-family: 'Inter', system-ui, sans-serif;
+            background: #09090b;
+            color: #ffffff;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 1rem;
+        }
+
+        /* Ambient glow */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 400px;
+            background: radial-gradient(ellipse, rgba(34,197,94,0.12) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
         }
 
         .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
+            position: relative;
+            z-index: 1;
+            background: rgba(24,24,27,0.95);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 24px;
-            padding: 48px;
+            padding: 48px 40px;
             text-align: center;
-            max-width: 500px;
-            width: 90%;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-            color: white;
-            border-radius: 0.75rem;
-            font-weight: 600;
-            padding: 0.875rem 1.5rem;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            max-width: 480px;
             width: 100%;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(34, 197, 94, 0.3);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        input {
-            width: 100%;
-            padding: 0.875rem 1rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 0.75rem;
-            color: var(--text-primary);
-            outline: none;
-            transition: all 0.2s ease;
-        }
-
-        input:focus {
-            border-color: var(--green);
-            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
-        }
-
-        .check-icon {
+        .icon-circle {
             width: 80px;
             height: 80px;
-            background: linear-gradient(135deg, #22c55e, #16a34a);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 24px;
-            animation: scaleIn 0.5s ease both;
+            margin: 0 auto 28px;
         }
+
+        .icon-circle.green  { background: linear-gradient(135deg, #22c55e, #16a34a); box-shadow: 0 8px 24px rgba(34,197,94,0.35); }
+        .icon-circle.spin   { background: linear-gradient(135deg, #22c55e, #16a34a); box-shadow: 0 8px 24px rgba(34,197,94,0.25); }
+        .icon-circle.red    { background: linear-gradient(135deg, #ef4444, #dc2626); box-shadow: 0 8px 24px rgba(239,68,68,0.35); }
+        .icon-circle.yellow { background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 8px 24px rgba(245,158,11,0.35); }
 
         @keyframes scaleIn {
-            from { transform: scale(0); }
-            to { transform: scale(1); }
+            0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+            60%  { transform: scale(1.15); }
+            100% { transform: scale(1) rotate(0); opacity: 1; }
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spinAnim { to { transform: rotate(360deg); } }
+        .spin-icon { animation: spinAnim 1s linear infinite; }
 
-        .animate-spin {
-            animation: spin 1s linear infinite;
-        }
-
-        .hidden { display: none !important; }
-
-        .fade-in {
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
+        @keyframes fadeUp {
             from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-up { animation: fadeUp 0.4s ease both; }
+
+        .title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.55);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .badge-paid {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(34,197,94,0.12);
+            border: 1px solid rgba(34,197,94,0.3);
+            color: #4ade80;
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 999px;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .input-wrap { text-align: left; margin-bottom: 14px; }
+        .input-wrap label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 6px;
+        }
+
+        .input-wrap input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-wrap input:focus { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,0.12); }
+        .input-wrap input[readonly] { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-green {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #fff;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 4px 16px rgba(34,197,94,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .btn-green:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(34,197,94,0.4); }
+        .btn-green:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+        .btn-whatsapp {
+            width: 100%;
+            padding: 14px;
+            background: #25D366;
+            color: #fff;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .btn-text {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.4);
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: underline;
         }
 
         .error-box {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: 12px;
-            padding: 16px;
-            margin: 16px 0;
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.3);
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 0.85rem;
+            color: #fca5a5;
+            text-align: left;
+            margin-bottom: 14px;
         }
 
-        .warning-box {
-            background: rgba(234, 179, 8, 0.1);
-            border: 1px solid rgba(234, 179, 8, 0.3);
-            border-radius: 12px;
-            padding: 16px;
-            margin: 16px 0;
+        .info-box {
+            background: rgba(59,130,246,0.08);
+            border: 1px solid rgba(59,130,246,0.2);
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 0.83rem;
+            color: #93c5fd;
+            text-align: left;
+            margin-bottom: 20px;
+            line-height: 1.5;
         }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.5);
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-row strong { color: rgba(255,255,255,0.85); }
+
+        .session-id {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.2);
+            font-family: monospace;
+            word-break: break-all;
+            margin-top: 20px;
+        }
+
+        /* Progress bar */
+        .progress-bar-wrap {
+            height: 4px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 24px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #22c55e, #16a34a);
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .divider {
+            height: 1px;
+            background: rgba(255,255,255,0.07);
+            margin: 20px 0;
+        }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <!-- Loading -->
-        <div id="loading-section">
-            <div class="check-icon" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
-                <svg id="loading-spinner" class="w-10 h-10 text-white animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-            </div>
-            
-            <h1 class="text-3xl font-bold mb-4">Processando...</h1>
-            <p class="text-lg mb-6" style="color: var(--text-secondary)">Verificando pagamento e criando sua conta.</p>
-        </div>
 
-        <!-- Success - Show Proxies -->
-        <div id="success-section" class="hidden fade-in">
-            <div class="check-icon" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
-                <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
-            
-            <h2 class="text-2xl font-bold mb-2" id="success-title">Tudo Pronto!</h2>
-            <p class="text-sm mb-6" style="color: var(--text-secondary)" id="success-subtitle">
-                Seus proxies foram criados e vinculados à sua conta.
-            </p>
-            
-            <!-- Order Details -->
-            <div id="order-details" class="mb-6 p-4 rounded-xl text-left" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2)">
-                <!-- Filled dynamically -->
-            </div>
-            
-            <!-- Proxies List -->
-            <div id="proxies-section" class="mb-6 p-4 rounded-xl text-left" style="background: #0a0a0a; border: 1px solid rgba(34, 197, 94, 0.3);">
-                <p class="text-xs mb-2" style="color: var(--text-secondary)">Suas credenciais de proxy:</p>
-                <pre id="proxies-list" class="text-sm overflow-x-auto" style="color: #22c55e; white-space: pre-wrap; word-break: break-all;"></pre>
-            </div>
-            
-            <button onclick="goToPortal()" class="btn-primary inline-block w-full text-center">
-                Acessar Painel do Cliente
-            </button>
-            
-            <p class="text-xs mt-4" style="color: var(--text-secondary)">
-                As credenciais também foram enviadas para seu email.
-            </p>
+    <!-- STATE: Processing (initial) -->
+    <div id="state-processing" class="card">
+        <div class="icon-circle spin">
+            <svg class="w-10 h-10 text-white spin-icon" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
         </div>
-
-        <!-- Create Account (Fallback - if process fails or user needs to set password) -->
-        <div id="account-section" class="hidden fade-in">
-            <div class="check-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-                <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
-            </div>
-            
-            <h2 class="text-2xl font-bold mb-2">Finalize seu Cadastro</h2>
-            <p class="text-sm mb-6" style="color: var(--text-secondary)">
-                Seu pagamento foi confirmado! Crie uma senha para acessar seus proxies.
-            </p>
-            
-            <form id="register-form" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium mb-2 text-left" style="color: var(--text-secondary)">Email</label>
-                    <input type="email" id="reg-email" readonly class="opacity-70">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-2 text-left" style="color: var(--text-secondary)">Sua Senha</label>
-                    <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres" required minlength="6">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-2 text-left" style="color: var(--text-secondary)">Confirmar Senha</label>
-                    <input type="password" id="reg-password-confirm" placeholder="Repita a senha" required minlength="6">
-                </div>
-                
-                <div id="register-error" class="error-box hidden"></div>
-                
-                <button type="submit" id="register-btn" class="btn-primary">
-                    <span id="register-btn-text">Ativar Conta</span>
-                    <svg id="register-spinner" class="w-5 h-5 animate-spin hidden mx-auto" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                </button>
-            </form>
-        </div>
-
-        <!-- Error -->
-        <div id="error-section" class="hidden fade-in">
-            <div class="check-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
-                <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </div>
-            
-            <h2 class="text-2xl font-bold mb-2" id="error-title">Ops! Algo deu errado</h2>
-            <p class="text-sm mb-6" style="color: var(--text-secondary)" id="error-message">
-                Não foi possível processar seu pagamento.
-            </p>
-            
-            <div class="warning-box text-left mb-6">
-                <p class="text-sm font-medium mb-2" style="color: #fbbf24;">📋 Dados do pedido:</p>
-                <p class="text-xs" style="color: var(--text-secondary)" id="error-order-info">
-                    Session ID: <span id="error-session-id"></span>
-                </p>
-            </div>
-            
-            <a href="https://wa.me/5511999999999" target="_blank" class="btn-primary inline-block w-full text-center mb-4">
-                💬 Falar com Suporte
-            </a>
-            
-            <a href="/" class="text-sm underline block" style="color: var(--text-secondary)">
-                Voltar para Home
-            </a>
-        </div>
+        <h1 class="title">Verificando pagamento…</h1>
+        <p class="subtitle">Aguarde, estamos confirmando sua compra com segurança.</p>
     </div>
 
-        <!-- Error / Manual Activation -->
-        <div id="error-section" class="hidden fade-in">
-            <div class="check-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-                <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
-            </div>
-            
-            <h2 class="text-2xl font-bold mb-2" id="error-title">Ops! Algo deu errado</h2>
-            <p class="text-sm mb-6" style="color: var(--text-secondary)" id="error-message">
-                Não foi possível criar sua conta automaticamente.
-            </p>
-            
-            <div class="warning-box text-left mb-6">
-                <p class="text-sm font-medium mb-2" style="color: #fbbf24;">📋 Seus dados do pedido:</p>
-                <p class="text-xs" style="color: var(--text-secondary)" id="error-order-info">
-                    Carregando informações...
-                </p>
-            </div>
-            
-            <p class="text-sm mb-4" style="color: var(--text-secondary)">
-                Entre em contato com o suporte para ativar sua conta manualmente:
-            </p>
-            
-            <a href="https://wa.me/5511999999999" target="_blank" class="btn-primary inline-block w-full text-center mb-4" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);">
-                💬 Falar com Suporte
-            </a>
-            
-            <a href="/" class="text-sm underline block" style="color: var(--text-secondary)">
-                Voltar para Home
-            </a>
+    <!-- STATE: Existing user — must login with password -->
+    <div id="state-existing-user" class="card fade-up hidden">
+        <div class="icon-circle green" style="animation: scaleIn 0.5s ease both">
+            <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+            </svg>
         </div>
+
+        <div class="badge-paid">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+            Pagamento Confirmado
+        </div>
+
+        <h1 class="title">Entre na sua conta</h1>
+        <p class="subtitle">
+            Pagamento aprovado! Como você já possui uma conta, confirme sua senha para acessar seus novos proxies.
+        </p>
+
+        <div class="info-box">
+            🔒 Por segurança, precisamos confirmar que é você antes de liberar o acesso.
+        </div>
+
+        <form id="existing-user-form" novalidate>
+            <div class="input-wrap">
+                <label>Email</label>
+                <input type="email" id="eu-email" readonly placeholder="seu@email.com">
+            </div>
+            <div class="input-wrap">
+                <label>Senha</label>
+                <input type="password" id="eu-password" placeholder="Sua senha de acesso" required autocomplete="current-password">
+            </div>
+
+            <div id="eu-error" class="error-box hidden"></div>
+
+            <button type="submit" class="btn-green" id="eu-btn">
+                <span id="eu-btn-text">Entrar e acessar proxies</span>
+                <svg id="eu-spinner" class="w-5 h-5 spin-icon hidden" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+            </button>
+        </form>
+
+        <div class="divider"></div>
+
+        <p style="font-size:0.8rem; color:rgba(255,255,255,0.3); text-align:center;">
+            Esqueceu a senha? Entre em contato com o suporte.
+        </p>
+    </div>
+
+    <!-- STATE: New user — create password -->
+    <div id="state-new-user" class="card fade-up hidden">
+        <div class="icon-circle green" style="animation: scaleIn 0.5s ease both">
+            <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+            </svg>
+        </div>
+
+        <div class="badge-paid">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+            Pagamento Confirmado
+        </div>
+
+        <h1 class="title">Crie sua conta 🎉</h1>
+        <p class="subtitle">
+            Defina uma senha para finalizar seu cadastro e acessar seus proxies.
+        </p>
+
+        <form id="new-user-form" novalidate>
+            <div class="input-wrap">
+                <label>Email</label>
+                <input type="email" id="nu-email" readonly placeholder="seu@email.com">
+            </div>
+            <div class="input-wrap">
+                <label>Criar senha</label>
+                <input type="password" id="nu-password" placeholder="Mínimo 6 caracteres" required minlength="6" autocomplete="new-password">
+            </div>
+            <div class="input-wrap">
+                <label>Confirmar senha</label>
+                <input type="password" id="nu-confirm" placeholder="Repita a senha" required minlength="6" autocomplete="new-password">
+            </div>
+
+            <div id="nu-error" class="error-box hidden"></div>
+
+            <button type="submit" class="btn-green" id="nu-btn">
+                <span id="nu-btn-text">Ativar minha conta</span>
+                <svg id="nu-spinner" class="w-5 h-5 spin-icon hidden" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+            </button>
+        </form>
+    </div>
+
+    <!-- STATE: Redirecting -->
+    <div id="state-redirecting" class="card fade-up hidden">
+        <div class="icon-circle green" style="animation: scaleIn 0.5s ease both">
+            <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+            </svg>
+        </div>
+
+        <h1 class="title">Tudo Pronto!</h1>
+        <p class="subtitle">
+            Pagamento confirmado e seus proxies foram ativados.<br>
+            Redirecionando para o painel…
+        </p>
+
+        <div class="progress-bar-wrap">
+            <div class="progress-bar" id="redirect-progress"></div>
+        </div>
+
+        <div id="redirect-details" class="text-left" style="background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.2); border-radius: 12px; padding: 16px;"></div>
+    </div>
+
+    <!-- STATE: Error -->
+    <div id="state-error" class="card fade-up hidden">
+        <div class="icon-circle red" style="animation: scaleIn 0.5s ease both">
+            <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </div>
+
+        <h1 class="title" id="err-title">Algo deu errado</h1>
+        <p class="subtitle" id="err-msg">Não foi possível processar seu pedido.</p>
+
+        <a href="https://wa.me/5511999999999" target="_blank" class="btn-whatsapp">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Falar com Suporte
+        </a>
+
+        <button class="btn-text" onclick="window.location.href='/'">← Voltar para a home</button>
+
+        <div class="session-id" id="err-session"></div>
     </div>
 
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const sessionId = urlParams.get('session_id');
-        
-        let paymentData = null;
-        
-        function showSection(section) {
-            document.getElementById('loading-section').classList.add('hidden');
-            document.getElementById('success-section').classList.add('hidden');
-            document.getElementById('account-section').classList.add('hidden');
-            document.getElementById('error-section').classList.add('hidden');
-            
-            if (section) {
-                document.getElementById(section + '-section').classList.remove('hidden');
-            }
+        const params    = new URLSearchParams(window.location.search);
+        const sessionId = params.get('session_id');
+
+        // ── helpers ─────────────────────────────────────────────────────────
+        function show(id) {
+            ['state-processing','state-existing-user','state-new-user','state-redirecting','state-error']
+                .forEach(s => document.getElementById(s).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
         }
-        
-        function showSuccess(data, alreadyProcessed = false) {
-            showSection('success');
-            
-            // Update title based on whether it was new or existing user
-            document.getElementById('success-title').textContent = alreadyProcessed ? 'Proxies Vinculados!' : 'Tudo Pronto!';
-            document.getElementById('success-subtitle').textContent = alreadyProcessed 
-                ? 'Seus proxies foram vinculados à sua conta existente.'
-                : 'Seus proxies foram criados e vinculados à sua conta.';
-            
-            // Order details
-            document.getElementById('order-details').innerHTML = `
-                <div class="space-y-2">
-                    <p class="font-semibold" style="color: var(--green)">✅ Pagamento Confirmado!</p>
-                    <p class="text-sm" style="color: var(--text-secondary)">Email: ${data.user?.email || 'N/A'}</p>
-                    <p class="text-sm" style="color: var(--text-secondary)">Plano: ${data.subscription?.period === 'annual' ? 'Anual' : 'Mensal'}</p>
-                    <p class="text-sm" style="color: var(--text-secondary)">Proxies: ${data.subscription?.proxyCount || data.proxies?.length || 0}</p>
-                </div>
-            `;
-            
-            // Proxies list
-            const proxiesText = (data.proxies || []).map(p => p.line || `${p.username}:${p.password}@${p.ip}:${p.port}`).join('\n');
-            document.getElementById('proxies-list').textContent = proxiesText || 'Nenhum proxy encontrado';
-            
-            // Store in localStorage
+
+        function showError(title, msg) {
+            show('state-error');
+            document.getElementById('err-title').textContent   = title;
+            document.getElementById('err-msg').textContent     = msg;
+            document.getElementById('err-session').textContent = sessionId ? `Session: ${sessionId}` : '';
+        }
+
+        function saveAndRedirect(data, isNew) {
+            // Persist auth
             localStorage.setItem('fastproxy_token', data.token);
-            localStorage.setItem('fastproxy_user', JSON.stringify(data.user));
-            localStorage.setItem('fastproxy_subscription', JSON.stringify(data.subscription));
-            localStorage.setItem('fastproxy_proxies', JSON.stringify(data.proxies || []));
-            
-            // Clear pending data
+            localStorage.setItem('fastproxy_user',  JSON.stringify(data.user));
+            localStorage.setItem('fastproxy_subscription', JSON.stringify(data.subscription || null));
+            localStorage.setItem('fastproxy_proxies',      JSON.stringify(data.proxies || []));
+
+            // Clear pending purchase info
             localStorage.removeItem('pendingAccountEmail');
             localStorage.removeItem('pendingAccountPeriod');
             localStorage.removeItem('pendingAccountProxies');
+            localStorage.removeItem('pendingAccountType');
+
+            show('state-redirecting');
+            fillRedirectDetails(data);
+            const dest = isNew ? '/portal.html?welcome=new' : '/portal.html?welcome=1';
+            animateProgress(() => window.location.href = dest);
         }
-        
-        function showCreateAccount(email) {
-            showSection('account');
-            document.getElementById('reg-email').value = email || '';
+
+        function fillRedirectDetails(data) {
+            const sub      = data.subscription || {};
+            const proxies  = data.proxies || [];
+            const period   = sub.period || 'mensal';
+            const qty      = sub.proxyCount || proxies.length || '?';
+            const email    = data.user?.email || '';
+
+            const PERIOD_NAMES = { '1m':'1 Mês', '6m':'6 Meses', '12m':'12 Meses', monthly:'Mensal', annual:'Anual' };
+
+            document.getElementById('redirect-details').innerHTML = `
+                <div class="info-row"><span>Email</span><strong>${email}</strong></div>
+                <div class="info-row"><span>Plano</span><strong>${PERIOD_NAMES[period] || period}</strong></div>
+                <div class="info-row"><span>Proxies</span><strong>${qty} proxy${qty !== 1 ? 's' : ''}</strong></div>
+                <div class="info-row"><span>Status</span><strong style="color:#22c55e">✓ Ativo</strong></div>
+            `;
         }
-        
-        function showError(title, message, sessionId) {
-            showSection('error');
-            document.getElementById('error-title').textContent = title;
-            document.getElementById('error-message').textContent = message;
-            document.getElementById('error-session-id').textContent = sessionId || 'N/A';
+
+        function animateProgress(cb) {
+            const bar = document.getElementById('redirect-progress');
+            let pct = 0;
+            const iv = setInterval(() => {
+                pct += 2;
+                bar.style.width = pct + '%';
+                if (pct >= 100) { clearInterval(iv); cb(); }
+            }, 40); // ~2 seconds total
         }
-        
-        function goToPortal() {
-            window.location.href = 'portal.html';
+
+        function setFormLoading(prefix, loading, loadingText, idleText) {
+            const btn     = document.getElementById(`${prefix}-btn`);
+            const btnText = document.getElementById(`${prefix}-btn-text`);
+            const spinner = document.getElementById(`${prefix}-spinner`);
+            btn.disabled = loading;
+            btnText.textContent = loading ? loadingText : idleText;
+            spinner.classList.toggle('hidden', !loading);
         }
-        
-        async function processPayment() {
+
+        function showFormError(prefix, msg) {
+            const errDiv = document.getElementById(`${prefix}-error`);
+            errDiv.textContent = msg;
+            errDiv.classList.remove('hidden');
+        }
+
+        function hideFormError(prefix) {
+            document.getElementById(`${prefix}-error`).classList.add('hidden');
+        }
+
+        // ── core flow ────────────────────────────────────────────────────────
+        async function run() {
             if (!sessionId) {
-                showError('Sessão Inválida', 'ID da sessão não encontrado. Entre em contato com o suporte.');
+                showError('Sessão inválida', 'Nenhum ID de sessão encontrado na URL. Entre em contato com o suporte.');
                 return;
             }
-            
+
             try {
-                // First verify the payment
-                const verifyRes = await fetch(`/api/stripe/verify/${sessionId}`);
-                const verifyData = await verifyRes.json();
-                
-                if (!verifyData.success || verifyData.paymentStatus !== 'paid') {
-                    showError('Pagamento Não Confirmado', 'Seu pagamento ainda não foi processado. Aguarde alguns minutos.');
+                // 1 — Verify payment with Stripe
+                const vRes  = await fetch(`/api/stripe/verify/${sessionId}`);
+                const vData = await vRes.json();
+
+                if (!vData.success || vData.paymentStatus !== 'paid') {
+                    showError('Pagamento não confirmado', 'O Stripe ainda não confirmou o seu pagamento. Aguarde 1-2 minutos e recarregue a página.');
                     return;
                 }
-                
-                paymentData = verifyData;
-                const email = verifyData.customerEmail || localStorage.getItem('pendingAccountEmail') || '';
-                
-                // Check if user already exists
-                const checkRes = await fetch(`/api/subscription/check-email/${encodeURIComponent(email)}`);
-                const checkData = await checkRes.json();
-                
-                if (checkData.exists) {
-                    // User exists - process payment and link proxies
-                    const processRes = await fetch(`/api/stripe/process-payment/${sessionId}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email })
-                    });
-                    
-                    const processData = await processRes.json();
-                    
-                    if (processData.success) {
-                        showSuccess(processData, processData.alreadyProcessed);
-                    } else {
-                        showError('Erro ao Processar', processData.error || 'Não foi possível vincular os proxies.');
-                    }
-                } else {
-                    // New user - need to create password
-                    showCreateAccount(email);
+
+                const email = (vData.customerEmail || localStorage.getItem('pendingAccountEmail') || '').toLowerCase().trim();
+
+                if (!email) {
+                    showError('Email não encontrado', 'Não foi possível identificar o email da compra. Entre em contato com o suporte.');
+                    return;
                 }
-                
+
+                // 2 — Check if user already exists in the system
+                const checkRes  = await fetch(`/api/subscription/check-email/${encodeURIComponent(email)}`);
+                const checkData = await checkRes.json();
+
+                if (checkData.exists) {
+                    // ─── EXISTING USER: must prove identity with password ───────
+                    show('state-existing-user');
+                    document.getElementById('eu-email').value = email;
+                } else {
+                    // ─── NEW USER: create a password ────────────────────────────
+                    show('state-new-user');
+                    document.getElementById('nu-email').value = email;
+                }
+
             } catch (err) {
-                console.error('Process payment error:', err);
-                showError('Erro de Conexão', 'Não foi possível conectar ao servidor. Tente novamente.');
+                console.error(err);
+                showError('Erro de conexão', 'Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.');
             }
         }
-        
-        // Register form handler
-        document.getElementById('register-form').addEventListener('submit', async (e) => {
+
+        // ── existing user login form ──────────────────────────────────────────
+        document.getElementById('existing-user-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            const email = document.getElementById('reg-email').value;
-            const password = document.getElementById('reg-password').value;
-            const passwordConfirm = document.getElementById('reg-password-confirm').value;
-            const errorDiv = document.getElementById('register-error');
-            const btn = document.getElementById('register-btn');
-            const btnText = document.getElementById('register-btn-text');
-            const spinner = document.getElementById('register-spinner');
-            
-            errorDiv.classList.add('hidden');
-            
-            if (password !== passwordConfirm) {
-                errorDiv.textContent = 'As senhas não coincidem.';
-                errorDiv.classList.remove('hidden');
+
+            const email    = document.getElementById('eu-email').value.trim();
+            const password = document.getElementById('eu-password').value;
+
+            hideFormError('eu');
+
+            if (!password) {
+                showFormError('eu', 'Digite sua senha para continuar.');
                 return;
             }
-            
-            if (password.length < 6) {
-                errorDiv.textContent = 'A senha deve ter pelo menos 6 caracteres.';
-                errorDiv.classList.remove('hidden');
-                return;
-            }
-            
-            btn.disabled = true;
-            btnText.classList.add('hidden');
-            spinner.classList.remove('hidden');
-            
+
+            setFormLoading('eu', true, 'Verificando…', 'Entrar e acessar proxies');
+
             try {
-                // Process payment with password
-                const res = await fetch(`/api/stripe/process-payment/${sessionId}`, {
-                    method: 'POST',
+                // Step 1: Authenticate user with password
+                const loginRes  = await fetch('/api/subscription/login', {
+                    method:  'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email,
-                        password,
-                        name: localStorage.getItem('pendingAccountName') || null,
-                        whatsapp: localStorage.getItem('pendingAccountWhatsapp') || null
-                    })
+                    body:    JSON.stringify({ email, password })
                 });
-                
-                const data = await res.json();
-                
-                if (data.success) {
-                    showSuccess(data, false);
-                } else {
-                    errorDiv.textContent = data.error || 'Erro ao criar conta. Tente novamente.';
-                    errorDiv.classList.remove('hidden');
-                    btn.disabled = false;
-                    btnText.classList.remove('hidden');
-                    spinner.classList.add('hidden');
+                const loginData = await loginRes.json();
+
+                if (!loginData.success) {
+                    const msg = loginData.message || loginData.error || 'Senha incorreta. Tente novamente.';
+                    showFormError('eu', msg);
+                    setFormLoading('eu', false, '', 'Entrar e acessar proxies');
+                    return;
                 }
+
+                // Step 2: Process payment (attaches subscription/proxies to this verified user)
+                const pRes  = await fetch(`/api/stripe/process-payment/${sessionId}`, {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:    JSON.stringify({ email })
+                });
+                const pData = await pRes.json();
+
+                if (pData.success) {
+                    // process-payment returns a fresh token — use it
+                    saveAndRedirect(pData, false);
+                    return;
+                }
+
+                // process-payment failed (e.g. session already processed or DB error)
+                // Fall back: use the login token we already have + redirect
+                if (loginData.token && loginData.user) {
+                    const fallbackData = {
+                        token:        loginData.token,
+                        user:         loginData.user,
+                        subscription: loginData.subscription || null,
+                        proxies:      loginData.proxies || []
+                    };
+                    saveAndRedirect(fallbackData, false);
+                    return;
+                }
+
+                showFormError('eu', pData.error || 'Erro ao processar pedido. Tente novamente ou fale com o suporte.');
+                setFormLoading('eu', false, '', 'Entrar e acessar proxies');
+
             } catch (err) {
-                console.error('Erro:', err);
-                showError('Erro de Conexão', 'Não foi possível criar sua conta. Entre em contato com o suporte.');
+                console.error(err);
+                showFormError('eu', 'Erro de conexão. Tente novamente.');
+                setFormLoading('eu', false, '', 'Entrar e acessar proxies');
             }
         });
-        
-        // Start processing on page load
-        processPayment();
+
+        // ── new user password form ──────────────────────────────────────────
+        document.getElementById('new-user-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const email    = document.getElementById('nu-email').value.trim();
+            const password = document.getElementById('nu-password').value;
+            const confirm  = document.getElementById('nu-confirm').value;
+
+            hideFormError('nu');
+
+            if (password !== confirm) {
+                showFormError('nu', 'As senhas não coincidem.');
+                return;
+            }
+            if (password.length < 6) {
+                showFormError('nu', 'A senha deve ter pelo menos 6 caracteres.');
+                return;
+            }
+
+            setFormLoading('nu', true, 'Criando conta…', 'Ativar minha conta');
+
+            try {
+                const res  = await fetch(`/api/stripe/process-payment/${sessionId}`, {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:    JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    saveAndRedirect(data, true);
+                } else {
+                    showFormError('nu', data.error || 'Erro ao criar conta. Tente novamente.');
+                    setFormLoading('nu', false, '', 'Ativar minha conta');
+                }
+            } catch (err) {
+                showFormError('nu', 'Erro de conexão. Tente novamente.');
+                setFormLoading('nu', false, '', 'Ativar minha conta');
+            }
+        });
+
+        // kick off
+        run();
     </script>
 </body>
 </html>
