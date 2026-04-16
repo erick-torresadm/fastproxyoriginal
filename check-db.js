@@ -6,57 +6,39 @@ const DATABASE_URL = 'postgresql://neondb_owner:npg_h36kyvFHKwLM@ep-divine-dust-
 const sql = neon(DATABASE_URL);
 
 async function fix() {
-  const userId = 32;
+  const userId = 34;
   
-  console.log('=== Fixing subscription dates ===\n');
+  console.log('=== Fixing user', userId, '===');
   
-  // Get the subscription
-  const subs = await sql`
-    SELECT * FROM subscriptions WHERE user_id = ${userId} AND status = 'active' ORDER BY created_at DESC LIMIT 1
-  `;
+  // Get subscription
+  const subs = await sql`SELECT * FROM subscriptions WHERE user_id = ${userId} AND status = 'active'`;
   
   if (subs.length === 0) {
-    console.log('No active subscription found');
+    console.log('No active subscription');
     return;
   }
   
   const sub = subs[0];
-  console.log('Current subscription:', sub);
+  console.log('Current:', sub);
   
-  // Calculate correct end date (1 month from now)
-  const startDate = new Date();
-  const endDate = new Date();
-  endDate.setMonth(endDate.getMonth() + 1);
+  const periodMonths = sub.period === '12m' ? 12 : sub.period === '6m' ? 6 : 1;
   
-  console.log('\nNew start_date:', startDate.toISOString());
-  console.log('New end_date:', endDate.toISOString());
+  const startDate = new Date(sub.start_date);
+  const endDate = new Date(startDate);
+  endDate.setMonth(endDate.getMonth() + periodMonths);
   
-  // Update subscription
-  await sql`
-    UPDATE subscriptions 
-    SET start_date = ${startDate}, end_date = ${endDate}, status = 'active'
-    WHERE id = ${sub.id}
-  `;
+  // Handle overflow
+  if (endDate.getMonth() !== (startDate.getMonth() + periodMonths) % 12) {
+    endDate.setDate(0);
+  }
   
-  // Also update user table
-  await sql`
-    UPDATE users 
-    SET subscription_status = 'active', 
-        subscription_start_date = ${startDate},
-        subscription_end_date = ${endDate},
-        subscription_period = '1m',
-        subscription_proxy_count = ${sub.proxy_count}
-    WHERE id = ${userId}
-  `;
+  console.log('\nNew end_date:', endDate.toISOString());
   
-  console.log('\n✅ Fixed subscription and user dates!');
+  // Update
+  await sql`UPDATE subscriptions SET end_date = ${endDate.toISOString()} WHERE id = ${sub.id}`;
+  await sql`UPDATE users SET subscription_status = 'active', subscription_start_date = ${startDate.toISOString()}, subscription_end_date = ${endDate.toISOString()}, subscription_period = ${sub.period} WHERE id = ${userId}`;
   
-  // Verify
-  const updatedSub = await sql`SELECT * FROM subscriptions WHERE id = ${sub.id}`;
-  console.table(updatedSub);
-  
-  const updatedUser = await sql`SELECT id, email, subscription_status, subscription_start_date, subscription_end_date FROM users WHERE id = ${userId}`;
-  console.table(updatedUser);
+  console.log('✅ Fixed!');
 }
 
 fix().then(() => process.exit(0)).catch(err => { console.error(err); process.exit(1); });
