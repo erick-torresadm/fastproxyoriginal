@@ -609,36 +609,60 @@ async function loadUserData() {
             const periodNames = { '1m': '1 Mês', '3m': '3 Meses', '6m': '6 Meses', '12m': '12 Meses', 'monthly': 'Mensal', 'annual': 'Anual' };
             const getPeriodName = (p) => periodNames[p] || p;
             
-            // Subscription info
-            if (hasActive && activeSub) {
-                
-                const sub = activeSub;
-                const endDate = new Date(sub.endDate);
-                const daysLeft = Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24));
-                
-                document.getElementById('subscription-info').textContent = 
-                    `${sub.proxyCount} proxies • ${getPeriodName(sub.period)} • ${daysLeft > 0 ? `${daysLeft} dias restantes` : 'Expirado'}`;
-                
-                document.getElementById('subscription-details').innerHTML = `
-                    <p><span class="text-muted">Plano:</span> ${getPeriodName(sub.period)}</p>
-                    <p><span class="text-muted">Proxies:</span> ${sub.proxyCount}</p>
-                    <p><span class="text-muted">Vencimento:</span> ${endDate.toLocaleDateString('pt-BR')}</p>
-                    <p><span class="text-muted">Status:</span> <span class="text-green-400">Ativo</span></p>
-                `;
-            } else if (firstSub) {
-                // Has subscription but expired
+            // Calculate days left
+            let daysLeft = 0;
+            if (activeSub?.endDate) {
+                const endDate = new Date(activeSub.endDate);
+                daysLeft = Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24));
+            } else if (firstSub?.endDate) {
                 const endDate = new Date(firstSub.endDate);
-                const daysLeft = Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24));
+                daysLeft = Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24));
+            }
+            
+            // Show as active if has proxies, even without valid subscription
+            const isExpired = daysLeft <= 0;
+            
+            if (hasProxies) {
+                // User has proxies - show as active
+                const period = activeSub?.period || firstSub?.period || '1m';
+                const proxyCount = activeSub?.proxyCount || firstSub?.proxyCount || currentProxies.length;
+                
+                if (isExpired) {
+                    // Proxies exist but subscription expired - show renewal option
+                    document.getElementById('subscription-info').textContent = 
+                        `${proxyCount} proxies • Expirado`;
+                    
+                    document.getElementById('subscription-details').innerHTML = `
+                        <p><span class="text-muted">Plano:</span> ${getPeriodName(period)}</p>
+                        <p><span class="text-muted">Proxies:</span> ${proxyCount}</p>
+                        <p><span class="text-muted">Vencimento:</span> ${firstSub?.endDate ? new Date(firstSub.endDate).toLocaleDateString('pt-BR') : 'N/A'}</p>
+                        <p><span class="text-muted">Status:</span> <span class="text-yellow-400">Expirado - Renove em 12h</span></p>
+                        <a href="/" class="inline-block mt-2 text-green-400 hover:underline">Renovar assinatura</a>
+                    `;
+                } else {
+                    document.getElementById('subscription-info').textContent = 
+                        `${proxyCount} proxies • ${getPeriodName(period)} • ${daysLeft} dias restantes`;
+                    
+                    document.getElementById('subscription-details').innerHTML = `
+                        <p><span class="text-muted">Plano:</span> ${getPeriodName(period)}</p>
+                        <p><span class="text-muted">Proxies:</span> ${proxyCount}</p>
+                        <p><span class="text-muted">Vencimento:</span> ${activeSub?.endDate ? new Date(activeSub.endDate).toLocaleDateString('pt-BR') : 'N/A'}</p>
+                        <p><span class="text-muted">Status:</span> <span class="text-green-400">Ativo</span></p>
+                    `;
+                }
+            } else if (firstSub && !hasProxies) {
+                // Has subscription but no proxies yet
+                const endDate = new Date(firstSub.endDate);
+                const daysLeft2 = Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24));
                 
                 document.getElementById('subscription-info').textContent = 
-                    `${firstSub.proxyCount} proxies • Expirado`;
+                    `${firstSub.proxyCount} proxies • ${daysLeft2 > 0 ? `${daysLeft2} dias restantes` : 'Expirado'}`;
                 
                 document.getElementById('subscription-details').innerHTML = `
                     <p><span class="text-muted">Plano:</span> ${getPeriodName(firstSub.period)}</p>
                     <p><span class="text-muted">Proxies:</span> ${firstSub.proxyCount}</p>
                     <p><span class="text-muted">Vencimento:</span> ${endDate.toLocaleDateString('pt-BR')}</p>
-                    <p><span class="text-muted">Status:</span> <span class="text-red-400">Expirado</span></p>
-                    <a href="/" class="inline-block mt-2 text-green-400 hover:underline">Renovar assinatura</a>
+                    <p><span class="text-muted">Status:</span> <span class="${daysLeft2 > 0 ? 'text-green-400' : 'text-red-400'}">${daysLeft2 > 0 ? 'Ativo' : 'Expirado'}</span></p>
                 `;
             } else {
                 document.getElementById('subscription-info').textContent = 'Nenhuma assinatura ativa';
@@ -789,18 +813,21 @@ async function loadUserData() {
                     </div>
                     <pre id="all-proxies-text" class="text-xs text-green-400 break-all whitespace-pre-wrap" style="display: none;">${allProxiesLine}</pre>
                 </div>
-            ` + currentProxies.map(p => `
+            ` + currentProxies.map(p => {
+                const createdDate = p.createdAt ? new Date(p.createdAt).toLocaleDateString('pt-BR') : 'N/A';
+                return `
                 <div class="proxy-card p-4">
                     <div class="flex items-center justify-between">
                         <div class="flex-1">
                             <div class="flex items-center gap-2 mb-2">
-                                <span class="w-2 h-2 rounded-full ${p.isActive !== false ? 'bg-green-400' : 'bg-red-400'}"></span>
+                                <span class="w-2 h-2 rounded-full bg-green-400"></span>
                                 <span class="text-sm text-secondary">${p.ip}:${p.port}</span>
+                                <span class="text-xs text-gray-500">📅 ${createdDate}</span>
                             </div>
                             <code class="text-sm text-green-400 break-all">${p.line || `${p.username}:${p.password}@${p.ip}:${p.port}`}</code>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="copyProxyLine(${JSON.stringify(p).replace(/"/g, '&quot;')})" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded-lg text-sm text-white" title="Copiar">
+                            <button onclick="copyProxyLine('${p.username}:${p.password}@${p.ip}:${p.port}')" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded-lg text-sm text-white" title="Copiar">
                                 <i class="fas fa-copy"></i>
                             </button>
                             <button onclick="openReplaceModal(${p.id})" class="btn-secondary px-3 py-1 rounded-lg text-sm flex items-center gap-1" title="Trocar proxy (R$ 1,99 - 11,99)">
