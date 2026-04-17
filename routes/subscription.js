@@ -315,17 +315,19 @@ router.get('/me', async (req, res) => {
 
     let proxies = [];
     
-    // Only return proxies if user has an ACTIVE subscription
-    if (activeSubscription) {
-      proxies = await sql`
-        SELECT p.*, pr.id as replacement_id, pr.reason, pr.created_at as replaced_at
-        FROM proxies p
-        LEFT JOIN proxy_replacements pr ON p.id = pr.proxy_id AND pr.created_at = (
-          SELECT MAX(created_at) FROM proxy_replacements WHERE proxy_id = p.id
-        )
-        WHERE p.user_id = ${user.id} AND p.is_active = true
-        ORDER BY p.created_at DESC
-      `;
+    // Always return proxies if user has active proxies (regardless of subscription)
+    const userProxies = await sql`
+      SELECT p.*, pr.id as replacement_id, pr.reason, pr.created_at as replaced_at
+      FROM proxies p
+      LEFT JOIN proxy_replacements pr ON p.id = pr.proxy_id AND pr.created_at = (
+        SELECT MAX(created_at) FROM proxy_replacements WHERE proxy_id = p.id
+      )
+      WHERE p.user_id = ${user.id} AND p.is_active = true
+      ORDER BY p.created_at DESC
+    `;
+    
+    if (userProxies.length > 0) {
+      proxies = userProxies;
     }
 
     // Get available discounts
@@ -365,7 +367,7 @@ router.get('/me', async (req, res) => {
         lastReplacedAt: p.replaced_at,
         replacementReason: p.reason
       })),
-      hasActiveSubscription: !!activeSubscription,
+      hasActiveSubscription: !!(activeSubscription || proxies.length > 0),
       discounts: discounts.map(d => ({
         id: d.id,
         type: d.type,
