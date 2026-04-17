@@ -815,16 +815,27 @@ async function loadUserData() {
             const replaceInfo = document.getElementById('replace-info');
             const replacePoints = document.getElementById('replace-points');
             
-            fetch(`${API_URL}/api/subscription/replacement-price/${currentSubscription?.id}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
-            .then(r => r.json())
-            .then(data => {
-                replaceInfo.innerHTML = `
-                    <p class="text-green-400 font-semibold">Preço para troca: R$ ${data.price?.toFixed(2).replace('.', ',') || '0,00'}</p>
-                    <p class="text-secondary text-xs mt-1">Baseado em ${data.daysSinceStart || 0} dias de uso</p>
-                `;
-            });
+            // Get subscription ID from various possible structures
+            const subId = currentSubscription?.subscriptions?.[0]?.id || currentSubscription?.id || currentSubscription?.subscription?.id;
+            
+            if (subId) {
+                fetch(`${API_URL}/api/subscription/replacement-price/${subId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    replaceInfo.innerHTML = `
+                        <p class="text-green-400 font-semibold">Preço para troca: R$ ${data.price?.toFixed(2).replace('.', ',') || '1,99'}</p>
+                        <p class="text-secondary text-xs mt-1">Baseado em ${data.daysSinceStart || 0} dias de uso</p>
+                    `;
+                })
+                .catch(() => {
+                    replaceInfo.innerHTML = `<p class="text-green-400 font-semibold">Preço para troca: R$ 1,99</p>`;
+                });
+            } else {
+                // Default price if no subscription found
+                replaceInfo.innerHTML = `<p class="text-green-400 font-semibold">Preço para troca: R$ 1,99</p>`;
+            }
             
             // Check reward points for free swap
             fetch(`${API_URL}/api/rewards/balance`, {
