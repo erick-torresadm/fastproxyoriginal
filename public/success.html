@@ -435,7 +435,7 @@
 
             show('state-redirecting');
             fillRedirectDetails(data);
-            const dest = isNew ? '/portal.html?welcome=new' : '/portal.html?welcome=1';
+            const dest = 'https://fastproxyoriginal.vercel.app/portal.html?welcome=' + (isNew ? 'new' : '1');
             animateProgress(() => window.location.href = dest);
         }
 
