@@ -1903,8 +1903,152 @@ router.post('/admin/setup', async (req, res) => {
   }
 });
 
-// Test Telegram notification (public — for setup verification)
-router.get('/test-telegram', async (req, res) => {
+// ── Admin: Coupon Routes (moved from coupons.js for reliability) ────────────
+router.get('/admin/coupons', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+    const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+    const coupons = await sql`
+      SELECT c.*, u.email as created_by_email
+      FROM coupons c
+      LEFT JOIN users u ON c.created_by = u.id
+      ORDER BY c.created_at DESC
+    `;
+    res.json({ success: true, coupons });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+router.post('/admin/coupons/create', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+    const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+    const { code, discount_percent, discount_amount, min_order_value, max_uses, max_uses_per_user, valid_days, proxy_types } = req.body;
+    if (!code) return res.status(400).json({ success: false, message: 'Código é obrigatório' });
+    if (!discount_percent && !discount_amount) return res.status(400).json({ success: false, message: 'Informe desconto (%) ou valor (R$)' });
+
+    let valid_until = null;
+    if (valid_days) { valid_until = new Date(); valid_until.setDate(valid_until.getDate() + valid_days); }
+
+    const [coupon] = await sql`
+      INSERT INTO coupons (code, discount_percent, discount_amount, min_order_value, max_uses, max_uses_per_user, valid_until, proxy_types, is_active, created_by)
+      VALUES (${code.toUpperCase()}, ${discount_percent || null}, ${discount_amount || null}, ${min_order_value || 0}, ${max_uses || null}, ${max_uses_per_user || null}, ${valid_until}, ${proxy_types || null}, true, ${decoded.id})
+      RETURNING *
+    `;
+    res.json({ success: true, coupon, message: `Cupom ${coupon.code} criado!` });
+  } catch (err) {
+    if (err.message && (err.message.includes('duplicate') || err.message.includes('unique'))) {
+      return res.status(400).json({ success: false, message: 'Código já existe' });
+    }
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+router.put('/admin/coupons/:id', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+    const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+    const { id } = req.params;
+    const { is_active, max_uses } = req.body;
+    const [coupon] = await sql`
+      UPDATE coupons SET is_active = COALESCE(${is_active}, is_active), max_uses = COALESCE(${max_uses}, max_uses)
+      WHERE id = ${id} RETURNING *
+    `;
+    if (!coupon) return res.status(404).json({ success: false, message: 'Cupom não encontrado' });
+    res.json({ success: true, coupon, message: 'Cupom atualizado!' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+router.delete('/admin/coupons/:id', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+    const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+    const { id } = req.params;
+    await sql`DELETE FROM coupons WHERE id = ${id}`;
+    res.json({ success: true, message: 'Cupom deletado!' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+router.get('/admin/coupons/usage', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+    const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+    const usage = await sql`
+      SELECT cu.*, c.code, u.email, u.name
+      FROM coupon_usage cu
+      JOIN coupons c ON cu.coupon_id = c.id
+      JOIN users u ON cu.user_id = u.id
+      ORDER BY cu.used_at DESC LIMIT 100
+    `;
+    res.json({ success: true, usage });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Coupon validation (public-ish — requires auth token)
+router.get('/coupon/validate/:code', async (req, res) => {
+  try {
+    const { code } = req.params;
+    if (!code) return res.status(400).json({ success: false, message: 'Código é obrigatório' });
+
+    const [coupon] = await sql`SELECT * FROM coupons WHERE UPPER(code) = UPPER(${code}) AND is_active = true`;
+    if (!coupon) return res.json({ success: false, message: 'Cupom inválido' });
+    if (coupon.valid_until && new Date(coupon.valid_until) < new Date()) return res.json({ success: false, message: 'Cupom expirado' });
+    if (coupon.max_uses && coupon.used_count >= coupon.max_uses) return res.json({ success: false, message: 'Cupom esgotado' });
+
+    const typeNames = { ipv6: 'IPv6', ipv4: 'IPv4', isp: 'ISP', mobile: 'Mobile 4G/5G' };
+    res.json({
+      success: true,
+      coupon: {
+        code: coupon.code,
+        discount_percent: coupon.discount_percent,
+        discount_amount: coupon.discount_amount,
+        proxy_type: coupon.proxy_types,
+        proxy_type_name: coupon.proxy_types ? (typeNames[coupon.proxy_types] || coupon.proxy_types) : 'Todos'
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Debug: check saved proxy_orders (requires auth)
   try {
     const { testNotification } = require('../lib/notifier');
     await testNotification();
