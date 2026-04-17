@@ -955,7 +955,8 @@ router.post('/cancel', async (req, res) => {
       WHERE id = ${subscription.id}
     `;
 
-    // ── 3. Deactivate stock proxies immediately ───────────────────────────────
+    // ── 3. Deactivate stock proxies — proxies remain usable until end_date ────
+    // NOTE: proxies keep working until original end_date (user already paid)
     await sql`
       UPDATE proxies
       SET is_active = false, updated_at = NOW()

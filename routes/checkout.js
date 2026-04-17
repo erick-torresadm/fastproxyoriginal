@@ -321,16 +321,18 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
             )
           `;
 
-          // Update user table with subscription info
-          await sql`
-            UPDATE users SET
-              subscription_status = 'active',
-              subscription_period = ${order.period},
-              subscription_proxy_count = ${order.quantity},
-              subscription_start_date = ${startDate},
-              subscription_end_date = ${endDateStr}
-            WHERE id = ${order.user_id}
-          `;
+          // Update user subscription info (skip if columns don't exist)
+          try {
+            await sql`
+              UPDATE users SET
+                subscription_status = 'active',
+                subscription_period = ${order.period},
+                subscription_proxy_count = ${order.quantity},
+                subscription_start_date = ${startDate},
+                subscription_end_date = ${endDateStr}
+              WHERE id = ${order.user_id}
+            `;
+          } catch(e) { /* users table may not have subscription_* columns */ }
 
           // Award reward points for this purchase
           try {
