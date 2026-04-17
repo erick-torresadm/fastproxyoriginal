@@ -2048,7 +2048,8 @@ router.get('/coupon/validate/:code', async (req, res) => {
   }
 });
 
-// Debug: check saved proxy_orders (requires auth)
+// Test Telegram notification (public)
+router.get('/test-telegram', async (req, res) => {
   try {
     const { testNotification } = require('../lib/notifier');
     await testNotification();
