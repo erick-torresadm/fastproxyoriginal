@@ -1903,6 +1903,17 @@ router.post('/admin/setup', async (req, res) => {
   }
 });
 
+// Test Telegram notification (public — for setup verification)
+router.get('/test-telegram', async (req, res) => {
+  try {
+    const { testNotification } = require('../lib/notifier');
+    await testNotification();
+    res.json({ success: true, message: 'Test notification sent! Check your Telegram.' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // Public: Get all tutorials
 router.get('/tutorials', async (req, res) => {
   try {
