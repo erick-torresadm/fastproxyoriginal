@@ -145,7 +145,7 @@ router.post('/process-payment/:sessionId', async (req, res) => {
     }
     
     const customerEmail = session.customer_email || email;
-    const proxyCount = parseInt(session.metadata?.proxy_count) || parseInt(req.body.proxyCount) || 1;
+    const proxyCount = parseInt(session.metadata?.quantity) || parseInt(req.body.proxyCount) || 1;
     const period = session.metadata?.period || req.body.period || 'monthly';
     const pricePaid = session.amount_total / 100;
     

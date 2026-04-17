@@ -5,53 +5,27 @@ const DATABASE_URL = 'postgresql://neondb_owner:npg_h36kyvFHKwLM@ep-divine-dust-
 
 const sql = neon(DATABASE_URL);
 
-async function fix() {
-  const email = 'fdfdf@tuamaeaquelaursa.com';
+async function check() {
+  const email = 'erickusuario@tuamaeaquelaursa.com';
   
-  console.log('=== Fixing:', email, '===\n');
+  console.log('=== Checking:', email, '===');
   
-  // Get user
   const user = await sql`SELECT * FROM users WHERE email = ${email}`;
-  if (user.length === 0) { console.log('User not found!'); return; }
+  if (user.length === 0) { console.log('User not found'); return; }
   const u = user[0];
   console.log('User ID:', u.id);
   
-  // Fix subscription dates
-  const startDate = new Date();
-  const endDate = new Date();
-  endDate.setMonth(endDate.getMonth() + 1);
+  const orders = await sql`SELECT * FROM proxy_orders WHERE user_id = ${u.id} ORDER BY created_at DESC LIMIT 5`;
+  console.log('\nProxy Orders:', orders.length);
+  orders.forEach(o => console.log('  ID:', o.id, 'quantity:', o.quantity, 'period:', o.period, 'status:', o.payment_status));
   
-  console.log('Start:', startDate.toISOString());
-  console.log('End:', endDate.toISOString());
+  const subs = await sql`SELECT * FROM subscriptions WHERE user_id = ${u.id} ORDER BY created_at DESC LIMIT 5`;
+  console.log('\nSubscriptions:', subs.length);
+  subs.forEach(s => console.log('  ID:', s.id, 'proxy_count:', s.proxy_count, 'period:', s.period, 'status:', s.status));
   
-  // Update subscription
-  await sql`
-    UPDATE subscriptions 
-    SET status = 'active', start_date = ${startDate.toISOString()}, end_date = ${endDate.toISOString()}
-    WHERE user_id = ${u.id}
-  `;
-  console.log('✅ Subscription fixed');
-  
-  // Update user table
-  await sql`
-    UPDATE users 
-    SET subscription_status = 'active', 
-        subscription_start_date = ${startDate.toISOString()}, 
-        subscription_end_date = ${endDate.toISOString()},
-        subscription_period = '1m',
-        subscription_proxy_count = 1
-    WHERE id = ${u.id}
-  `;
-  console.log('✅ User fixed');
-  
-  // Show result
-  const updated = await sql`SELECT * FROM users WHERE email = ${email}`;
-  console.log('\n=== Result ===');
-  console.log('subscription_status:', updated[0].subscription_status);
-  console.log('subscription_period:', updated[0].subscription_period);
-  console.log('subscription_proxy_count:', updated[0].subscription_proxy_count);
-  console.log('subscription_start_date:', updated[0].subscription_start_date);
-  console.log('subscription_end_date:', updated[0].subscription_end_date);
+  const proxies = await sql`SELECT * FROM proxies WHERE user_id = ${u.id}`;
+  console.log('\nLocal Proxies:', proxies.length);
+  proxies.forEach(p => console.log('  ', p.ip, ':', p.port));
 }
 
-fix().then(() => process.exit(0)).catch(err => { console.error(err); process.exit(1); });
+check().then(() => process.exit(0)).catch(err => { console.error(err); process.exit(1); });
