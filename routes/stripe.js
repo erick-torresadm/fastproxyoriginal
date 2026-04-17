@@ -70,8 +70,8 @@ router.post('/create-checkout', express.json(), async (req, res) => {
       period: period,
       quantity: quantity,
       couponDiscount: couponDiscount || 0,
-      successUrl: `${appUrl}/success.html?session_id={CHECKOUT_SESSION_ID}`,
-      cancelUrl: `${appUrl}/cancel.html`
+      successUrl: `${appUrl}/portal.html?payment=success`,
+      cancelUrl: `${appUrl}/planos.html?payment=cancelled`
     });
     
     console.log('Checkout session created:', session.id);
@@ -505,7 +505,7 @@ router.post('/create-swap-checkout', express.json(), async (req, res) => {
         userId: decoded.id.toString(),
         reason: reason || 'Não informado'
       },
-      success_url: `${appUrl}/success-swap.html?session_id={CHECKOUT_SESSION_ID}&proxyId=${proxyId}`,
+      success_url: `${appUrl}/portal.html?swap=success&proxyId=${proxyId}`,
       cancel_url: `${appUrl}/portal.html`
     });
     
