@@ -218,7 +218,7 @@ Total: R$ ${finalPrice.toFixed(2)}${deliveryNote}
         },
       ],
       mode: 'payment',
-      success_url: `https://fastproxyoriginal.vercel.app/portal.html?payment=success&order=${order.id}`,
+      success_url: `https://fastproxyoriginal.vercel.app/login.html`,
       cancel_url: `https://fastproxyoriginal.vercel.app/planos.html?payment=cancelled`,
       metadata: {
         orderId: order.id.toString(),

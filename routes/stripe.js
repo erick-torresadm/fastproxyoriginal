@@ -70,7 +70,7 @@ router.post('/create-checkout', express.json(), async (req, res) => {
       period: period,
       quantity: quantity,
       couponDiscount: couponDiscount || 0,
-      successUrl: `${appUrl}/portal.html?payment=success`,
+      successUrl: `${appUrl}/login.html`,
       cancelUrl: `${appUrl}/planos.html?payment=cancelled`
     });
     
