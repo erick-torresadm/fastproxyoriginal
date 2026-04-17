@@ -6,30 +6,28 @@ const DATABASE_URL = 'postgresql://neondb_owner:npg_h36kyvFHKwLM@ep-divine-dust-
 const sql = neon(DATABASE_URL);
 
 async function fix() {
-  const email = 'erickusuario@tuamaeaquelaursa.com';
-  const user = await sql`SELECT * FROM users WHERE email = ${email}`;
-  if (user.length === 0) { console.log('User not found'); return; }
+  const userEmail = 'erickusuario@tuamaeaquelaursa.com';
+  const user = await sql`SELECT * FROM users WHERE email = ${userEmail}`;
+  if (user.length === 0) return;
   const u = user[0];
   
-  console.log('User ID:', u.id);
+  console.log('Fixando usuário:', u.email);
   
-  // Update subscription to 2 proxies
-  await sql`UPDATE subscriptions SET proxy_count = 2 WHERE user_id = ${u.id} AND status = 'active'`;
-  console.log('Updated proxy_count to 2');
+  // 1. Atualizar subscription_status na tabela users
+  await sql`UPDATE users SET subscription_status = 'active', updated_at = NOW() WHERE id = ${u.id}`;
+  console.log('✓ subscription_status atualizado para active');
   
-  // Get subscription ID
-  const subs = await sql`SELECT id FROM subscriptions WHERE user_id = ${u.id} AND status = 'active' ORDER BY created_at DESC LIMIT 1`;
-  if (subs.length === 0) { console.log('No active subscription'); return; }
-  const subId = subs[0].id;
+  // 2. Criar mais 1 proxy (ter 2 no total)
+  const sub = await sql`SELECT id FROM subscriptions WHERE user_id = ${u.id} AND status = 'active' ORDER BY created_at DESC LIMIT 1`;
+  if (sub.length > 0) {
+    await sql`INSERT INTO proxies (user_id, subscription_id, ip, port, username, password, is_active, created_at) VALUES (${u.id}, ${sub[0].id}, '177.54.146.90', 11372, 'fastproxy123', 'fast123', true, NOW())`;
+    console.log('✓ Proxy adicional criado (porta 11372)');
+  }
   
-  // Create 2nd proxy (without proxy_type column)
-  await sql`INSERT INTO proxies (user_id, subscription_id, ip, port, username, password, is_active, created_at) VALUES (${u.id}, ${subId}, '177.54.146.90', 11371, 'fastproxy123', 'fast123', true, NOW())`;
-  console.log('Created 2nd proxy');
-  
-  // Verify
-  const proxies = await sql`SELECT * FROM proxies WHERE user_id = ${u.id}`;
-  console.log('\nTotal proxies:', proxies.length);
-  proxies.forEach(p => console.log('  ', p.ip, ':', p.port));
+  // 3. Verificar
+  const proxies = await sql`SELECT ip, port FROM proxies WHERE user_id = ${u.id} AND is_active = true`;
+  console.log('\nProxies agora:', proxies.length);
+  proxies.forEach(p => console.log('  -', p.ip + ':' + p.port));
 }
 
 fix().then(() => process.exit(0)).catch(err => { console.error(err); process.exit(1); });

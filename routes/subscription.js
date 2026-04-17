@@ -3,8 +3,11 @@ const router = express.Router();
 const { sql } = require('../lib/database');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { sendWelcomeEmail, sendProxyCredentials, sendCancellationEmail } = require('../lib/email');
+const { sendWelcomeEmail, sendProxyCredentials, sendCancellationEmail, sendPasswordResetEmail } = require('../lib/email');
 const proxyseller = require('../lib/proxyseller');
+
+// In-memory password reset tokens: email → { token, expires, name }
+const resetTokens = new Map();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fastproxy_secret_key_2024';
 const JWT_EXPIRE = process.env.JWT_EXPIRE || '7d';
@@ -725,6 +728,184 @@ router.get('/check-expiration', async (req, res) => {
   } catch (err) {
     console.error('Check expiration error:', err);
     res.status(500).json({ success: false, message: 'Erro ao verificar expiração' });
+  }
+});
+
+// ── Forgot password ─────────────────────────────────────────────────────────
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ success: false, message: 'Email é obrigatório' });
+
+    const users = await sql`SELECT id, email, name FROM users WHERE email = ${email.toLowerCase()}`;
+
+    // Always return success to prevent email enumeration attacks
+    if (users.length === 0) {
+      return res.json({ success: true, message: 'Se o email existir, você receberá as instruções.' });
+    }
+
+    const user = users[0];
+
+    // Generate a 64-char hex token
+    const crypto = require('crypto');
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = Date.now() + 30 * 60 * 1000; // 30 min
+
+    resetTokens.set(email.toLowerCase(), { token, expires, userId: user.id, name: user.name });
+
+    // Clean up expired tokens opportunistically
+    for (const [k, v] of resetTokens.entries()) {
+      if (v.expires < Date.now()) resetTokens.delete(k);
+    }
+
+    // Send email async
+    sendPasswordResetEmail(user.email, user.name, token).catch(err =>
+      console.error('Failed to send reset email:', err)
+    );
+
+    console.log(`🔑 Password reset token generated for ${email} (expires in 30min)`);
+    res.json({ success: true, message: 'Se o email existir, você receberá as instruções.' });
+
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    res.status(500).json({ success: false, message: 'Erro interno. Tente novamente.' });
+  }
+});
+
+// ── Reset password ───────────────────────────────────────────────────────────
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Token e nova senha são obrigatórios' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: 'A senha deve ter pelo menos 6 caracteres' });
+    }
+
+    // Find token in map
+    let foundEntry = null;
+    let foundEmail = null;
+    for (const [email, entry] of resetTokens.entries()) {
+      if (entry.token === token) {
+        foundEntry = entry;
+        foundEmail = email;
+        break;
+      }
+    }
+
+    if (!foundEntry) {
+      return res.status(400).json({ success: false, message: 'Token inválido ou já utilizado' });
+    }
+
+    if (foundEntry.expires < Date.now()) {
+      resetTokens.delete(foundEmail);
+      return res.status(400).json({ success: false, message: 'Token expirado. Solicite um novo.' });
+    }
+
+    // Update password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await sql`UPDATE users SET password = ${hashedPassword}, updated_at = NOW() WHERE id = ${foundEntry.userId}`;
+
+    // Invalidate token
+    resetTokens.delete(foundEmail);
+
+    console.log(`✅ Password reset successful for userId=${foundEntry.userId}`);
+    res.json({ success: true, message: 'Senha alterada com sucesso! Faça login com sua nova senha.' });
+
+  } catch (err) {
+    console.error('Reset password error:', err);
+    res.status(500).json({ success: false, message: 'Erro interno. Tente novamente.' });
+  }
+});
+
+// ── Transaction history ──────────────────────────────────────────────────────
+router.get('/history', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    // Get all subscriptions (purchases)
+    const subscriptions = await sql`
+      SELECT
+        s.id,
+        s.period,
+        s.proxy_count,
+        s.price_paid,
+        s.status,
+        s.start_date,
+        s.end_date,
+        s.created_at,
+        s.stripe_session_id
+      FROM subscriptions s
+      WHERE s.user_id = ${decoded.id}
+      ORDER BY s.created_at DESC
+      LIMIT 50
+    `;
+
+    // Get proxy orders (ProxySeller purchases)
+    let proxyOrders = [];
+    try {
+      proxyOrders = await sql`
+        SELECT
+          po.id,
+          po.proxy_type,
+          po.quantity,
+          po.period,
+          po.price_sold_brl as price_paid,
+          po.status,
+          po.created_at,
+          po.expira_em as end_date,
+          'proxy_order' as record_type
+        FROM proxy_orders po
+        WHERE po.user_id = ${decoded.id}
+        ORDER BY po.created_at DESC
+        LIMIT 20
+      `;
+    } catch (e) {
+      // proxy_orders table may not exist
+    }
+
+    const PERIOD_NAMES = {
+      '1m':'1 Mês','6m':'6 Meses','12m':'12 Meses',
+      '1w':'1 Semana','2w':'2 Semanas','3m':'3 Meses',
+      monthly:'Mensal', annual:'Anual'
+    };
+
+    const history = subscriptions.map(s => ({
+      id:         s.id,
+      type:       'subscription',
+      description:`${s.proxy_count} proxy(s) — ${PERIOD_NAMES[s.period] || s.period}`,
+      amount:     parseFloat(s.price_paid) || 0,
+      status:     s.status,
+      date:       s.created_at,
+      endDate:    s.end_date,
+      sessionId:  s.stripe_session_id
+    })).concat(proxyOrders.map(o => ({
+      id:         o.id,
+      type:       'proxy_order',
+      description:`${o.quantity} proxy(s) ${o.proxy_type?.toUpperCase() || ''} via API — ${PERIOD_NAMES[o.period] || o.period}`,
+      amount:     parseFloat(o.price_paid) || 0,
+      status:     o.status,
+      date:       o.created_at,
+      endDate:    o.end_date
+    }))).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    res.json({ success: true, history });
+
+  } catch (err) {
+    if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
+      return res.status(401).json({ success: false, message: 'Token inválido ou expirado' });
+    }
+    console.error('History error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao buscar histórico' });
   }
 });
 

@@ -255,85 +255,176 @@ router.post('/process-payment/:sessionId', async (req, res) => {
     `;
     const subscription = subscriptions[0];
     
-    // 6. Allocate proxies from available stock
-    // First, check for available proxies (user_id is NULL - not allocated yet)
-    const availableProxies = await sql`
-      SELECT * FROM proxies 
-      WHERE user_id IS NULL AND subscription_id IS NULL AND is_active = true
-      ORDER BY id LIMIT ${proxyCount}
-    `;
-    
+    // 6. Provision proxies — IPv6 uses stock; IPv4/ISP/Mobile use ProxySeller API
     const proxies = [];
-    
-    if (availableProxies.length >= proxyCount) {
-      // Use available proxies from stock
-      for (let i = 0; i < proxyCount; i++) {
-        const p = availableProxies[i];
-        await sql`
-          UPDATE proxies 
-          SET user_id = ${user.id}, subscription_id = ${subscription.id}, updated_at = NOW()
-          WHERE id = ${p.id}
-        `;
-        proxies.push({
-          id: p.id,
-          ip: p.ip,
-          port: p.port,
-          username: p.username,
-          password: p.password
-        });
+
+    if (proxyType === 'ipv6') {
+      // ── Stock proxies ──────────────────────────────────────────────────────
+      const availableProxies = await sql`
+        SELECT * FROM proxies
+        WHERE user_id IS NULL AND subscription_id IS NULL AND is_active = true
+        ORDER BY id LIMIT ${proxyCount}
+      `;
+
+      if (availableProxies.length >= proxyCount) {
+        for (let i = 0; i < proxyCount; i++) {
+          const p = availableProxies[i];
+          await sql`UPDATE proxies SET user_id=${user.id}, subscription_id=${subscription.id}, updated_at=NOW() WHERE id=${p.id}`;
+          proxies.push({ id: p.id, ip: p.ip, port: p.port, username: p.username, password: p.password });
+        }
+        console.log(`✅ Allocated ${proxyCount} IPv6 proxies from stock`);
+      } else {
+        // Use what's available + generate the rest
+        for (const p of availableProxies) {
+          await sql`UPDATE proxies SET user_id=${user.id}, subscription_id=${subscription.id}, updated_at=NOW() WHERE id=${p.id}`;
+          proxies.push({ id: p.id, ip: p.ip, port: p.port, username: p.username, password: p.password });
+        }
+
+        const IP_BASE = process.env.PROXY_IP || '177.54.146.90';
+        const PORT_START = parseInt(process.env.PROXY_PORT_START || '11331');
+        const maxPortRes = await sql`SELECT COALESCE(MAX(port),${PORT_START - 1}) as mp FROM proxies`;
+        let nextPort = (maxPortRes[0]?.mp || PORT_START - 1) + 1;
+
+        const remaining = proxyCount - availableProxies.length;
+        for (let i = 0; i < remaining; i++) {
+          const username = 'fp' + Math.floor(Math.random() * 90000 + 10000);
+          const pwd = Math.random().toString(36).slice(2, 10);
+          const port = nextPort + i;
+          const np = await sql`
+            INSERT INTO proxies (user_id, subscription_id, ip, port, username, password)
+            VALUES (${user.id}, ${subscription.id}, ${IP_BASE}, ${port}, ${username}, ${pwd})
+            RETURNING *
+          `;
+          proxies.push(np[0]);
+        }
+        console.log(`⚠️ Stock short — allocated ${availableProxies.length} from stock, generated ${remaining}`);
       }
-      console.log(`✅ Allocated ${proxyCount} proxies from stock`);
-    } else if (availableProxies.length > 0) {
-      // Partially available - use what's available and create remaining
-      for (const p of availableProxies) {
-        await sql`
-          UPDATE proxies 
-          SET user_id = ${user.id}, subscription_id = ${subscription.id}, updated_at = NOW()
-          WHERE id = ${p.id}
-        `;
-        proxies.push({
-          id: p.id,
-          ip: p.ip,
-          port: p.port,
-          username: p.username,
-          password: p.password
-        });
-      }
-      console.log(`⚠️ Only ${availableProxies.length} proxies available, need to create more`);
-      
-      // Create remaining proxies
-      const IP_BASE = process.env.PROXY_IP || '177.54.146.90';
-      const remaining = proxyCount - availableProxies.length;
-      
-      for (let i = 0; i < remaining; i++) {
-        const username = 'fp' + Math.floor(Math.random() * 90000 + 10000);
-        const pwd = Math.random().toString(36).slice(2, 10);
-        const port = PORT_START + proxies.length + i;
-        
-        const newProxies = await sql`
-          INSERT INTO proxies (user_id, subscription_id, ip, port, username, password)
-          VALUES (${user.id}, ${subscription.id}, ${IP_BASE}, ${port}, ${username}, ${pwd})
-          RETURNING *
-        `;
-        proxies.push(newProxies[0]);
-      }
+
     } else {
-      // No proxies in stock - create new ones
-      console.log('📦 No proxies in stock, creating new ones...');
-      const IP_BASE = process.env.PROXY_IP || '177.54.146.90';
-      const PORT_START = parseInt(process.env.PROXY_PORT_START || '11331');
-      
-      for (let i = 0; i < proxyCount; i++) {
-        const username = 'fp' + Math.floor(Math.random() * 90000 + 10000);
-        const pwd = Math.random().toString(36).slice(2, 10);
-        const port = PORT_START + i;
-        
-        const newProxies = await sql`
-          INSERT INTO proxies (user_id, subscription_id, ip, port, username, password)
-          VALUES (${user.id}, ${subscription.id}, ${IP_BASE}, ${port}, ${username}, ${pwd})
+      // ── ProxySeller API proxies (IPv4, ISP, Mobile) ───────────────────────
+      console.log(`🌐 Ordering ${proxyCount}x ${proxyType} proxies via ProxySeller API...`);
+
+      const proxyseller = require('../lib/proxyseller');
+      const { PROXY_TYPES } = require('../lib/proxyseller');
+      const proxyTypeConfig = PROXY_TYPES[proxyType];
+
+      if (!proxyTypeConfig) {
+        throw new Error(`ProxySeller config not found for type: ${proxyType}`);
+      }
+
+      // Map our period codes to ProxySeller day-based period IDs
+      const PERIOD_DAYS_MAP = { '1w':7,'2w':14,'1m':30,'2m':60,'3m':90,'6m':180,'12m':365 };
+      const psePeriodId = PERIOD_DAYS_MAP[period] || 30;
+
+      try {
+        // Calculate first to check balance
+        const calcResult = await proxyseller.calculateOrder({
+          type:            proxyType,
+          countryId:       proxyTypeConfig.countryId,
+          periodId:        psePeriodId,
+          quantity:        proxyCount,
+          protocol:        'HTTPS',
+          targetSectionId: proxyTypeConfig.targetSectionId,
+          targetId:        proxyTypeConfig.targetId
+        });
+        console.log('ProxySeller calc result:', JSON.stringify(calcResult?.data));
+
+        // Make the order
+        const orderResult = await proxyseller.makeOrder({
+          type:            proxyType,
+          countryId:       proxyTypeConfig.countryId,
+          periodId:        psePeriodId,
+          quantity:        proxyCount,
+          protocol:        'HTTPS',
+          targetSectionId: proxyTypeConfig.targetSectionId,
+          targetId:        proxyTypeConfig.targetId
+        });
+
+        const orderId       = orderResult.data?.orderId || orderResult.data?.id;
+        const orderNumber   = orderResult.data?.listBaseOrderNumbers?.[0] || orderId;
+        console.log(`✅ ProxySeller order created: orderId=${orderId}, orderNumber=${orderNumber}`);
+
+        // Save proxy_order record
+        const periodDays = PERIOD_DAYS_MAP[period] || 30;
+        try {
+          await sql`
+            INSERT INTO proxy_orders (
+              user_id, proxyseller_order_id, proxyseller_order_number,
+              proxy_type, country, country_id, quantity, period, period_days,
+              cost_usd, cost_brl, price_sold_brl, profit_margin,
+              status, payment_status, expira_em
+            ) VALUES (
+              ${user.id}, ${String(orderId)}, ${String(orderNumber)},
+              ${proxyType}, 'Brazil', ${proxyTypeConfig.countryId},
+              ${proxyCount}, ${period}, ${periodDays},
+              ${calcResult.data?.total || 0}, ${(calcResult.data?.total || 0) * 5.5},
+              ${pricePaid}, ${pricePaid - (calcResult.data?.total || 0) * 5.5},
+              'active', 'paid', ${endDate}
+            )
+          `;
+        } catch (dbErr) {
+          console.warn('proxy_orders insert failed (table may not exist):', dbErr.message);
+        }
+
+        // Create auth credentials for the order
+        const authResult = await proxyseller.createAuth(String(orderNumber));
+        const authLogin    = authResult.data?.login    || authResult.data?.username;
+        const authPassword = authResult.data?.password;
+        const authId       = authResult.data?.id;
+        console.log(`✅ ProxySeller auth created: id=${authId}, login=${authLogin}`);
+
+        // Wait briefly for proxy provisioning, then fetch the list
+        await new Promise(r => setTimeout(r, 3000));
+        const proxyListResult = await proxyseller.getProxyList(proxyType, { orderId: String(orderNumber) });
+        const psProxies = proxyListResult.data || [];
+
+        if (psProxies.length === 0) {
+          console.warn('⚠️ ProxySeller returned 0 proxies — order may be pending provisioning');
+          // Store a placeholder so the user knows it's being provisioned
+          const placeholderPort = 10000 + Math.floor(Math.random() * 10000);
+          const np = await sql`
+            INSERT INTO proxies (user_id, subscription_id, ip, port, username, password, is_active)
+            VALUES (${user.id}, ${subscription.id}, ${'pending.proxyseller.com'}, ${placeholderPort}, ${authLogin || 'pending'}, ${authPassword || 'pending'}, true)
+            RETURNING *
+          `;
+          proxies.push({ ...np[0], pending: true });
+        }
+
+        for (const p of psProxies) {
+          const proxyIp   = p.host || p.ip || p.address;
+          const proxyPort = p.port;
+
+          if (!proxyIp || !proxyPort) continue;
+
+          // Store in proxyseller_proxies (ignore errors if table doesn't exist)
+          try {
+            await sql`
+              INSERT INTO proxyseller_proxies (user_id, proxyseller_proxy_id, ip, port, username, password, proxyseller_auth_id, is_active)
+              VALUES (${user.id}, ${String(p.id || p.proxy_id)}, ${proxyIp}, ${proxyPort}, ${authLogin}, ${authPassword}, ${String(authId)}, true)
+            `;
+          } catch (e) { /* table may not exist or has different schema */ }
+
+          // Also store in main proxies table (used by /me endpoint)
+          const np = await sql`
+            INSERT INTO proxies (user_id, subscription_id, ip, port, username, password, is_active)
+            VALUES (${user.id}, ${subscription.id}, ${proxyIp}, ${proxyPort}, ${authLogin}, ${authPassword}, true)
+            RETURNING *
+          `;
+          proxies.push(np[0]);
+        }
+        console.log(`✅ ProxySeller: stored ${proxies.length} proxies for user ${user.id}`);
+
+      } catch (pseErr) {
+        console.error('❌ ProxySeller API failed:', pseErr.message);
+        // Fallback: log the error and store a "pending" proxy entry so user knows to contact support
+        const fallbackPort = 20000 + Math.floor(Math.random() * 10000);
+        const np = await sql`
+          INSERT INTO proxies (user_id, subscription_id, ip, port, username, password, is_active)
+          VALUES (${user.id}, ${subscription.id}, ${'api.pending'}, ${fallbackPort}, ${'pending_' + proxyType}, ${'contact_support'}, true)
           RETURNING *
         `;
-        proxies.push(newProxies[0]);
+        proxies.push({ ...np[0], error: `ProxySeller API error: ${pseErr.message}` });
+        console.warn(`⚠️ Stored fallback proxy entry — user ${user.email} should contact support`);
       }
     }
     
