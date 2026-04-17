@@ -3,247 +3,1094 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog - FastProxy | Artigos sobre Proxies e Automação</title>
-    <meta name="description" content="Blog da FastProxy. Artigos, dicas e novidades sobre proxies, automação, múltiplas contas e muito mais para turbinar seus resultados.">
-    <meta name="keywords" content="blog proxy, dicas proxy, automação marketing, múltiplas contas, marketing digital">
-    <meta property="og:title" content="Blog - FastProxy">
-    <meta property="og:description" content="Artigos, dicas e novidades sobre proxies e automação.">
+
+    <!-- Primary SEO -->
+    <title id="page-title">Blog FastProxy — Guias, Dicas e Tutoriais sobre Proxy no Brasil</title>
+    <meta id="meta-desc" name="description" content="Blog da FastProxy: guias completos sobre proxy HTTP, SOCKS5, IPv6, IPv4 dedicado no Brasil. Aprenda a usar proxies para automação, múltiplas contas, scraping e marketing digital.">
+    <meta name="keywords" content="blog proxy, proxy brasil, guia proxy, tutorial proxy, proxy http, proxy socks5, proxy ipv6, proxy ipv4, proxy dedicado, proxy residencial, proxy isp, proxy barato brasil, proxy para automação, proxy múltiplas contas, proxy instagram, proxy whatsapp, proxy facebook, proxy para scraping, proxy para bots, proxy para marketing digital, como usar proxy, o que é proxy, proxy vs vpn, proxy brasil dedicado, comprar proxy brasil, melhor proxy brasil, proxy com suporte, proxy baixa latência, proxy alta velocidade, proxy rotativo, proxy estático, proxy datacenter, proxy mobile">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="author" content="FastProxy">
+    <meta name="language" content="pt-BR">
+    <link id="canonical" rel="canonical" href="https://fastproxy.com.br/blog.html">
+
+    <!-- Open Graph -->
+    <meta id="og-title" property="og:title" content="Blog FastProxy — Guias, Dicas e Tutoriais sobre Proxy no Brasil">
+    <meta id="og-desc" property="og:description" content="Blog da FastProxy: guias completos sobre proxy HTTP, SOCKS5, IPv6, IPv4 dedicado no Brasil. Automação, múltiplas contas, scraping e marketing digital.">
     <meta property="og:type" content="website">
-    <link rel="canonical" href="https://fastproxyoriginal.vercel.app/blog.html">
+    <meta id="og-url" property="og:url" content="https://fastproxy.com.br/blog.html">
+    <meta id="og-image" property="og:image" content="https://fastproxy.com.br/img/LOGO%20FAST%20PROXY.png">
+    <meta property="og:site_name" content="FastProxy">
+    <meta property="og:locale" content="pt_BR">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta id="tw-title" name="twitter:title" content="Blog FastProxy — Guias, Dicas e Tutoriais sobre Proxy no Brasil">
+    <meta id="tw-desc" name="twitter:description" content="Guias completos sobre proxy no Brasil. HTTP, SOCKS5, IPv6, IPv4, automação e marketing digital.">
+    <meta id="tw-image" name="twitter:image" content="https://fastproxy.com.br/img/LOGO%20FAST%20PROXY.png">
+    <meta name="twitter:site" content="@fastproxy">
+
+    <!-- JSON-LD Blog -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Blog",
+      "name": "Blog FastProxy",
+      "url": "https://fastproxy.com.br/blog.html",
+      "description": "Guias, dicas e tutoriais sobre proxies dedicados no Brasil",
+      "publisher": {
+        "@type": "Organization",
+        "name": "FastProxy",
+        "url": "https://fastproxy.com.br",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://fastproxy.com.br/img/LOGO%20FAST%20PROXY.png"
+        }
+      },
+      "inLanguage": "pt-BR"
+    }
+    </script>
+    <script id="ld-article" type="application/ld+json"></script>
+
+    <!-- Breadcrumb JSON-LD -->
+    <script id="ld-breadcrumb" type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Início", "item": "https://fastproxy.com.br/"},
+        {"@type": "ListItem", "position": 2, "name": "Blog", "item": "https://fastproxy.com.br/blog.html"}
+      ]
+    }
+    </script>
+
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
-    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: { 50: '#f0fdf4', 400: '#4ade80', 500: '#22c55e', 600: '#16a34a' }
-                    }
-                }
-            }
-        }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <style>
         :root {
-            --bg-primary: #09090b;
-            --bg-secondary: rgba(24, 24, 27, 0.5);
-            --bg-card: rgba(24, 24, 27, 0.9);
-            --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.6);
-            --border-color: rgba(255, 255, 255, 0.08);
+            --bg: #080a0f;
+            --bg2: #0d1017;
+            --card: #111318;
+            --card2: #161b24;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.12);
+            --text: #f0f4ff;
+            --muted: rgba(240,244,255,0.45);
+            --accent: #22d06a;
+            --accent2: #00c6ff;
+            --accent3: #a259ff;
         }
-        html { background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', sans-serif; }
-        .card { background: var(--bg-card); border: 1px solid var(--border-color); }
-        .gradient-text { background: linear-gradient(135deg, #4ade80, #22c55e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .theme-toggle { position: relative; width: 48px; height: 24px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; }
-        .theme-toggle::before { content: '☀️'; position: absolute; left: 6px; top: 50%; transform: translateY(-50%); font-size: 10px; }
-        .theme-toggle::after { content: '🌙'; position: absolute; right: 6px; top: 50%; transform: translateY(-50%); font-size: 10px; }
-        nav { background: var(--bg-card); backdrop-filter: blur(20px); }
-        .post-image { height: 200px; background-size: cover; background-position: center; }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        h1, h2, h3, h4, h5, .font-display { font-family: 'Syne', sans-serif; }
+
+        /* Noise texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        /* Nav */
+        nav {
+            background: rgba(8,10,15,0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-link {
+            color: var(--muted);
+            font-size: 0.875rem;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .nav-link:hover { color: var(--text); }
+        .nav-link.active { color: var(--accent); font-weight: 600; }
+
+        .btn-portal {
+            background: rgba(34,208,106,0.1);
+            border: 1px solid rgba(34,208,106,0.3);
+            color: var(--accent);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-portal:hover {
+            background: rgba(34,208,106,0.18);
+            border-color: var(--accent);
+        }
+
+        /* Hero */
+        .blog-hero {
+            background: radial-gradient(ellipse 80% 60% at 50% -20%, rgba(34,208,106,0.12) 0%, transparent 70%);
+            padding: 7rem 1.5rem 3rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--accent);
+            background: rgba(34,208,106,0.1);
+            border: 1px solid rgba(34,208,106,0.2);
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 1rem;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-desc {
+            color: var(--muted);
+            font-size: 1.1rem;
+            max-width: 520px;
+            margin: 0 auto 2rem;
+            line-height: 1.7;
+        }
+
+        /* Category filter */
+        .cat-bar {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 0 1.5rem 2.5rem;
+        }
+
+        .cat-btn {
+            padding: 0.4rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border: 1px solid var(--border2);
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .cat-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .cat-btn.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 700; }
+
+        /* Cards */
+        .post-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            overflow: hidden;
+            transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+            cursor: pointer;
+            position: relative;
+        }
+        .post-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border2);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(34,208,106,0.08);
+        }
+
+        .post-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .post-img-placeholder {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        .post-body { padding: 1.25rem 1.5rem 1.5rem; }
+
+        .post-cat {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            margin-bottom: 0.75rem;
+        }
+
+        .post-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            line-height: 1.35;
+            margin-bottom: 0.6rem;
+            color: var(--text);
+        }
+
+        .post-excerpt {
+            font-size: 0.875rem;
+            color: var(--muted);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .post-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+
+        .read-more {
+            color: var(--accent);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.82rem;
+        }
+
+        /* Featured */
+        .featured-card {
+            background: var(--card2);
+            border: 1px solid rgba(34,208,106,0.15);
+            border-radius: 1.5rem;
+            overflow: hidden;
+            cursor: pointer;
+            transition: border-color 0.25s, box-shadow 0.25s;
+            position: relative;
+        }
+        .featured-card:hover {
+            border-color: rgba(34,208,106,0.35);
+            box-shadow: 0 0 60px rgba(34,208,106,0.08);
+        }
+
+        .featured-img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+        }
+
+        .featured-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #000;
+            background: var(--accent);
+            padding: 0.3rem 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        /* Post view */
+        .post-view { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
+
+        .post-view-header {
+            padding: 6rem 1.5rem 2.5rem;
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        .post-view-img {
+            width: 100%;
+            max-height: 420px;
+            object-fit: cover;
+            border-radius: 1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .post-content {
+            line-height: 1.85;
+            color: rgba(240,244,255,0.82);
+            font-size: 1.05rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3, .post-content h4 {
+            font-family: 'Syne', sans-serif;
+            color: var(--text);
+            margin: 2rem 0 1rem;
+            line-height: 1.3;
+            font-weight: 700;
+        }
+        .post-content h2 { font-size: 1.6rem; }
+        .post-content h3 { font-size: 1.3rem; }
+        .post-content p { margin-bottom: 1.25rem; }
+        .post-content ul, .post-content ol {
+            margin: 1rem 0 1.25rem 1.5rem;
+        }
+        .post-content li { margin-bottom: 0.4rem; }
+        .post-content strong { color: var(--text); }
+        .post-content a { color: var(--accent); text-decoration: underline; }
+        .post-content a:hover { opacity: 0.8; }
+        .post-content blockquote {
+            border-left: 3px solid var(--accent);
+            padding: 0.75rem 1.25rem;
+            background: rgba(34,208,106,0.06);
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin: 1.5rem 0;
+            font-style: italic;
+            color: rgba(240,244,255,0.7);
+        }
+        .post-content code {
+            background: rgba(255,255,255,0.08);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.88em;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+        .post-content pre code {
+            background: none;
+            padding: 0;
+        }
+        .post-content img { max-width: 100%; border-radius: 0.75rem; margin: 1.5rem 0; }
+        .post-content hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+        .post-content table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+        .post-content th { background: var(--card2); padding: 0.75rem 1rem; text-align: left; border: 1px solid var(--border); font-weight: 600; }
+        .post-content td { padding: 0.75rem 1rem; border: 1px solid var(--border); }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+        }
+        .breadcrumb a { color: var(--muted); text-decoration: none; }
+        .breadcrumb a:hover { color: var(--accent); }
+        .breadcrumb .sep { opacity: 0.4; }
+
+        /* Skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, var(--card) 0%, var(--card2) 50%, var(--card) 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+            border-radius: 0.5rem;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* Empty / error */
+        .empty-state {
+            text-align: center;
+            padding: 5rem 2rem;
+            color: var(--muted);
+        }
+        .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.3; }
+
+        /* Tags */
+        .cat-colors {
+            tutorial: { bg: rgba(34,208,106,0.15); color: #22d06a; },
+            automação: { bg: rgba(162,89,255,0.15); color: #a259ff; },
+            segurança: { bg: rgba(0,198,255,0.15); color: #00c6ff; },
+            dicas: { bg: rgba(255,184,0,0.15); color: #ffb800; },
+            marketing: { bg: rgba(255,100,100,0.15); color: #ff6464; },
+            novidades: { bg: rgba(34,208,106,0.15); color: #22d06a; }
+        }
+
+        /* Back button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--muted);
+            font-size: 0.875rem;
+            text-decoration: none;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            font-family: 'DM Sans', sans-serif;
+            transition: color 0.2s;
+            margin-bottom: 1.5rem;
+        }
+        .back-btn:hover { color: var(--accent); }
+
+        /* Share */
+        .share-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1.5rem 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            margin: 2.5rem 0;
+            flex-wrap: wrap;
+        }
+        .share-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.45rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border2);
+            background: transparent;
+            color: var(--muted);
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .share-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* Related posts */
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem 1.5rem;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.82rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .hero-title { font-size: 2.2rem; }
+            .grid-3 { grid-template-columns: 1fr; }
+        }
+
+        /* Grid */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
+        }
+        @media (max-width: 1024px) {
+            .grid-3 { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 640px) {
+            .grid-3 { grid-template-columns: 1fr; }
+        }
+
+        /* Reading time */
+        .reading-time {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+
+        /* CTA Box */
+        .cta-box {
+            background: linear-gradient(135deg, rgba(34,208,106,0.08), rgba(0,198,255,0.05));
+            border: 1px solid rgba(34,208,106,0.2);
+            border-radius: 1.25rem;
+            padding: 2.5rem;
+            text-align: center;
+            margin: 3rem 0;
+        }
+        .cta-box h3 { margin: 0 0 0.75rem; font-size: 1.4rem; }
+        .cta-box p { color: var(--muted); margin-bottom: 1.5rem; font-size: 0.95rem; }
+        .cta-btn {
+            display: inline-block;
+            background: var(--accent);
+            color: #000;
+            font-weight: 700;
+            padding: 0.75rem 2rem;
+            border-radius: 0.75rem;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: opacity 0.2s;
+        }
+        .cta-btn:hover { opacity: 0.88; }
+
+        /* Fade-in */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-up { animation: fadeUp 0.45s ease both; }
+        .fade-up-1 { animation-delay: 0.05s; }
+        .fade-up-2 { animation-delay: 0.12s; }
+        .fade-up-3 { animation-delay: 0.2s; }
     </style>
 </head>
-<body class="min-h-screen">
+<body>
+
     <!-- Navbar -->
-    <nav class="fixed top-0 w-full z-50 border-b" style="border-color: var(--border-color)">
-        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="/" class="flex items-center gap-3">
-                <img src="img/LOGO%20FAST%20PROXY.png" alt="FastProxy" class="h-9">
+    <nav class="fixed top-0 w-full z-50">
+        <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;height:64px;display:flex;align-items:center;justify-content:space-between;">
+            <a href="/" style="display:flex;align-items:center;gap:0.75rem;text-decoration:none;">
+                <img src="img/LOGO%20FAST%20PROXY.png" alt="FastProxy" style="height:36px;">
             </a>
-            <div class="flex items-center gap-6">
-                <a href="/" class="text-sm opacity-60 hover:opacity-100 transition">Início</a>
-                <a href="tutoriais.html" class="text-sm opacity-60 hover:opacity-100 transition">Tutoriais</a>
-                <a href="blog.html" class="text-sm font-semibold text-green-400">Blog</a>
-                <a href="portal.html" class="text-sm py-2 px-4 rounded-lg font-medium" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); color: #22c55e;">Área do Cliente</a>
-                <button onclick="toggleTheme()" class="theme-toggle"></button>
+            <div style="display:flex;align-items:center;gap:1.5rem;">
+                <a href="/" class="nav-link">Início</a>
+                <a href="planos.html" class="nav-link">Planos</a>
+                <a href="blog.html" class="nav-link active">Blog</a>
+                <a href="portal.html" class="btn-portal">Área do Cliente</a>
             </div>
         </div>
     </nav>
 
-    <!-- Hero -->
-    <section class="pt-32 pb-16 px-6">
-        <div class="max-w-4xl mx-auto text-center">
-            <h1 class="text-4xl md:text-5xl font-black mb-6">
-                <span class="gradient-text">Blog</span> FastProxy
+    <!-- Blog list view -->
+    <div id="list-view">
+        <!-- Hero -->
+        <div class="blog-hero">
+            <div class="hero-label">
+                <i class="fas fa-rss" style="font-size:0.65rem;"></i>
+                Conteúdo Fresh
+            </div>
+            <h1 class="hero-title">
+                Blog <span class="gradient-text">FastProxy</span>
             </h1>
-            <p class="text-xl opacity-60 max-w-2xl mx-auto">
-                Artigos, dicas e novidades sobre proxies, automação e marketing digital.
+            <p class="hero-desc">
+                Guias práticos, dicas e novidades sobre proxies dedicados no Brasil — para quem leva automação e marketing digital a sério.
             </p>
         </div>
-    </section>
 
-    <!-- Featured Post -->
-    <section class="pb-16 px-6">
-        <div class="max-w-6xl mx-auto">
-            <article class="card rounded-3xl overflow-hidden">
-                <div class="md:flex">
-                    <div class="md:w-1/2 post-image" style="background-image: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800'); background-color: #1a1a1a;">
-                        <div class="h-full flex items-center justify-center bg-gradient-to-br from-green-900/50 to-transparent">
-                            <i class="fas fa-chart-line text-8xl text-green-500 opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
-                        <div class="flex items-center gap-3 mb-4">
-                            <span class="px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400">Destaque</span>
-                            <span class="text-xs opacity-40">10 de Abril, 2026</span>
-                        </div>
-                        <h2 class="text-2xl md:text-3xl font-bold mb-4">
-                            Como Multiplicar seus Resultados com Múltiplas Contas
-                        </h2>
-                        <p class="opacity-60 mb-6">
-                            Descubra como usar proxies para gerenciar múltiplas contas sem ser bloqueado. 
-                            Estratégias comprovadas para масштабировать suas operações.
-                        </p>
-                        <a href="blog-multiplas-contas.html" class="inline-flex items-center gap-2 text-green-400 font-medium hover:underline">
-                            Ler artigo <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
+        <!-- Category filter -->
+        <div class="cat-bar" id="cat-bar">
+            <button class="cat-btn active" data-cat="todos" onclick="filterCategory('todos')">Todos</button>
+        </div>
+
+        <!-- Content -->
+        <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem 5rem;">
+
+            <!-- Featured -->
+            <div id="featured-wrap" style="margin-bottom:2.5rem;"></div>
+
+            <!-- Grid -->
+            <div id="posts-grid" class="grid-3"></div>
+
+            <!-- Empty -->
+            <div id="empty-state" class="empty-state" style="display:none;">
+                <div class="icon">📄</div>
+                <p>Nenhum post encontrado nesta categoria.</p>
+            </div>
+
+            <!-- Loading skeletons -->
+            <div id="loading-state">
+                <div class="grid-3">
+                    <div class="post-card"><div class="skeleton" style="height:200px;border-radius:0;"></div><div style="padding:1.25rem 1.5rem;"><div class="skeleton" style="height:1rem;width:30%;margin-bottom:0.75rem;"></div><div class="skeleton" style="height:1.2rem;width:85%;margin-bottom:0.5rem;"></div><div class="skeleton" style="height:1rem;width:60%;margin-bottom:1rem;"></div><div class="skeleton" style="height:0.8rem;width:40%;"></div></div></div>
+                    <div class="post-card"><div class="skeleton" style="height:200px;border-radius:0;"></div><div style="padding:1.25rem 1.5rem;"><div class="skeleton" style="height:1rem;width:30%;margin-bottom:0.75rem;"></div><div class="skeleton" style="height:1.2rem;width:90%;margin-bottom:0.5rem;"></div><div class="skeleton" style="height:1rem;width:55%;margin-bottom:1rem;"></div><div class="skeleton" style="height:0.8rem;width:40%;"></div></div></div>
+                    <div class="post-card"><div class="skeleton" style="height:200px;border-radius:0;"></div><div style="padding:1.25rem 1.5rem;"><div class="skeleton" style="height:1rem;width:25%;margin-bottom:0.75rem;"></div><div class="skeleton" style="height:1.2rem;width:80%;margin-bottom:0.5rem;"></div><div class="skeleton" style="height:1rem;width:65%;margin-bottom:1rem;"></div><div class="skeleton" style="height:0.8rem;width:40%;"></div></div></div>
                 </div>
-            </article>
+            </div>
+
         </div>
-    </section>
+    </div>
 
-    <!-- Latest Posts -->
-    <section class="pb-16 px-6">
-        <div class="max-w-6xl mx-auto">
-            <h2 class="text-2xl font-bold mb-8">Últimos Artigos</h2>
-            
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Post 1 -->
-                <article class="card rounded-2xl overflow-hidden">
-                    <div class="post-image flex items-center justify-center" style="background: linear-gradient(135deg, #22c55e20, #16a34a10);">
-                        <i class="fas fa-shield-alt text-5xl text-green-500"></i>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex items-center gap-2 mb-3">
-                            <span class="text-xs opacity-40">8 Abr, 2026</span>
-                            <span class="text-xs text-green-400">Segurança</span>
-                        </div>
-                        <h3 class="font-bold mb-2">Por que seus proxies param de funcionar?</h3>
-                        <p class="text-sm opacity-60 mb-4">Entenda os motivos mais comuns e como evitá-los.</p>
-                        <a href="blog-proxy-problemas.html" class="text-sm text-green-400 font-medium hover:underline">Ler mais →</a>
-                    </div>
-                </article>
+    <!-- Post view -->
+    <div id="post-view" style="display:none;">
 
-                <!-- Post 2 -->
-                <article class="card rounded-2xl overflow-hidden">
-                    <div class="post-image flex items-center justify-center" style="background: linear-gradient(135deg, #3b82f620, #2563eb10);">
-                        <i class="fas fa-bullhorn text-5xl text-blue-500"></i>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex items-center gap-2 mb-3">
-                            <span class="text-xs opacity-40">5 Abr, 2026</span>
-                            <span class="text-xs text-blue-400">Marketing</span>
-                        </div>
-                        <h3 class="font-bold mb-2">5 Plataformas que Exigem Proxies Dedicados</h3>
-                        <p class="text-sm opacity-60 mb-4">Conheça as plataformas onde proxy compartilhado não funciona.</p>
-                        <a href="blog-plataformas-proxy.html" class="text-sm text-green-400 font-medium hover:underline">Ler mais →</a>
-                    </div>
-                </article>
-
-                <!-- Post 3 -->
-                <article class="card rounded-2xl overflow-hidden">
-                    <div class="post-image flex items-center justify-center" style="background: linear-gradient(135deg, #8b5cf620, #7c3aed10);">
-                        <i class="fas fa-robot text-5xl text-purple-500"></i>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex items-center gap-2 mb-3">
-                            <span class="text-xs opacity-40">2 Abr, 2026</span>
-                            <span class="text-xs text-purple-400">Automação</span>
-                        </div>
-                        <h3 class="font-bold mb-2">Introdução ao Browser Antidetect</h3>
-                        <p class="text-sm opacity-60 mb-4">O que é e por que você precisa de um para масштабирование.</p>
-                        <a href="blog-antidetect.html" class="text-sm text-green-400 font-medium hover:underline">Ler mais →</a>
-                    </div>
-                </article>
-
-                <!-- Post 4 -->
-                <article class="card rounded-2xl overflow-hidden">
-                    <div class="post-image flex items-center justify-center" style="background: linear-gradient(135deg, #f59e0b20, #d9770610);">
-                        <i class="fas fa-sync text-5xl text-yellow-500"></i>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex items-center gap-2 mb-3">
-                            <span class="text-xs opacity-40">28 Mar, 2026</span>
-                            <span class="text-xs text-yellow-400">Dicas</span>
-                        </div>
-                        <h3 class="font-bold mb-2">Quando Trocar seu Proxy</h3>
-                        <p class="text-sm opacity-60 mb-4">Sinais de que seus proxies precisam ser substituídos.</p>
-                        <a href="blog-quando-trocar.html" class="text-sm text-green-400 font-medium hover:underline">Ler mais →</a>
-                    </div>
-                </article>
-
-                <!-- Post 5 -->
-                <article class="card rounded-2xl overflow-hidden">
-                    <div class="post-image flex items-center justify-center" style="background: linear-gradient(135deg, #ef444420, #dc262610);">
-                        <i class="fas fa-globe text-5xl text-red-500"></i>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex items-center gap-2 mb-3">
-                            <span class="text-xs opacity-40">25 Mar, 2026</span>
-                            <span class="text-xs text-red-400">Geolocalização</span>
-                        </div>
-                        <h3 class="font-bold mb-2">Proxy Brasileiro: Para Que Serve?</h3>
-                        <p class="text-sm opacity-60 mb-4">Casos de uso para proxies do Brasil.</p>
-                        <a href="blog-proxy-brasileiro.html" class="text-sm text-green-400 font-medium hover:underline">Ler mais →</a>
-                    </div>
-                </article>
-
-                <!-- Post 6 -->
-                <article class="card rounded-2xl overflow-hidden">
-                    <div class="post-image flex items-center justify-center" style="background: linear-gradient(135deg, #14b8a620, #0d948810);">
-                        <i class="fas fa-tachometer-alt text-5xl text-teal-500"></i>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex items-center gap-2 mb-3">
-                            <span class="text-xs opacity-40">20 Mar, 2026</span>
-                            <span class="text-xs text-teal-400">Performance</span>
-                        </div>
-                        <h3 class="font-bold mb-2">Como Testar Velocidade do Proxy</h3>
-                        <p class="text-sm opacity-60 mb-4">Ferramentas e métodos para medir a performance.</p>
-                        <a href="blog-teste-velocidade.html" class="text-sm text-green-400 font-medium hover:underline">Ler mais →</a>
-                    </div>
-                </article>
+        <div class="post-view-header">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i> Voltar ao Blog
+            </button>
+            <nav class="breadcrumb" id="post-breadcrumb">
+                <a href="/">Início</a>
+                <span class="sep">/</span>
+                <a href="/blog.html">Blog</a>
+                <span class="sep">/</span>
+                <span id="bc-title">Carregando...</span>
+            </nav>
+            <div id="post-cat-badge" style="margin-bottom:1rem;"></div>
+            <h1 id="post-view-title" style="font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;line-height:1.15;letter-spacing:-0.02em;margin-bottom:1rem;"></h1>
+            <p id="post-view-excerpt" style="font-size:1.1rem;color:var(--muted);line-height:1.7;margin-bottom:1.5rem;"></p>
+            <div style="display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.82rem;color:var(--muted);">
+                    <i class="fas fa-calendar-alt" style="font-size:0.7rem;"></i>
+                    <span id="post-view-date"></span>
+                </div>
+                <div id="post-reading-time" class="reading-time"></div>
             </div>
         </div>
-    </section>
 
-    <!-- Newsletter -->
-    <section class="py-16 px-6">
-        <div class="max-w-4xl mx-auto text-center">
-            <div class="card rounded-3xl p-8 md:p-12" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.05)); border: 1px solid rgba(34, 197, 94, 0.2);">
-                <i class="fas fa-envelope text-4xl text-green-500 mb-4"></i>
-                <h2 class="text-2xl font-bold mb-4">Receba Novidades</h2>
-                <p class="opacity-60 mb-6">Cadastre seu email para receber dicas e novidades sobre proxies.</p>
-                <form class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-                    <input type="email" placeholder="seu@email.com" class="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-green-500 focus:outline-none">
-                    <button type="submit" class="bg-green-600 hover:bg-green-500 text-white px-6 py-3 rounded-xl font-semibold transition">
-                        Inscrever
-                    </button>
-                </form>
+        <div class="post-view">
+            <img id="post-view-img" src="" alt="" class="post-view-img" style="display:none;">
+
+            <div id="post-view-content" class="post-content"></div>
+
+            <!-- Share bar -->
+            <div class="share-bar">
+                <span style="font-size:0.82rem;color:var(--muted);margin-right:0.25rem;">Compartilhar:</span>
+                <a id="share-whatsapp" href="#" target="_blank" class="share-btn"><i class="fab fa-whatsapp" style="color:#25d366;"></i> WhatsApp</a>
+                <a id="share-twitter" href="#" target="_blank" class="share-btn"><i class="fab fa-x-twitter"></i> X/Twitter</a>
+                <a id="share-linkedin" href="#" target="_blank" class="share-btn"><i class="fab fa-linkedin" style="color:#0a66c2;"></i> LinkedIn</a>
+                <button onclick="copyLink()" class="share-btn" id="copy-btn"><i class="fas fa-link"></i> Copiar link</button>
+            </div>
+
+            <!-- CTA -->
+            <div class="cta-box">
+                <h3>Precisa de proxies dedicados no Brasil?</h3>
+                <p>IPs exclusivos, alta velocidade e suporte técnico. A partir de R$29,90/mês.</p>
+                <a href="/" class="cta-btn">Ver Planos e Preços →</a>
+            </div>
+
+            <!-- Related posts -->
+            <div id="related-section" style="margin-top:3rem;display:none;">
+                <h3 style="font-size:1.25rem;font-weight:700;margin-bottom:1rem;">Mais artigos</h3>
+                <div class="related-grid" id="related-posts"></div>
             </div>
         </div>
-    </section>
+    </div>
 
     <!-- Footer -->
-    <footer class="py-8 px-6 border-t" style="border-color: var(--border-color)">
-        <div class="max-w-6xl mx-auto text-center text-sm opacity-40">
-            <p>© 2026 FastProxy. Todos os direitos reservados.</p>
-        </div>
+    <footer>
+        <p>© 2026 FastProxy — Proxies Dedicados no Brasil. Todos os direitos reservados.</p>
+        <p style="margin-top:0.4rem;"><a href="/" style="color:var(--muted);text-decoration:none;">Início</a> · <a href="planos.html" style="color:var(--muted);text-decoration:none;">Planos</a> · <a href="portal.html" style="color:var(--muted);text-decoration:none;">Área do Cliente</a></p>
     </footer>
 
     <script>
-        function toggleTheme() {
-            document.documentElement.classList.toggle('light');
-            if (document.documentElement.classList.contains('light')) {
-                document.documentElement.style.cssText = '--bg-primary: #ffffff; --bg-secondary: #f4f4f5; --bg-card: #ffffff; --text-primary: #18181b; --text-secondary: #52525b; --border-color: #e4e4e7;';
-            } else {
-                document.documentElement.style.cssText = '';
-            }
+    // ─── State ──────────────────────────────────────────────────────────
+    let allPosts = [];
+    let activeCategory = 'todos';
+
+    // ─── Category colours ───────────────────────────────────────────────
+    const CAT_COLORS = {
+        'tutorial':    { bg: 'rgba(34,208,106,0.15)',  color: '#22d06a' },
+        'automação':   { bg: 'rgba(162,89,255,0.15)',  color: '#a259ff' },
+        'segurança':   { bg: 'rgba(0,198,255,0.15)',   color: '#00c6ff' },
+        'dicas':       { bg: 'rgba(255,184,0,0.15)',   color: '#ffb800' },
+        'marketing':   { bg: 'rgba(255,100,100,0.15)', color: '#ff6464' },
+        'novidades':   { bg: 'rgba(34,208,106,0.15)',  color: '#22d06a' },
+        'casos de uso':{ bg: 'rgba(0,198,255,0.15)',   color: '#00c6ff' },
+    };
+
+    const CAT_ICONS = {
+        'tutorial':     '📖',
+        'automação':    '🤖',
+        'segurança':    '🛡️',
+        'dicas':        '💡',
+        'marketing':    '📣',
+        'novidades':    '✨',
+        'casos de uso': '🔎',
+    };
+
+    function getCatStyle(cat) {
+        const key = (cat || '').toLowerCase().trim();
+        return CAT_COLORS[key] || { bg: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' };
+    }
+
+    function getCatIcon(cat) {
+        const key = (cat || '').toLowerCase().trim();
+        return CAT_ICONS[key] || '📄';
+    }
+
+    // ─── Helpers ────────────────────────────────────────────────────────
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        try {
+            return new Date(dateStr).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+        } catch { return dateStr; }
+    }
+
+    function formatShortDate(dateStr) {
+        if (!dateStr) return '';
+        try {
+            return new Date(dateStr).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+        } catch { return dateStr; }
+    }
+
+    function readingTime(content) {
+        if (!content) return '';
+        const words = content.replace(/<[^>]*>/g, '').split(/\s+/).filter(Boolean).length;
+        const mins = Math.max(1, Math.round(words / 200));
+        return `${mins} min de leitura`;
+    }
+
+    function imgOrPlaceholder(post, height, featured) {
+        const icon = getCatIcon(post.category);
+        const style = getCatStyle(post.category);
+        if (post.image_url) {
+            return `<img src="${escHtml(post.image_url)}" alt="${escHtml(post.title)}" style="width:100%;height:${height}px;object-fit:cover;display:block;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                    <div class="post-img-placeholder" style="height:${height}px;background:${style.bg};color:${style.color};display:none;font-size:3.5rem;">${icon}</div>`;
         }
+        return `<div class="post-img-placeholder" style="height:${height}px;background:${style.bg};color:${style.color};font-size:${featured ? '4.5rem' : '3.5rem'};">${icon}</div>`;
+    }
+
+    function escHtml(str) {
+        return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ─── Load posts list ─────────────────────────────────────────────────
+    async function loadPosts() {
+        try {
+            const res = await fetch('/api/subscription/posts');
+            const data = await res.json();
+            if (!data.success || !data.posts) throw new Error('API error');
+            allPosts = data.posts;
+            renderPosts(allPosts);
+            buildCategoryBar(allPosts);
+            document.getElementById('loading-state').style.display = 'none';
+        } catch (err) {
+            console.error('Blog load error:', err);
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('empty-state').style.display = 'block';
+            document.getElementById('empty-state').innerHTML = `
+                <div class="icon">⚠️</div>
+                <p style="color:var(--muted);">Não foi possível carregar os artigos.<br>Tente recarregar a página.</p>`;
+        }
+    }
+
+    function buildCategoryBar(posts) {
+        const cats = [...new Set(posts.map(p => p.category).filter(Boolean))];
+        const bar = document.getElementById('cat-bar');
+        bar.innerHTML = `<button class="cat-btn active" data-cat="todos" onclick="filterCategory('todos')">Todos</button>`;
+        cats.forEach(cat => {
+            const btn = document.createElement('button');
+            btn.className = 'cat-btn';
+            btn.dataset.cat = cat;
+            btn.textContent = getCatIcon(cat) + ' ' + cat.charAt(0).toUpperCase() + cat.slice(1);
+            btn.onclick = () => filterCategory(cat);
+            bar.appendChild(btn);
+        });
+    }
+
+    function filterCategory(cat) {
+        activeCategory = cat;
+        document.querySelectorAll('.cat-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.cat === cat);
+        });
+        const filtered = cat === 'todos' ? allPosts : allPosts.filter(p => (p.category || '').toLowerCase() === cat.toLowerCase());
+        renderPosts(filtered);
+    }
+
+    function renderPosts(posts) {
+        const featuredWrap = document.getElementById('featured-wrap');
+        const grid = document.getElementById('posts-grid');
+        const empty = document.getElementById('empty-state');
+
+        if (!posts || posts.length === 0) {
+            featuredWrap.innerHTML = '';
+            grid.innerHTML = '';
+            empty.style.display = 'block';
+            return;
+        }
+        empty.style.display = 'none';
+
+        // Featured = first post
+        const featured = posts[0];
+        const rest = posts.slice(1);
+
+        featuredWrap.innerHTML = renderFeatured(featured);
+        grid.innerHTML = rest.map(renderCard).join('');
+    }
+
+    function renderFeatured(post) {
+        const style = getCatStyle(post.category);
+        const rt = readingTime(post.content);
+        return `
+        <div class="featured-card fade-up" onclick="openPost('${escHtml(post.slug)}')">
+            <div style="display:grid;grid-template-columns:1fr 1fr;min-height:300px;">
+                <div style="overflow:hidden;">
+                    ${imgOrPlaceholder(post, 300, true)}
+                </div>
+                <div style="padding:2.5rem 2.5rem;display:flex;flex-direction:column;justify-content:center;">
+                    <div class="featured-label">★ Em Destaque</div>
+                    ${post.category ? `<span class="post-cat" style="background:${style.bg};color:${style.color};margin-bottom:1rem;">${getCatIcon(post.category)} ${post.category}</span>` : ''}
+                    <h2 style="font-size:1.6rem;font-weight:800;line-height:1.25;margin-bottom:0.85rem;color:var(--text);">${escHtml(post.title)}</h2>
+                    <p style="font-size:0.9rem;color:var(--muted);line-height:1.65;margin-bottom:1.5rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${escHtml(post.excerpt || '')}</p>
+                    <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+                        <span style="font-size:0.78rem;color:var(--muted);"><i class="fas fa-calendar-alt" style="font-size:0.65rem;margin-right:0.3rem;"></i>${formatShortDate(post.created_at)}</span>
+                        ${rt ? `<span class="reading-time"><i class="fas fa-clock" style="font-size:0.65rem;"></i>${rt}</span>` : ''}
+                        <span style="color:var(--accent);font-size:0.85rem;font-weight:600;margin-left:auto;">Ler artigo <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></span>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    function renderCard(post) {
+        const style = getCatStyle(post.category);
+        const rt = readingTime(post.content);
+        return `
+        <article class="post-card fade-up" onclick="openPost('${escHtml(post.slug)}')">
+            ${imgOrPlaceholder(post, 200, false)}
+            <div class="post-body">
+                ${post.category ? `<span class="post-cat" style="background:${style.bg};color:${style.color};">${getCatIcon(post.category)} ${post.category}</span>` : ''}
+                <h3 class="post-title">${escHtml(post.title)}</h3>
+                <p class="post-excerpt">${escHtml(post.excerpt || '')}</p>
+                <div class="post-meta">
+                    <span><i class="fas fa-calendar-alt" style="font-size:0.65rem;margin-right:0.3rem;opacity:0.6;"></i>${formatShortDate(post.created_at)}</span>
+                    ${rt ? `<span class="reading-time"><i class="fas fa-clock" style="font-size:0.65rem;"></i>${rt}</span>` : ''}
+                </div>
+            </div>
+        </article>`;
+    }
+
+    // ─── Open post ───────────────────────────────────────────────────────
+    async function openPost(slug) {
+        // Update URL without reload
+        const newUrl = `/blog.html?post=${slug}`;
+        history.pushState({ slug }, '', newUrl);
+
+        document.getElementById('list-view').style.display = 'none';
+        document.getElementById('post-view').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'instant' });
+
+        // Show loading state
+        document.getElementById('post-view-title').textContent = 'Carregando...';
+        document.getElementById('post-view-content').innerHTML = `
+            <div style="padding:2rem 0;">
+                <div class="skeleton" style="height:1rem;width:90%;margin-bottom:1rem;"></div>
+                <div class="skeleton" style="height:1rem;width:80%;margin-bottom:1rem;"></div>
+                <div class="skeleton" style="height:1rem;width:85%;margin-bottom:1rem;"></div>
+                <div class="skeleton" style="height:1rem;width:70%;margin-bottom:2rem;"></div>
+                <div class="skeleton" style="height:1.4rem;width:40%;margin-bottom:1.5rem;"></div>
+                <div class="skeleton" style="height:1rem;width:95%;margin-bottom:1rem;"></div>
+                <div class="skeleton" style="height:1rem;width:88%;margin-bottom:1rem;"></div>
+            </div>`;
+
+        try {
+            const res = await fetch(`/api/subscription/posts/${slug}`);
+            const data = await res.json();
+            if (!data.success || !data.post) throw new Error('Post not found');
+            renderPostView(data.post);
+        } catch (err) {
+            document.getElementById('post-view-title').textContent = 'Post não encontrado';
+            document.getElementById('post-view-content').innerHTML = `
+                <div style="text-align:center;padding:3rem 0;color:var(--muted);">
+                    <p>Este artigo não foi encontrado ou não está disponível.</p>
+                    <button onclick="goBack()" style="margin-top:1.5rem;background:var(--accent);color:#000;border:none;padding:0.6rem 1.5rem;border-radius:0.5rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">← Voltar ao Blog</button>
+                </div>`;
+        }
+    }
+
+    function renderPostView(post) {
+        const style = getCatStyle(post.category);
+        const rt = readingTime(post.content);
+
+        // Breadcrumb
+        document.getElementById('bc-title').textContent = post.title;
+
+        // Badge
+        document.getElementById('post-cat-badge').innerHTML = post.category
+            ? `<span class="post-cat" style="background:${style.bg};color:${style.color};font-size:0.72rem;">${getCatIcon(post.category)} ${post.category}</span>`
+            : '';
+
+        // Title / excerpt / date
+        document.getElementById('post-view-title').textContent = post.title;
+        document.getElementById('post-view-excerpt').textContent = post.excerpt || '';
+        document.getElementById('post-view-date').textContent = formatDate(post.created_at);
+        document.getElementById('post-reading-time').innerHTML = rt
+            ? `<i class="fas fa-clock" style="font-size:0.65rem;"></i> ${rt}`
+            : '';
+
+        // Image
+        const imgEl = document.getElementById('post-view-img');
+        if (post.image_url) {
+            imgEl.src = post.image_url;
+            imgEl.alt = post.title;
+            imgEl.style.display = 'block';
+        } else {
+            imgEl.style.display = 'none';
+        }
+
+        // Content
+        document.getElementById('post-view-content').innerHTML = post.content || '<p>Sem conteúdo.</p>';
+
+        // Share links
+        const url = `https://fastproxy.com.br/blog.html?post=${post.slug}`;
+        const txt = encodeURIComponent(post.title + ' — FastProxy');
+        document.getElementById('share-whatsapp').href = `https://wa.me/?text=${txt}%20${encodeURIComponent(url)}`;
+        document.getElementById('share-twitter').href = `https://twitter.com/intent/tweet?text=${txt}&url=${encodeURIComponent(url)}`;
+        document.getElementById('share-linkedin').href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+
+        // Related posts (same category, exclude current)
+        const related = allPosts.filter(p => p.slug !== post.slug && p.category === post.category).slice(0, 3);
+        if (related.length > 0) {
+            document.getElementById('related-section').style.display = 'block';
+            document.getElementById('related-posts').innerHTML = related.map(p => {
+                const s = getCatStyle(p.category);
+                return `<article class="post-card" onclick="openPost('${escHtml(p.slug)}')" style="cursor:pointer;">
+                    ${imgOrPlaceholder(p, 150, false)}
+                    <div class="post-body" style="padding:1rem 1.25rem 1.25rem;">
+                        <h4 style="font-size:0.95rem;font-weight:700;line-height:1.35;margin-bottom:0.4rem;">${escHtml(p.title)}</h4>
+                        <p style="font-size:0.8rem;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escHtml(p.excerpt || '')}</p>
+                    </div>
+                </article>`;
+            }).join('');
+        } else {
+            document.getElementById('related-section').style.display = 'none';
+        }
+
+        // SEO meta
+        updateMeta(post);
+    }
+
+    function updateMeta(post) {
+        const url = `https://fastproxy.com.br/blog.html?post=${post.slug}`;
+        const desc = (post.excerpt || post.title || '').substring(0, 160);
+        const img = post.image_url || 'https://fastproxy.com.br/img/LOGO%20FAST%20PROXY.png';
+
+        document.getElementById('page-title').textContent = `${post.title} — Blog FastProxy`;
+        document.getElementById('meta-desc').setAttribute('content', desc);
+        document.getElementById('canonical').setAttribute('href', url);
+
+        document.getElementById('og-title').setAttribute('content', post.title);
+        document.getElementById('og-desc').setAttribute('content', desc);
+        document.getElementById('og-url').setAttribute('content', url);
+        document.getElementById('og-image').setAttribute('content', img);
+
+        document.getElementById('tw-title').setAttribute('content', post.title);
+        document.getElementById('tw-desc').setAttribute('content', desc);
+        document.getElementById('tw-image').setAttribute('content', img);
+
+        // JSON-LD BlogPosting
+        const ld = {
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "headline": post.title,
+            "description": desc,
+            "url": url,
+            "datePublished": post.created_at,
+            "dateModified": post.updated_at || post.created_at,
+            "image": img,
+            "author": { "@type": "Organization", "name": "FastProxy", "url": "https://fastproxy.com.br" },
+            "publisher": {
+                "@type": "Organization",
+                "name": "FastProxy",
+                "logo": { "@type": "ImageObject", "url": "https://fastproxy.com.br/img/LOGO%20FAST%20PROXY.png" }
+            },
+            "mainEntityOfPage": { "@type": "WebPage", "@id": url },
+            "articleSection": post.category || "Blog"
+        };
+        document.getElementById('ld-article').textContent = JSON.stringify(ld);
+
+        // Breadcrumb JSON-LD
+        document.getElementById('ld-breadcrumb').textContent = JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {"@type": "ListItem", "position": 1, "name": "Início", "item": "https://fastproxy.com.br/"},
+                {"@type": "ListItem", "position": 2, "name": "Blog", "item": "https://fastproxy.com.br/blog.html"},
+                {"@type": "ListItem", "position": 3, "name": post.title, "item": url}
+            ]
+        });
+    }
+
+    function resetMeta() {
+        document.getElementById('page-title').textContent = 'Blog FastProxy — Guias, Dicas e Tutoriais sobre Proxy no Brasil';
+        document.getElementById('meta-desc').setAttribute('content', 'Blog da FastProxy: guias completos sobre proxy HTTP, SOCKS5, IPv6, IPv4 dedicado no Brasil. Automação, múltiplas contas, scraping e marketing digital.');
+        document.getElementById('canonical').setAttribute('href', 'https://fastproxy.com.br/blog.html');
+        document.getElementById('og-url').setAttribute('content', 'https://fastproxy.com.br/blog.html');
+        document.getElementById('ld-article').textContent = '';
+        document.getElementById('ld-breadcrumb').textContent = JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {"@type": "ListItem", "position": 1, "name": "Início", "item": "https://fastproxy.com.br/"},
+                {"@type": "ListItem", "position": 2, "name": "Blog", "item": "https://fastproxy.com.br/blog.html"}
+            ]
+        });
+    }
+
+    // ─── Navigation ──────────────────────────────────────────────────────
+    function goBack() {
+        history.pushState({}, '', '/blog.html');
+        document.getElementById('post-view').style.display = 'none';
+        document.getElementById('list-view').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        resetMeta();
+    }
+
+    window.addEventListener('popstate', function(e) {
+        const slug = getSlugFromUrl();
+        if (slug) {
+            openPost(slug);
+        } else {
+            document.getElementById('post-view').style.display = 'none';
+            document.getElementById('list-view').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'instant' });
+            resetMeta();
+        }
+    });
+
+    // ─── Share ───────────────────────────────────────────────────────────
+    function copyLink() {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            const btn = document.getElementById('copy-btn');
+            btn.innerHTML = '<i class="fas fa-check" style="color:var(--accent);"></i> Copiado!';
+            setTimeout(() => { btn.innerHTML = '<i class="fas fa-link"></i> Copiar link'; }, 2000);
+        });
+    }
+
+    // ─── Init ─────────────────────────────────────────────────────────────
+    function getSlugFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('post');
+    }
+
+    async function init() {
+        // Always load posts list in background for related posts etc.
+        await loadPosts();
+        const slug = getSlugFromUrl();
+        if (slug) {
+            await openPost(slug);
+        }
+    }
+
+    init();
     </script>
 </body>
 </html>
