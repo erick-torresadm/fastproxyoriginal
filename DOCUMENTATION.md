@@ -23,58 +23,35 @@ Sistema de gestão de proxies com compra via Stripe, portal do usuário e painel
 
 ---
 
-## 🔧 Implementações Realizadas
+## 🔧 Lógica do Sistema (SIMPLIFICADA)
 
-### 1. Portal do Usuário (portal.html)
+### Regra Principal: PROXY = ACESSO
 
-**Funcionalidades:**
-- Login com validação
-- Dashboard mostrando proxies ativos
-- Histórico de transações (pontos)
-- Sistema de pontos de fidelidade
-- Trocar proxy com pontos (100 pontos = 1 troca grátis)
-- Preço dinâmico de troca (R$ 1,99 - 11,99 baseado em dias de uso)
-- Mostrar data de criação de cada proxy
-- Status "Ativo" quando tem proxies, mesmo sem subscription válida
-- Expirado com opção de renovar em 12h
+**Se o usuário tem proxies ativos = pode usar o sistema**
+- Não precisa de subscription válida para acessar portal
+- Não precisa de subscription válida para ver proxies
+- Não precisa de subscription válida para trocar proxy
 
-**Correções:**
-- `hasActiveSubscription` agora considera usuários com proxies ativos
-- Sistema não mostra mais "Expirado" incorretamente
-- Data do proxy mostrada (📅)
+### Fluxo Simplificado:
 
-### 2. Painel Admin (admin.html)
+1. **Usuário compra** → Sistema cria subscription + proxies
+2. **Usuário tem proxies** → Acesso garantido ao portal
+3. **Subscription expira** → Usuário ainda usa proxies até renovar
+4. **Renovar** → Estende data da subscription
 
-**Funcionalidades:**
-- Login admin
-- Listar usuários e proxies
-- Atribuir proxy por email
-- Cancelar assinaturas
-- Estatísticas
+### Código (regras):
 
-**APIs utilizadas:**
-- `/api/subscription/admin/users` - Lista usuários
-- `/api/subscription/admin/users/by-email/:email` - Busca por email
-- `/api/subscription/admin/proxies/allocate` - Aloca proxy
+```
+SE (user.tem proxies ativos) → ACESSO LIBERADO
+SE (subscription.expirada) → MOSTRAR "RENOVE EM 12H"
+SE (não tem proxies) → MOSTRAR "COMPRE PROXIES"
+```
 
-### 3. Checkout (routes/checkout.js + stripe.js)
+### APIs importante:
 
-**Fluxo:**
-1. Usuário escolhe quantidade e período
-2. Cria sessão Stripe com metadata
-3. Após pagamento, cria subscription e proxies automaticamente
-4. Pontos de fidelidade concedidos (1 ponto por R$ 1)
-
-**Correções:**
-- `proxy_count` lido corretamente da metadata (era `quantity`)
-- Datas de subscription corrigidas
-
-### 4. API de Login (routes/subscription.js)
-
-**Correções:**
-- Busca proxies por `user_id` (não só `subscription_id`)
-- `hasActiveSubscription` considera usuários com proxies ativos
-- Resposta inclui subscription mesmo quando não há subscription válida
+- `/login` - Retorna proxies se usuário tem proxies ativos
+- `/me` - Retorna proxies se usuário tem proxies ativos
+- `hasActiveSubscription` = TRUE se tem proxies OU subscription válida
 
 ---
 
@@ -118,6 +95,16 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 2. ~~Status mostra "Expirado" incorretamente~~ ✅ CORRIGIDO  
 3. ~~Botão copiar não funciona~~ ✅ CORRIGIDO
 4. ~~Swap price não mostra~~ ✅ CORRIGIDO
+5. ~~API /me não retorna proxies quando não tem subscription~~ ✅ CORRIGIDO
+
+## 📌 Estados do Usuário
+
+| Tem Proxies | Sub Válida | Status Mostrado |
+|------------|------------|----------------|
+| SIM | SIM | Ativo |
+| SIM | NÃO | Ativo (pode renovar) |
+| NÃO | SIM | Ativo (sem proxies ainda) |
+| NÃO | NÃO | Precisa comprar |
 
 ---
 
