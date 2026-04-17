@@ -4,6 +4,7 @@ const { sql } = require('../lib/database');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { sendWelcomeEmail, sendProxyCredentials, sendCancellationEmail } = require('../lib/email');
+const proxyseller = require('../lib/proxyseller');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fastproxy_secret_key_2024';
 const JWT_EXPIRE = process.env.JWT_EXPIRE || '7d';
@@ -740,7 +741,7 @@ router.post('/cancel', async (req, res) => {
 
     const { reason, subscriptionId } = req.body;
 
-    // Find the subscription to cancel
+    // ── 1. Find the active subscription ──────────────────────────────────────
     let subscriptionQuery;
     if (subscriptionId) {
       subscriptionQuery = await sql`
@@ -750,7 +751,6 @@ router.post('/cancel', async (req, res) => {
         WHERE s.id = ${subscriptionId} AND s.user_id = ${decoded.id} AND s.status = 'active'
       `;
     } else {
-      // Cancel the most recent active subscription
       subscriptionQuery = await sql`
         SELECT s.*, u.email as user_email, u.name as user_name
         FROM subscriptions s
@@ -767,21 +767,77 @@ router.post('/cancel', async (req, res) => {
 
     const subscription = subscriptionQuery[0];
 
-    // Mark subscription as cancelled
+    // ── 2. Mark subscription as cancelled in DB ───────────────────────────────
     await sql`
       UPDATE subscriptions
       SET status = 'cancelled', auto_renew = false, updated_at = NOW()
       WHERE id = ${subscription.id}
     `;
 
-    // Deactivate proxies immediately on cancellation
+    // ── 3. Deactivate stock proxies immediately ───────────────────────────────
     await sql`
       UPDATE proxies
       SET is_active = false, updated_at = NOW()
       WHERE user_id = ${decoded.id} AND subscription_id = ${subscription.id}
     `;
 
-    // Send cancellation confirmation email (async, don't block response)
+    // ── 4. Deactivate ProxySeller API proxies ─────────────────────────────────
+    // Find any active proxy_orders linked to this user and deactivate their auths
+    try {
+      // Check if proxy_orders table exists and has records for this user
+      const activeOrders = await sql`
+        SELECT po.id, po.proxyseller_order_number, po.status
+        FROM proxy_orders po
+        WHERE po.user_id = ${decoded.id} AND po.status = 'active'
+      `;
+
+      if (activeOrders.length > 0) {
+        console.log(`🔌 Deactivating ${activeOrders.length} ProxySeller order(s) for user ${decoded.id}`);
+
+        for (const order of activeOrders) {
+          try {
+            // Get all active auths for this order
+            const auths = await sql`
+              SELECT pp.id, pp.proxyseller_auth_id
+              FROM proxyseller_proxies pp
+              WHERE pp.proxy_order_id = ${order.id} AND pp.is_active = true AND pp.proxyseller_auth_id IS NOT NULL
+            `;
+
+            // Deactivate each auth via ProxySeller API
+            for (const auth of auths) {
+              try {
+                await proxyseller.changeAuth(auth.proxyseller_auth_id, false);
+                console.log(`  ✓ Deactivated ProxySeller auth ${auth.proxyseller_auth_id}`);
+              } catch (authErr) {
+                console.error(`  ✗ Failed to deactivate auth ${auth.proxyseller_auth_id}:`, authErr.message);
+              }
+            }
+
+            // Mark proxyseller_proxies as inactive in DB
+            await sql`
+              UPDATE proxyseller_proxies
+              SET is_active = false, updated_at = NOW()
+              WHERE proxy_order_id = ${order.id}
+            `;
+
+            // Mark proxy_order as cancelled
+            await sql`
+              UPDATE proxy_orders
+              SET status = 'cancelled', updated_at = NOW()
+              WHERE id = ${order.id}
+            `;
+
+          } catch (orderErr) {
+            console.error(`Failed to process proxy_order ${order.id}:`, orderErr.message);
+          }
+        }
+      }
+    } catch (psErr) {
+      // proxy_orders table may not exist or ProxySeller key not set — not fatal
+      console.warn('ProxySeller cancellation skipped:', psErr.message);
+    }
+
+    // ── 5. Send cancellation email (async, non-blocking) ─────────────────────
     sendCancellationEmail(subscription.user_email, subscription.user_name, {
       period:     subscription.period,
       proxyCount: subscription.proxy_count,
@@ -789,16 +845,16 @@ router.post('/cancel', async (req, res) => {
       reason:     reason || 'Não informado'
     }).catch(err => console.error('Failed to send cancellation email:', err));
 
-    console.log(`✅ Subscription ${subscription.id} cancelled by user ${decoded.id}`);
+    console.log(`✅ Subscription ${subscription.id} cancelled by user ${decoded.id} — reason: ${reason || 'not provided'}`);
 
     res.json({
       success: true,
       message: 'Assinatura cancelada com sucesso.',
       subscription: {
-        id:        subscription.id,
-        status:    'cancelled',
-        endDate:   subscription.end_date,
-        period:    subscription.period,
+        id:         subscription.id,
+        status:     'cancelled',
+        endDate:    subscription.end_date,
+        period:     subscription.period,
         proxyCount: subscription.proxy_count
       }
     });
