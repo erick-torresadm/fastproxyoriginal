@@ -52,6 +52,26 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '10kb' }));
 
+// Simple in-memory rate limiter for public endpoints
+const rateLimitMap = new Map();
+function rateLimit(maxReqs, windowMs) {
+  return (req, res, next) => {
+    const key = req.ip + req.path;
+    const now = Date.now();
+    const entry = rateLimitMap.get(key) || { count: 0, resetAt: now + windowMs };
+    if (now > entry.resetAt) {
+      entry.count = 0;
+      entry.resetAt = now + windowMs;
+    }
+    entry.count++;
+    rateLimitMap.set(key, entry);
+    if (entry.count > maxReqs) {
+      return res.status(429).json({ success: false, message: 'Muitas requisições. Aguarde um momento.' });
+    }
+    next();
+  };
+}
+
 // Serve static files from public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -64,8 +84,13 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Status / diagnostics endpoint
+// Status / diagnostics endpoint — admin-only, protected by secret header
 app.get('/api/status', (req, res) => {
+  const adminKey = req.headers['x-admin-key'];
+  const expectedKey = process.env.ADMIN_STATUS_KEY;
+  if (!expectedKey || adminKey !== expectedKey) {
+    return res.status(404).json({ success: false, message: 'Not found' });
+  }
   const loadedRoutes = {
     stripe: !!stripeRoutes,
     subscription: !!subscriptionRoutes,
@@ -128,6 +153,7 @@ try {
 
 try {
   const couponRoutes = require('./routes/coupons');
+  app.use('/api/coupons/validate-public', rateLimit(20, 60000)); // 20 req/min per IP
   app.use('/api/coupons', couponRoutes);
   console.log('✅ Coupons routes registered');
 } catch (err) {
@@ -174,16 +200,6 @@ app.get('/test', (req, res) => {
   });
 });
 
-app.get('/debug/env', (req, res) => {
-  res.json({
-    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ? 'set' : 'missing',
-    STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY ? 'set' : 'missing',
-    STRIPE_TEST_MODE: process.env.STRIPE_TEST_MODE,
-    DATABASE_URL: process.env.DATABASE_URL ? 'set' : 'missing',
-    APP_URL: process.env.APP_URL,
-    RESEND_API_KEY: process.env.RESEND_API_KEY ? `set (${process.env.RESEND_API_KEY.substring(0, 10)}...)` : 'missing'
-  });
-});
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -192,7 +208,7 @@ app.get('/', (req, res) => {
 // API 404 — catch unmatched API routes before the static wildcard
 app.all('/api/*', (req, res) => {
   console.warn(`[404] ${req.method} ${req.path} - route not found`);
-  res.status(404).json({ success: false, message: `Rota não encontrada: ${req.method} ${req.path}` });
+  res.status(404).json({ success: false, message: 'Recurso não encontrado' });
 });
 
 app.get('*', (req, res) => {

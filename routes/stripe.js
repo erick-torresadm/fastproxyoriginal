@@ -28,8 +28,6 @@ router.post('/create-checkout', express.json(), async (req, res) => {
     const { email, whatsapp, period, type, proxyCount, couponCode } = req.body;
     const quantity = proxyCount || 1;
 
-    console.log('email:', email);
-    console.log('whatsapp:', whatsapp);
     console.log('type:', type);
     console.log('period:', period);
     console.log('quantity:', quantity);
@@ -139,7 +137,7 @@ router.post('/create-checkout', express.json(), async (req, res) => {
     
     res.status(500).json({
       success: false,
-      error: err.message
+      error: 'Erro interno. Tente novamente.'
     });
   }
 });
@@ -163,7 +161,7 @@ router.get('/verify/:sessionId', async (req, res) => {
     });
   } catch (err) {
     console.error('Verify session error:', err.message);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erro interno. Tente novamente.' });
   }
 });
 
@@ -175,7 +173,6 @@ router.post('/process-payment/:sessionId', async (req, res) => {
     
     console.log('=== PROCESS PAYMENT ===');
     console.log('Session:', sessionId);
-    console.log('User:', email);
     
     if (!Stripe || !Stripe.stripe) {
       return res.status(500).json({ success: false, error: 'Stripe não configurado' });
@@ -522,7 +519,7 @@ router.post('/process-payment/:sessionId', async (req, res) => {
     
   } catch (err) {
     console.error('Process payment error:', err);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: 'Erro interno. Tente novamente.' });
   }
 });
 
@@ -554,7 +551,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
     res.json({ received: true });
   } catch (err) {
     console.error('Webhook error:', err.message);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erro interno. Tente novamente.' });
   }
 });
 

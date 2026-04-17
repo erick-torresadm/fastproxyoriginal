@@ -9,6 +9,7 @@ const proxyseller = require('../lib/proxyseller');
 // In-memory password reset tokens: email → { token, expires, name }
 const resetTokens = new Map();
 
+if (!process.env.JWT_SECRET) console.error('⚠️ CRITICAL: JWT_SECRET não configurado! Configure JWT_SECRET nas variáveis de ambiente.');
 const JWT_SECRET = process.env.JWT_SECRET || 'fastproxy_secret_key_2024';
 const JWT_EXPIRE = process.env.JWT_EXPIRE || '7d';
 
@@ -64,7 +65,7 @@ router.get('/check-email/:email', async (req, res) => {
     res.json({ exists: users.length > 0, email: email.toLowerCase() });
   } catch (err) {
     console.error('Check email error:', err);
-    res.status(500).json({ exists: false, error: err.message });
+    res.status(500).json({ exists: false });
   }
 });
 
@@ -123,7 +124,7 @@ router.post('/register', async (req, res) => {
 
   } catch (err) {
     console.error('Register error:', err);
-    res.status(500).json({ success: false, message: 'Erro ao criar conta', error: err.message });
+    res.status(500).json({ success: false, message: 'Erro ao criar conta'});
   }
 });
 
@@ -142,7 +143,7 @@ router.post('/register-after-payment', async (req, res) => {
 
   } catch (err) {
     console.error('Register after payment error:', err);
-    res.status(500).json({ success: false, message: 'Erro ao criar conta', error: err.message });
+    res.status(500).json({ success: false, message: 'Erro ao criar conta'});
   }
 });
 
@@ -278,7 +279,7 @@ router.post('/login', async (req, res) => {
 
   } catch (err) {
     console.error('Login error:', err);
-    res.status(500).json({ success: false, message: 'Erro no login', error: err.message });
+    res.status(500).json({ success: false, message: 'Erro no login'});
   }
 });
 
@@ -1334,7 +1335,7 @@ router.post('/admin/proxies', async (req, res) => {
 
   } catch (err) {
     console.error('Admin create proxy error:', err);
-    res.status(500).json({ success: false, message: 'Erro ao criar proxy', error: err.message });
+    res.status(500).json({ success: false, message: 'Erro ao criar proxy'});
   }
 });
 
@@ -1376,7 +1377,7 @@ router.post('/admin/proxies/bulk', async (req, res) => {
 
   } catch (err) {
     console.error('Admin bulk create proxies error:', err);
-    res.status(500).json({ success: false, message: 'Erro ao criar proxies', error: err.message });
+    res.status(500).json({ success: false, message: 'Erro ao criar proxies'});
   }
 });
 
@@ -1487,7 +1488,7 @@ router.put('/admin/proxies/:id', async (req, res) => {
 
   } catch (err) {
     console.error('Admin update proxy error:', err);
-    res.status(500).json({ success: false, message: 'Erro ao atualizar proxy', error: err.message });
+    res.status(500).json({ success: false, message: 'Erro ao atualizar proxy'});
   }
 });
 
@@ -1594,7 +1595,7 @@ router.post('/admin/create', async (req, res) => {
 
   } catch (err) {
     console.error('Admin create error:', err);
-    res.status(500).json({ success: false, message: 'Erro ao criar admin', error: err.message });
+    res.status(500).json({ success: false, message: 'Erro ao criar admin'});
   }
 });
 
@@ -1662,7 +1663,7 @@ router.post('/admin/users/:id/cancel', async (req, res) => {
 
   } catch (err) {
     console.error('Admin cancel subscription error:', err);
-    res.status(500).json({ success: false, message: 'Erro ao cancelar assinatura', error: err.message });
+    res.status(500).json({ success: false, message: 'Erro ao cancelar assinatura'});
   }
 });
 
@@ -1739,7 +1740,7 @@ router.put('/admin/users/:id/subscription', async (req, res) => {
 
   } catch (err) {
     console.error('Admin update subscription error:', err);
-    res.status(500).json({ success: false, message: 'Erro ao atualizar assinatura', error: err.message });
+    res.status(500).json({ success: false, message: 'Erro ao atualizar assinatura'});
   }
 });
 
@@ -1799,7 +1800,7 @@ router.post('/admin/add-to-stock', async (req, res) => {
 
   } catch (err) {
     console.error('Admin add to stock error:', err);
-    res.status(500).json({ success: false, message: 'Erro ao adicionar ao estoque', error: err.message });
+    res.status(500).json({ success: false, message: 'Erro ao adicionar ao estoque'});
   }
 });
 
@@ -1839,7 +1840,7 @@ router.get('/admin/stock', async (req, res) => {
 
   } catch (err) {
     console.error('Admin stock error:', err);
-    res.status(500).json({ success: false, message: 'Erro ao buscar estoque', error: err.message });
+    res.status(500).json({ success: false, message: 'Erro ao buscar estoque'});
   }
 });
 
@@ -1899,7 +1900,7 @@ router.post('/admin/setup', async (req, res) => {
     
   } catch (err) {
     console.error('Admin setup error:', err);
-    res.status(500).json({ success: false, message: 'Erro ao criar admin', error: err.message });
+    res.status(500).json({ success: false, message: 'Erro ao criar admin'});
   }
 });
 
@@ -2226,7 +2227,7 @@ router.post('/admin/tutorials', async (req, res) => {
     res.status(201).json({ success: true, tutorial: tutorials[0] });
   } catch (err) {
     console.error('Admin create tutorial error:', err);
-    res.status(500).json({ success: false, message: 'Erro ao criar tutorial', error: err.message });
+    res.status(500).json({ success: false, message: 'Erro ao criar tutorial'});
   }
 });
 
@@ -2385,7 +2386,7 @@ router.post('/admin/posts', async (req, res) => {
     res.status(201).json({ success: true, post: posts[0] });
   } catch (err) {
     console.error('Admin create post error:', err);
-    res.status(500).json({ success: false, message: 'Erro ao criar post', error: err.message });
+    res.status(500).json({ success: false, message: 'Erro ao criar post'});
   }
 });
 

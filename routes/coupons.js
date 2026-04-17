@@ -3,6 +3,7 @@ const router = express.Router();
 const { sql } = require('../lib/database');
 
 // Inline middleware — avoids circular require with subscription.js
+if (!process.env.JWT_SECRET) console.error('⚠️ CRITICAL: JWT_SECRET não configurado! Configure JWT_SECRET nas variáveis de ambiente.');
 const JWT_SECRET = process.env.JWT_SECRET || 'fastproxy_secret_key_2024';
 
 function authenticate(req, res, next) {
@@ -317,6 +318,7 @@ router.post('/validate-public', async (req, res) => {
   }
 });
 
+module.exports = router;
 module.exports.validateCouponLogic = validateCouponLogic;
 
 // ── Quick coupon creator for simple offers ──────────────────────────────────
