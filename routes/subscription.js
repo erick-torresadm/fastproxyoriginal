@@ -773,13 +773,21 @@ router.post('/cancel', async (req, res) => {
 
 // ============ ADMIN ROUTES ============
 
-// Admin login
+// Admin login - simplified debug
 router.post('/admin/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    console.log('Admin login attempt:', email);
+
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Email e senha são obrigatórios' });
+    }
+
+    // Check DATABASE_URL
+    if (!process.env.DATABASE_URL) {
+      console.error('DATABASE_URL not set!');
+      return res.status(500).json({ success: false, message: 'Banco de dados não configurado' });
     }
 
     const users = await sql`
@@ -787,11 +795,15 @@ router.post('/admin/login', async (req, res) => {
     `;
 
     if (users.length === 0) {
+      console.log('Admin not found:', email);
       return res.status(400).json({ success: false, message: 'Credenciais inválidas' });
     }
 
     const user = users[0];
+    console.log('User found:', user.email, user.role);
+    
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log('Password match:', isMatch);
 
     if (!isMatch) {
       return res.status(400).json({ success: false, message: 'Credenciais inválidas' });
@@ -807,7 +819,7 @@ router.post('/admin/login', async (req, res) => {
 
   } catch (err) {
     console.error('Admin login error:', err);
-    res.status(500).json({ success: false, message: 'Erro no login', error: err.message });
+    res.status(500).json({ success: false, message: 'Erro no login: ' + err.message });
   }
 });
 
