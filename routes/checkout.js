@@ -336,6 +336,29 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
           try {
             const rewards = require('./rewards');
             await rewards.awardPointsForOrder(order.user_id, orderId, order.price_sold_brl);
+            
+            // Create transaction record
+            await rewards.createTransaction(order.user_id, {
+              type: 'purchase',
+              amount: order.price_sold_brl,
+              description: `${order.quantity} proxies - Plano ${order.period}`,
+              proxyCount: order.quantity,
+              proxyDetails: order.proxies || [],
+              stripeSessionId: sessionId
+            });
+            
+            // Welcome message - only first time
+            const existingMsg = await sql`
+              SELECT id FROM user_messages 
+              WHERE user_id = ${order.user_id} AND type = 'welcome'
+            `;
+            if (existingMsg.length === 0) {
+              await rewards.createMessage(order.user_id, {
+                type: 'welcome',
+                title: '🎉 Pagamento Confirmado!',
+                message: 'Seus proxies estão prontos! Acesse o portal para ver suas credenciais.'
+              });
+            }
           } catch (err) {
             console.error('Error awarding points:', err);
           }

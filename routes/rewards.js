@@ -198,5 +198,116 @@ async function awardPointsForOrder(userId, orderId, orderValue) {
   }
 }
 
+// Get user transactions (purchase history)
+router.get('/transactions', authenticate, async (req, res) => {
+  try {
+    const transactions = await sql`
+      SELECT * FROM user_transactions 
+      WHERE user_id = ${req.user.id}
+      ORDER BY created_at DESC
+      LIMIT 50
+    `;
+
+    res.json({
+      success: true,
+      transactions: transactions.map(t => ({
+        id: t.id,
+        type: t.type,
+        amount: parseFloat(t.amount),
+        description: t.description,
+        proxyCount: t.proxy_count,
+        status: t.status,
+        createdAt: t.created_at
+      }))
+    });
+  } catch (err) {
+    console.error('Get transactions error:', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Get user messages/notifications
+router.get('/messages', authenticate, async (req, res) => {
+  try {
+    const messages = await sql`
+      SELECT * FROM user_messages 
+      WHERE user_id = ${req.user.id}
+      ORDER BY created_at DESC
+      LIMIT 20
+    `;
+
+    res.json({
+      success: true,
+      messages: messages.map(m => ({
+        id: m.id,
+        type: m.type,
+        title: m.title,
+        message: m.message,
+        isRead: m.is_read,
+        createdAt: m.created_at
+      }))
+    });
+  } catch (err) {
+    console.error('Get messages error:', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Mark message as read
+router.put('/messages/:id/read', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    await sql`
+      UPDATE user_messages 
+      SET is_read = true 
+      WHERE id = ${id} AND user_id = ${req.user.id}
+    `;
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Mark read error:', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Create user transaction (called after payment)
+async function createTransaction(userId, data) {
+  try {
+    await sql`
+      INSERT INTO user_transactions (
+        user_id, type, amount, description, proxy_count, 
+        proxy_details, payment_method, stripe_session_id, status
+      ) VALUES (
+        ${userId}, ${data.type || 'purchase'}, ${data.amount || 0}, 
+        ${data.description || ''}, ${data.proxyCount || 0},
+        ${JSON.stringify(data.proxyDetails || [])}, 
+        ${data.paymentMethod || 'stripe'}, ${data.stripeSessionId}, 'completed'
+      )
+    `;
+    console.log('✅ Transaction created for user', userId);
+  } catch (err) {
+    console.error('Create transaction error:', err);
+  }
+}
+
+// Create user message/notification
+async function createMessage(userId, data) {
+  try {
+    await sql`
+      INSERT INTO user_messages (
+        user_id, type, title, message
+      ) VALUES (
+        ${userId}, ${data.type || 'promo'}, ${data.title || ''}, ${data.message || ''}
+      )
+    `;
+    console.log('✅ Message created for user', userId);
+  } catch (err) {
+    console.error('Create message error:', err);
+  }
+}
+
 module.exports = router;
 module.exports.awardPointsForOrder = awardPointsForOrder;
+module.exports.createTransaction = createTransaction;
+module.exports.createMessage = createMessage;
