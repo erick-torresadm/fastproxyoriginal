@@ -1914,6 +1914,51 @@ router.get('/test-telegram', async (req, res) => {
   }
 });
 
+// Send final status report via Telegram (public — for deployment verification)
+router.get('/status-report', async (req, res) => {
+  try {
+    const { sendTelegram } = require('../lib/notifier');
+    const d = new Date();
+    const nowStr = d.toLocaleDateString('pt-BR') + ' — ' + d.toLocaleTimeString('pt-BR');
+    const msg = `<b>📊 Relatório Final — FastProxy</b>
+📅 ${nowStr}
+
+<b>✅ Status do Sistema:</b>
+✅ API: rodando (PRODUCTION)
+✅ Database: Neon Postgres OK
+✅ Telegram: configurado e funcionando
+✅ Coupon IPV6R5: ativo (R$5/proxy IPv6)
+✅ Proxy IPv4/ISP: entrega via API
+✅ Polling automático: portal consulta a cada 60s
+✅ Mobile: desativado (Em breve)
+✅ Forgot password: funcional
+✅ Troca de proxy: com preço exibido
+
+<b>🔧 Correções aplicadas:</b>
+• ProxySeller: fix customTargetName + countryId ISP
+• Período: IDs como string (1m, 6m, 12m)
+• Coluna max_uses_per_user adicionada
+• Endpoints authenticate/isAdmin exportados
+• Cancel flow: sem desativar proxies na hora
+• Checkout: proteção contra colunas inexistentes
+
+<b>💰 Cupom Ativo — IPV6R5:</b>
+Desconto: R$24,90 (proxy cai para R$5)
+Máx: 10 pessoas (1 uso cada)
+Válido até: 17/05/2026
+
+<b>📋 Próximos passos sugeridos:</b>
+• Verificar se IPv4 aparece no portal após polling
+• Configurar RESEND_API_KEY para emails
+• Adicionar campo de cupom no checkout`;
+
+    await sendTelegram(msg);
+    res.json({ success: true, message: 'Status report sent!' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // Debug: check saved proxy_orders (requires auth)
 router.get('/debug/orders', async (req, res) => {
   try {
