@@ -31,7 +31,20 @@ app.use(helmet({
 app.set('trust proxy', 1);
 
 app.use(cors({
-  origin: process.env.APP_URL || '*',
+  origin: function (origin, callback) {
+    const allowed = [
+      process.env.APP_URL || '*',
+      'https://fastproxyoriginal.vercel.app',
+      'https://fastproxyv3.vercel.app',
+      'https://fastproxy.com.br',
+      'http://localhost:3000',
+    ].filter(Boolean);
+    if (!origin || allowed.some(u => u.replace(/\/+$/, '') === origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
 app.use(express.json({ limit: '10kb' }));
