@@ -33,13 +33,13 @@ app.set('trust proxy', 1);
 app.use(cors({
   origin: function (origin, callback) {
     const allowed = [
-      process.env.APP_URL || '*',
+      process.env.APP_URL,
       'https://fastproxyoriginal.vercel.app',
       'https://fastproxyv3.vercel.app',
-      'https://fastproxy.com.br',
       'http://localhost:3000',
-    ].filter(Boolean);
-    if (!origin || allowed.some(u => u.replace(/\/+$/, '') === origin)) {
+    ].map(u => u && u.replace(/\/+$/, '')).filter(Boolean);
+    const normalOrigin = origin && origin.replace(/\/+$/, '');
+    if (!normalOrigin || allowed.includes(normalOrigin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
