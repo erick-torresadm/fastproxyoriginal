@@ -526,9 +526,28 @@
             document.getElementById('nav-email').textContent = currentUser?.email || '';
         }
 
-        async function loadUserData() {
-            if (!token) return;
+async function loadUserData() {
+            const token = localStorage.getItem('fastproxy_token');
             
+            if (!token) {
+                logout();
+                return;
+            }
+            
+            // Try to get data from localStorage first for fast load
+            const storedProxies = JSON.parse(localStorage.getItem('fastproxy_proxies') || '[]');
+            const storedSub = JSON.parse(localStorage.getItem('fastproxy_subscription') || 'null');
+            const storedUser = JSON.parse(localStorage.getItem('fastproxy_user') || 'null');
+            
+            if (storedProxies.length > 0) {
+                // Use cached data if available
+                currentUser = storedUser;
+                currentProxies = storedProxies;
+                currentSubscription = storedSub;
+                renderDashboard();
+            }
+            
+            // Then try to refresh from server
             try {
                 const res = await fetch(`${API_URL}/api/subscription/me`, {
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -536,20 +555,22 @@
                 
                 const data = await res.json();
                 
-                if (data.success) {
+                if (data.success && data.proxies && data.proxies.length > 0) {
+                    // Update with fresh data from server
                     currentUser = data.user;
-                    currentProxies = data.proxies || [];
-                    currentSubscription = data; // Store entire response
+                    currentProxies = data.proxies;
+                    currentSubscription = data;
                     
                     localStorage.setItem('fastproxy_user', JSON.stringify(currentUser));
                     localStorage.setItem('fastproxy_proxies', JSON.stringify(currentProxies));
                     localStorage.setItem('fastproxy_subscription', JSON.stringify(data));
                     
                     renderDashboard();
-                } else {
-                    // Token inválido ou expirado
-                    logout();
                 }
+            } catch (err) {
+                console.error('Error refreshing user data:', err);
+            }
+        }
             } catch (err) {
                 console.error('Error loading user data:', err);
             }
