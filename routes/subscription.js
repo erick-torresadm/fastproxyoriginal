@@ -909,6 +909,140 @@ router.get('/history', async (req, res) => {
   }
 });
 
+// ── Poll ProxySeller API for pending orders ──────────────────────────────────
+router.post('/fetch-proxies', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    // Find active proxy_orders for this user
+    let proxyOrders = [];
+    try {
+      proxyOrders = await sql`
+        SELECT * FROM proxy_orders
+        WHERE user_id = ${decoded.id} AND status = 'active' AND payment_status = 'paid'
+          AND (proxyseller_order_id IS NOT NULL OR proxyseller_order_number IS NOT NULL)
+          AND proxy_type != 'ipv6'
+        ORDER BY created_at DESC
+        LIMIT 10
+      `;
+    } catch (e) {
+      // proxy_orders table may not exist
+      return res.json({ success: true, fetched: 0, message: 'No orders to check' });
+    }
+
+    if (proxyOrders.length === 0) {
+      return res.json({ success: true, fetched: 0, message: 'No pending orders' });
+    }
+
+    let totalFetched = 0;
+    let totalAuthsCreated = 0;
+
+    for (const order of proxyOrders) {
+      const orderNumber = order.proxyseller_order_number || order.proxyseller_order_id;
+      if (!orderNumber) continue;
+
+      console.log(`🔄 Polling ProxySeller for order ${orderNumber} (type: ${order.proxy_type})...`);
+
+      // 1. Fetch proxies from ProxySeller API
+      let proxyListResult;
+      try {
+        const pseType = order.proxy_type || 'ipv4';
+        proxyListResult = await proxyseller.getProxyList(pseType, { orderId: String(orderNumber) });
+      } catch (e) {
+        console.warn(`⏳ Order ${orderNumber} still provisioning:`, e.message);
+        continue;
+      }
+
+      const psProxies = proxyListResult.data || [];
+      if (psProxies.length === 0) {
+        console.log(`⏳ Order ${orderNumber} — no proxies ready yet`);
+        continue;
+      }
+
+      console.log(`✅ Order ${orderNumber} — ${psProxies.length} proxies ready!`);
+
+      // 2. Check if auths exist, create if needed
+      let authLogin = null;
+      let authPassword = null;
+      let authId = null;
+
+      try {
+        const authsList = await proxyseller.listAuths(String(orderNumber));
+        const authData = authsList.data || {};
+        const auths = Array.isArray(authData) ? authData : Object.values(authData);
+        if (auths.length > 0) {
+          authLogin = auths[0].login || auths[0].username;
+          authPassword = auths[0].password;
+          authId = auths[0].id;
+          console.log(`  Auth found: ${authLogin}`);
+        }
+      } catch (e) {
+        console.log(`  No auths yet for order ${orderNumber}, creating...`);
+        try {
+          const authResult = await proxyseller.createAuth(String(orderNumber));
+          authLogin = authResult.data?.login || authResult.data?.username;
+          authPassword = authResult.data?.password;
+          authId = authResult.data?.id;
+          totalAuthsCreated++;
+          console.log(`  Auth created: ${authLogin}`);
+        } catch (authErr) {
+          console.warn(`  Failed to create auth for ${orderNumber}:`, authErr.message);
+          continue;
+        }
+      }
+
+      // 3. Save each proxy to DB
+      for (const p of psProxies) {
+        const proxyIp = p.host || p.ip || p.address;
+        const proxyPort = p.port;
+        if (!proxyIp || !proxyPort) continue;
+
+        // Check if already saved
+        const existing = await sql`
+          SELECT id FROM proxies WHERE user_id = ${decoded.id} AND ip = ${proxyIp} AND port = ${proxyPort}
+        `;
+        if (existing.length > 0) continue; // already in DB
+
+        // Store in proxyseller_proxies
+        try {
+          await sql`
+            INSERT INTO proxyseller_proxies (user_id, ip, port, username, password, proxyseller_auth_id, is_active)
+            VALUES (${decoded.id}, ${proxyIp}, ${proxyPort}, ${authLogin}, ${authPassword}, ${String(authId)}, true)
+          `;
+        } catch (e) { /* table might not exist */ }
+
+        // Store in main proxies table
+        await sql`
+          INSERT INTO proxies (user_id, ip, port, username, password, is_active)
+          VALUES (${decoded.id}, ${proxyIp}, ${proxyPort}, ${authLogin}, ${authPassword}, true)
+        `;
+
+        totalFetched++;
+        console.log(`  Saved proxy: ${proxyIp}:${proxyPort}`);
+      }
+    }
+
+    const message = totalFetched > 0
+      ? `${totalFetched} proxy(s) encontrados e salvos!${totalAuthsCreated > 0 ? ` (${totalAuthsCreated} auth(s) criados)` : ''}`
+      : 'Proxies ainda provisionando. Tente novamente em 1-2 minutos.';
+
+    res.json({ success: true, fetched: totalFetched, authsCreated: totalAuthsCreated, message });
+
+  } catch (err) {
+    if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
+      return res.status(401).json({ success: false, message: 'Token inválido ou expirado' });
+    }
+    console.error('Fetch proxies error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao consultar ProxySeller' });
+  }
+});
+
 // Cancel subscription
 router.post('/cancel', async (req, res) => {
   try {
@@ -1018,6 +1152,16 @@ router.post('/cancel', async (req, res) => {
       // proxy_orders table may not exist or ProxySeller key not set — not fatal
       console.warn('ProxySeller cancellation skipped:', psErr.message);
     }
+
+    // ── 5. Notify via Telegram (async, non-blocking) ────────────────────────
+    try {
+      const notifier = require('../lib/notifier');
+      notifier.notifyCancellation({
+        user: { email: subscription.user_email, name: subscription.user_name },
+        subscription: { period: subscription.period, proxyCount: subscription.proxy_count },
+        reason
+      }).catch(err => console.error('Notifier error:', err));
+    } catch (e) { /* notifier not configured */ }
 
     // ── 5. Send cancellation email (async, non-blocking) ─────────────────────
     sendCancellationEmail(subscription.user_email, subscription.user_name, {

@@ -443,6 +443,16 @@ router.post('/process-payment/:sessionId', async (req, res) => {
     console.log('✅ Payment processed successfully!');
     console.log('User:', user.email);
     console.log('Proxies created:', proxies.length);
+
+    // Notify via Telegram (async, non-blocking)
+    try {
+      const notifier = require('../lib/notifier');
+      notifier.notifyPurchase({
+        user: { email: user.email, whatsapp: user.whatsapp },
+        order: { type: proxyType, period, quantity: proxyCount, pricePaid },
+        proxies: proxiesData
+      }).catch(err => console.error('Notifier error:', err));
+    } catch (e) { /* notifier not configured */ }
     
     res.json({
       success: true,
