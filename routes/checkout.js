@@ -373,9 +373,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
                 countryId: countryId,
                 periodId: order.period,
                 quantity: order.quantity,
-                protocol: 'HTTPS',
-                targetSectionId: proxyType?.targetSectionId,
-                targetId: proxyType?.targetId
+                protocol: 'HTTPS'
               });
 
               if (calcResult.data.balance >= calcResult.data.total) {
@@ -384,9 +382,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
                   countryId: countryId,
                   periodId: order.period,
                   quantity: order.quantity,
-                  protocol: 'HTTPS',
-                  targetSectionId: proxyType?.targetSectionId,
-                  targetId: proxyType?.targetId
+                  protocol: 'HTTPS'
                 });
 
                 await sql`

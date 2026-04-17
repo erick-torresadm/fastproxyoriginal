@@ -312,32 +312,27 @@ router.post('/process-payment/:sessionId', async (req, res) => {
         throw new Error(`ProxySeller config not found for type: ${proxyType}`);
       }
 
-      // Map our period codes to ProxySeller day-based period IDs
-      const PERIOD_DAYS_MAP = { '1w':7,'2w':14,'1m':30,'2m':60,'3m':90,'6m':180,'12m':365 };
-      const psePeriodId = PERIOD_DAYS_MAP[period] || 30;
+      const PSE_PERIOD_MAP = { '1w':'1w','2w':'2w','1m':'1m','2m':'2m','3m':'3m','6m':'6m','12m':'12m','monthly':'1m','annual':'12m' };
+      const psePeriodId = PSE_PERIOD_MAP[period] || '1m';
 
       try {
         // Calculate first to check balance
         const calcResult = await proxyseller.calculateOrder({
-          type:            proxyType,
-          countryId:       proxyTypeConfig.countryId,
-          periodId:        psePeriodId,
-          quantity:        proxyCount,
-          protocol:        'HTTPS',
-          targetSectionId: proxyTypeConfig.targetSectionId,
-          targetId:        proxyTypeConfig.targetId
+          type:     proxyType,
+          countryId: proxyTypeConfig.countryId,
+          periodId:  psePeriodId,
+          quantity:  proxyCount,
+          protocol:  'HTTPS'
         });
         console.log('ProxySeller calc result:', JSON.stringify(calcResult?.data));
 
         // Make the order
         const orderResult = await proxyseller.makeOrder({
-          type:            proxyType,
-          countryId:       proxyTypeConfig.countryId,
-          periodId:        psePeriodId,
-          quantity:        proxyCount,
-          protocol:        'HTTPS',
-          targetSectionId: proxyTypeConfig.targetSectionId,
-          targetId:        proxyTypeConfig.targetId
+          type:     proxyType,
+          countryId: proxyTypeConfig.countryId,
+          periodId:  psePeriodId,
+          quantity:  proxyCount,
+          protocol:  'HTTPS'
         });
 
         const orderId       = orderResult.data?.orderId || orderResult.data?.id;
