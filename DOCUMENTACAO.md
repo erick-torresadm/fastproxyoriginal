@@ -1,646 +1,351 @@
-# FastProxy - Documentação Técnica Completa
-
-> Última atualização: 10/04/2026
+# FastProxy — Documentação Completa (2026-04-17)
 
 ---
 
-## 📋 Índice
+## 📋 Visão Geral
 
-1. [Visão Geral](#visão-geral)
-2. [Stack Tecnológica](#stack-tecnológica)
-3. [Estrutura de Pastas](#estrutura-de-pastas)
-4. [Banco de Dados](#banco-de-dados)
-5. [APIs](#apis)
-6. [Frontend](#frontend)
-7. [Deploy](#deploy)
-8. [Variáveis de Ambiente](#variáveis-de-ambiente)
-9. [Segurança](#segurança)
-10. [Manutenção](#manutenção)
-
----
-
-## 🏠 Visão Geral
-
-**FastProxy** é um sistema de venda e gerenciamento de proxies HTTP IPv6 com:
+**FastProxy** é um SaaS de venda e gerenciamento de proxies HTTP com:
 - Pagamentos via Stripe
-- Cadastro/login de clientes
-- Gerenciamento de assinaturas
-- Alocação automática de proxies
-- Troca de proxies por preço escalonado
-- Sistema de cupons de desconto
+- Portal do cliente com dashboard
+- Alocação automática de proxies via ProxySeller API
+- Sistema de cupons, pontos de fidelidade e histórico de transações
+- Painel administrativo
 
-### URLs dos Sites
-
-| Ambiente | URL |
-|----------|-----|
-| **Produção** (fastproxyv3) | https://fastproxyv3.vercel.app |
-| **Produção** (fastproxyoriginal) | https://fastproxyoriginal.vercel.app |
-
----
-
-## 💻 Stack Tecnológica
-
-### Frontend
-- **HTML5/CSS3/JavaScript**
-- **Tailwind CSS** (via CDN)
-- **Google Fonts** (Inter)
-
-### Backend
-- **Node.js** + **Express.js**
-- **Vercel** (Serverless Functions)
-
-### Banco de Dados
-- **Neon Postgres** (Serverless PostgreSQL)
-  - Conexão via `DATABASE_URL`
-  - Sem limites de conexões (serverless)
-
-### Pagamentos
-- **Stripe** (Checkout e Webhooks)
+**URLs:**
+| Deploy | URL |
+|---|---|
+| Produção (fastproxyv3) | https://fastproxyv3.vercel.app |
+| Produção (fastproxyoriginal) | https://fastproxyoriginal.vercel.app |
+| Portal do cliente | `/portal.html` |
+| Painel admin | `/admin.html` |
 
 ---
 
-## 📁 Estrutura de Pastas
+## 🛠️ Stack
 
+| Camada | Tecnologia |
+|---|---|
+| Backend | Node.js + Express |
+| Database | Neon PostgreSQL (serverless) via `@neondatabase/serverless` |
+| Pagamentos | Stripe (Checkout + Webhooks) |
+| Proxies | ProxySeller API (`proxy-seller.com/personal/api/`) |
+| Email | Resend (opcional) |
+| Notifications | Telegram Bot (opcional) |
+| Frontend | HTML/CSS/JS + Tailwind CSS (CDN) |
+| Hosting | Vercel (serverless functions) |
+| Auth | JWT (7 dias), bcrypt (10 rounds) |
+
+---
+
+## 🚀 Comandos
+
+```bash
+# Instalar dependências
+npm install
+
+# Rodar localmente
+node server.js            # ou: npm start / npm run dev
+
+# Deploy para produção
+vercel --prod
+
+# Configurar variáveis de ambiente
+vercel env add NOME_VARIAVEL production
+
+# Health check (após deploy)
+curl https://fastproxyoriginal.vercel.app/test
 ```
-fastproxyv3/
-├── public/                    # Arquivos estáticos
-│   ├── index.html            # Página principal (landing)
-│   ├── portal.html           # Painel do cliente
-│   ├── admin.html            # Painel admin
-│   ├── success.html          # Página pós-pagamento
-│   ├── cancel.html           # Página pagamento cancelado
-│   └── img/                  # Imagens (logos)
-│
-├── routes/                    # Rotas da API
-│   ├── auth.js               # Autenticação (legacy)
-│   ├── stripe.js             # Pagamentos Stripe
-│   ├── subscription.js        # Sistema de assinaturas (PRINCIPAL)
-│   └── test.js               # APIs de teste
-│
-├── lib/                       # Bibliotecas
-│   ├── database.js           # Conexão com Neon Postgres
-│   └── stripe.js             # Configuração Stripe
-│
-├── server.js                  # Arquivo principal do servidor
-├── vercel.json                # Configuração Vercel
-├── package.json               # Dependências Node.js
-├── .env                       # Variáveis locais (NÃO COMMITAR)
-└── DOCUMENTACAO.md            # Este arquivo
-```
+
+Não há testes automatizados. Scripts de teste são utilitários manuais (`test-*.js`).
 
 ---
 
 ## 🗄️ Banco de Dados
 
-### Como Trocar o Banco de Dados
+Conexão via `lib/database.js` usando `@neondatabase/serverless`. Tabelas criadas automaticamente (`CREATE TABLE IF NOT EXISTS`) ao iniciar o servidor. Não há sistema de migrations tradicional — novas colunas são adicionadas com `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`.
 
-O banco está configurado no arquivo `lib/database.js`:
+### Tabelas e propósito
 
-```javascript
-const DATABASE_URL = process.env.DATABASE_URL;
-const sql = neon(DATABASE_URL);
-```
-
-**Para trocar o banco:**
-
-1. **Neon Postgres** → pegar nova `DATABASE_URL` no dashboard
-2. **Supabase** → usar `postgresql://...` deles
-3. **Outro Postgres** → ajustar connection string
-
-**Atualizar no Vercel:**
-```bash
-vercel env add DATABASE_URL production
-# Cole a nova connection string
-```
-
-### Tabelas do Banco
-
-#### 1. `users` - Usuários
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| id | SERIAL | ID único |
-| email | VARCHAR(255) | Email único |
-| password | VARCHAR(255) | Senha hasheada (bcrypt) |
-| name | VARCHAR(255) | Nome |
-| whatsapp | VARCHAR(50) | Telefone |
-| role | VARCHAR(20) | 'user' ou 'admin' |
-| created_at | TIMESTAMP | Data criação |
-| updated_at | TIMESTAMP | Data atualização |
-
-#### 2. `subscriptions` - Assinaturas
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| id | SERIAL | ID único |
-| user_id | INTEGER | FK para users |
-| stripe_session_id | VARCHAR(255) | ID sessão Stripe |
-| stripe_customer_id | VARCHAR(255) | ID cliente Stripe |
-| period | VARCHAR(20) | 'monthly' ou 'annual' |
-| proxy_count | INTEGER | Quantidade de proxies |
-| price_paid | DECIMAL(10,2) | Preço pago |
-| status | VARCHAR(20) | 'active', 'expired', 'cancelled' |
-| start_date | TIMESTAMP | Início assinatura |
-| end_date | TIMESTAMP | Vencimento |
-| auto_renew | BOOLEAN | Renovação automática |
-| created_at | TIMESTAMP | Data criação |
-
-#### 3. `proxies` - Proxies Alocados
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| id | SERIAL | ID único |
-| user_id | INTEGER | FK para users |
-| subscription_id | INTEGER | FK para subscriptions |
-| ip | VARCHAR(45) | IP do proxy (ex: 177.54.146.90) |
-| port | INTEGER | Porta (ex: 11331) |
-| username | VARCHAR(50) | Usuário (ex: fp12345) |
-| password | VARCHAR(100) | Senha do proxy |
-| is_active | BOOLEAN | Se está ativo |
-| created_at | TIMESTAMP | Data criação |
-| updated_at | TIMESTAMP | Última atualização |
-
-#### 4. `proxy_replacements` - Histórico de Trocas
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| id | SERIAL | ID único |
-| proxy_id | INTEGER | FK para proxies |
-| old_ip | VARCHAR(45) | IP antigo |
-| old_port | INTEGER | Porta antiga |
-| new_ip | VARCHAR(45) | IP novo |
-| new_port | INTEGER | Porta nova |
-| price_charged | DECIMAL(10,2) | Preço cobrado |
-| reason | VARCHAR(255) | Motivo da troca |
-| created_at | TIMESTAMP | Data da troca |
-
-#### 5. `discounts` - Cupons de Desconto
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| id | SERIAL | ID único |
-| user_id | INTEGER | FK para users |
-| type | VARCHAR(50) | Tipo ('renewal_50', etc) |
-| discount_percent | DECIMAL(5,2) | Percentual (ex: 50.00) |
-| valid_until | TIMESTAMP | Validade |
-| used | BOOLEAN | Se foi usado |
-| created_at | TIMESTAMP | Data criação |
+| Tabela | Propósito |
+|---|---|
+| `users` | Usuários (email, senha, role, whatsapp) |
+| `subscriptions` | Assinaturas ativas (período, qtd proxies, status) |
+| `proxies` | Proxies ativos dos clientes (ip, porta, credenciais) |
+| `proxy_replacements` | Histórico de trocas de proxy |
+| `proxy_orders` | Pedidos ProxySeller (order_id, status, custo) |
+| `proxyseller_proxies` | Proxies individuais do ProxySeller |
+| `coupons` | Cupons de desconto |
+| `coupon_usage` | Histórico de uso de cupons |
+| `discounts` | Descontos gerados automaticamente (expiração) |
+| `reward_points` | Pontos de fidelidade por usuário |
+| `reward_transactions` | Histórico de pontos |
+| `user_transactions` | Histórico completo de compras |
+| `user_messages` | Notificações/push para usuários |
+| `access_logs` | Logs de acesso (Marco Civil — 6 meses) |
+| `attribution_logs` | Logs de atribuição de IP (Marco Civil) |
+| `user_consents` | Consentimentos LGPD |
+| `terms_acceptance` | Aceite dos termos de uso |
+| `tutorials` | Conteúdo de tutoriais |
+| `blog_posts` | Posts do blog |
 
 ---
 
 ## 🔌 APIs
 
-### Endpoints Principais (`/api/subscription/`)
+### Base URL: `/api/subscription/`
 
-#### 1. Verificar se email existe
-```
-GET /api/subscription/check-email/:email
-```
-**Resposta:**
-```json
-{ "exists": true, "email": "teste@email.com" }
-```
+| Endpoint | Método | Auth | Descrição |
+|---|---|---|---|
+| `/login` | POST | ❌ | Login (email + senha) |
+| `/register` | POST | ❌ | Cadastro simples |
+| `/me` | GET | ✅ | Dados do usuário + proxies + assinaturas |
+| `/replace-proxy` | POST | ✅ | Trocar proxy (preço: R$1,99-11,99) |
+| `/add-proxies` | POST | ✅ | Adicionar mais proxies |
+| `/my-discounts` | GET | ✅ | Cupons disponíveis do usuário |
+| `/check-expiration` | GET | ✅ | Verificar expiração da assinatura |
+| `/history` | GET | ✅ | Histórico de transações |
+| `/check-email/:email` | GET | ❌ | Verificar se email existe |
+| `/forgot-password` | POST | ❌ | Solicitar redefinição de senha |
+| `/reset-password` | POST | ❌ | Redefinir senha com token |
+| `/fetch-proxies` | POST | ✅ | Poll ProxySeller API (provisionamento) |
+| `/test-telegram` | GET | ❌ | Testar notificações Telegram |
+| `/debug/orders` | GET | ✅ | Debug: verificar proxy_orders do usuário |
 
-#### 2. Registrar após pagamento
-```
-POST /api/subscription/register-after-payment
-```
-**Body:**
-```json
-{
-  "email": "cliente@email.com",
-  "password": "senha123",
-  "name": "João",
-  "whatsapp": "11999999999",
-  "proxyCount": 3,
-  "period": "monthly",
-  "stripeSessionId": "cs_xxx"
-}
-```
-**Resposta:**
-```json
-{
-  "success": true,
-  "isNewUser": true,
-  "token": "jwt_token",
-  "user": { "id": 1, "email": "...", "name": "..." },
-  "subscription": { "id": 1, "period": "monthly", "proxyCount": 3, ... },
-  "proxies": [
-    { "id": 1, "ip": "177.54.146.90", "port": 11331, "username": "fp12345", "password": "abc123", "line": "fp12345:abc123@177.54.146.90:11331" }
-  ]
-}
-```
+### Admin:
 
-#### 3. Login
-```
-POST /api/subscription/login
-```
-**Body:**
-```json
-{ "email": "cliente@email.com", "password": "senha123" }
-```
+| Endpoint | Método | Auth | Descrição |
+|---|---|---|---|
+| `/admin/login` | POST | ❌ | Login admin |
+| `/admin/proxies` | GET/POST/DELETE/PUT | ✅ Admin | CRUD proxies |
+| `/admin/users` | GET | ✅ Admin | Listar usuários |
+| `/admin/setup` | POST | ✅/❌ | Criar primeiro admin |
 
-#### 4. Dados do usuário (autenticado)
-```
-GET /api/subscription/me
-```
-**Headers:** `Authorization: Bearer <token>`
+### Stripe: `/api/stripe/`
 
-#### 5. Preço da troca de proxy
-```
-GET /api/subscription/replacement-price/:subscriptionId
-```
-**Resposta:**
-```json
-{ "success": true, "daysSinceStart": 5, "price": 5.99, "message": "Troca disponível por R$ 5,99" }
-```
+| Endpoint | Método | Descrição |
+|---|---|---|
+| `/create-checkout` | POST | Criar sessão Checkout |
+| `/verify/:sessionId` | GET | Verificar pagamento |
+| `/process-payment/:sessionId` | POST | Processar pagamento (cria user, subscription, proxies) |
+| `/create-swap-checkout` | POST | Checkout para troca de proxy |
+| `/webhook` | POST | Webhook Stripe |
 
-**Lógica de Preços:**
-- 0-3 dias: R$ 1,99
-- 4-7 dias: R$ 5,99
-- 8+ dias: R$ 11,99
+### Cupons: `/api/coupons/`
 
-#### 6. Trocar proxy
-```
-POST /api/subscription/replace-proxy
-```
-**Headers:** `Authorization: Bearer <token>`
-**Body:**
-```json
-{ "proxyId": 1, "reason": "nao funciona" }
-```
+| Endpoint | Método | Auth | Descrição |
+|---|---|---|---|
+| `/validate` | POST | ✅ | Validar cupom + calcular desconto |
+| `/apply` | POST | ✅ | Aplicar cupom ao pedido |
+| `/admin/list` | GET | ✅ Admin | Listar cupons |
+| `/admin/create` | POST | ✅ Admin | Criar cupom |
+| `/admin/quick-create` | POST | ✅ Admin | Criar cupom rápido (auto-generate code) |
+| `/admin/usage` | GET | ✅ Admin | Histórico de uso |
 
-#### 7. Adicionar proxies
-```
-POST /api/subscription/add-proxies
-```
-**Headers:** `Authorization: Bearer <token>`
-**Body:**
-```json
-{ "additionalCount": 2 }
-```
+### Extras:
+- `/api/rewards/balance` — Saldo de pontos
+- `/api/accesslogs/` — Logs de acesso
+- `/api/test/` — Endpoints de debug
+- `/test` — Health check público
+- `/debug/env` — Verificar variáveis de ambiente
 
-#### 8. Verificar expiração
+---
+
+## 💰 Preços e Tipos de Proxy
+
+| Tipo | Preço/mês | Entrega | Mín. Qtd |
+|---|---|---|---|
+| **IPv6** | R$ 29,90 | Estoque | 1 |
+| **IPv4** | R$ 39,90 | ⏱️ API (5-10 min) | 1 |
+| **ISP** | R$ 49,90 | ⏱️ API (5-10 min) | 1 |
+| **Mobile 4G/5G** | **Em breve** | — | — |
+
+### Descontos por período:
+| Período | Desconto |
+|---|---|
+| 1 mês | 0% |
+| 6 meses | 25% |
+| 12 meses | 35% |
+
+### Troca de proxy (preço progressivo):
+| Dias de uso | Preço |
+|---|---|
+| 1-3 dias | R$ 1,99 |
+| 4-7 dias | R$ 5,99 |
+| 8+ dias | R$ 11,99 |
+
+Também é possível trocar usando **100 pontos de fidelidade** (grátis).
+
+---
+
+## 🔑 Fluxo de Pagamento
+
+### Fluxo completo:
+
+1. Usuário escolhe tipo, período, quantidade na landing page
+2. Stripe checkout → pagamento
+3. `/api/stripe/process-payment`:
+   a. Verifica pagamento no Stripe
+   b. Cria/find user pelo email
+   c. Cria subscription
+   d. **IPv6**: aloca do estoque (tabela `proxies`)
+   e. **IPv4/ISP**: cria ordem via ProxySeller API → cria auth → salva em `proxy_orders`
+   f. Gera JWT e retorna dados
+   g. Envia email de boas-vindas (Resend)
+   h. Notifica via Telegram
+
+### Regra: Proxy = Acesso
 ```
-GET /api/subscription/check-expiration
+SE user.tem_proxies_ativos → ACESSO LIBERADO (independente do status da assinatura)
+SE NÃO → MOSTRAR "ASSINAR UM PLANO"
 ```
 
 ---
 
-### Endpoints Stripe (`/api/stripe/`)
+## 🌐 ProxySeller API
 
-#### 1. Criar checkout
-```
-POST /api/stripe/create-checkout
-```
-**Body:**
-```json
-{
-  "proxyCount": 3,
-  "email": "cliente@email.com",
-  "whatsapp": "11999999999",
-  "period": "monthly"
-}
-```
+**URL:** `https://proxy-seller.com/personal/api/v1/{API_KEY}/`
 
-#### 2. Verificar pagamento
-```
-GET /api/stripe/verify/:sessionId
-```
+### Chave atual: `a38df52a4a9d3d93b8305720080b00ab`
 
-#### 3. Webhook (Stripe notifica pagamento)
-```
-POST /api/stripe/webhook
-```
+### Endpoints usados:
+| Endpoint | Método | Uso |
+|---|---|---|
+| `reference/list/{type}` | GET | Buscar países, períodos, targets |
+| `order/calc` | POST | Calcular preço (requer `customTargetName`) |
+| `order/make` | POST | Fazer pedido |
+| `proxy/list/{type}` | GET | Listar proxies (por orderId) |
+| `auth/add` | POST | Criar credenciais de acesso |
+| `auth/list` | GET | Listar credenciais |
+| `auth/change` | POST | Ativar/desativar credencial |
 
----
+### ⚠️ Erros comuns:
+- `Set [customTargetName]` — faltou o parâmetro obrigatório `customTargetName`
+- `Set existed [periodId]` — usar string `"1m"`, não número `30`
 
-## 🎨 Frontend
+### Provisionamento:
+- API leva **5-10 minutos** para provisionar proxies
+- Portal faz **auto-polling** a cada 60s via `/api/subscription/fetch-proxies`
+- Proxies pendentes mostram "⏳ Provisionando" no painel
 
-### Arquivos Principais
-
-#### index.html - Landing Page
-- Design dark/light mode
-- Seção hero com CTA
-- Planos de preços
-- Modal de checkout Stripe
-
-#### portal.html - Painel do Cliente
-- Login/Cadastro
-- Lista de proxies
-- Trocar proxy
-- Adicionar proxies
-- Informações da assinatura
-
-#### admin.html - Painel Admin (TODO: implementar)
-- Lista de usuários
-- Gerenciar assinaturas
-- Ver proxies alocados
-- Histórico de trocas
-
-#### success.html - Pós-Pagamento
-- Verifica pagamento no Stripe
-- Mostra login se email existe
-- Mostra cadastro se email não existe
-- Exibe proxies após autenticação
-
-### Variáveis JavaScript Locais
-
-```javascript
-// Armazenadas no localStorage do navegador
-localStorage.getItem('fastproxy_token')      // JWT token
-localStorage.getItem('fastproxy_user')       // Dados do usuário
-localStorage.getItem('fastproxy_subscription') // Assinatura
-localStorage.getItem('fastproxy_proxies')    // Lista de proxies
-```
+### ❌ Sem API de refund:
+- ProxySeller **não oferece** endpoint de reembolso
+- Reembolsos devem ser feitos manualmente pelo suporte
 
 ---
 
-## 🚀 Deploy
+## 🔔 Notificações (Telegram)
 
-### Vercel (Produção)
-
+### Configuração:
+1. Criar bot via @BotFather → copiar token
+2. Configurar no Vercel:
 ```bash
-# 1. Fazer login
-vercel login
-
-# 2. Deploy para produção
-vercel --prod
-
-# 3. Listar projetos
-vercel list
-
-# 4. Ver variáveis de ambiente
-vercel env ls
-
-# 5. Adicionar variável
-vercel env add NOME_DA_VAR production
+vercel env add TELEGRAM_BOT_TOKEN production
+vercel env add TELEGRAM_CHAT_ID production
 ```
 
-### Variáveis de Ambiente Necessárias
+### Quando envia notificação:
+- ✅ Nova compra: email, tipo, qtd, valor, hora
+- ❌ Cancelamento: email, plano, motivo
 
-| Variável | Descrição | Exemplo |
-|----------|-----------|---------|
-| `DATABASE_URL` | Connection string Neon Postgres | `postgresql://...` |
-| `STRIPE_SECRET_KEY` | Chave secreta Stripe | `sk_live_...` |
-| `STRIPE_PUBLISHABLE_KEY` | Chave pública Stripe | `pk_live_...` |
-| `JWT_SECRET` | Secret para JWT (opcional) | `minha_secret_key` |
-
-### Trocando de Banco
-
-1. Acesse Neon Dashboard: https://neon.tech
-2. Crie novo projeto ou use existente
-3. Copie a `DATABASE_URL`
-4. No terminal:
-   ```bash
-   vercel env add DATABASE_URL production
-   ```
-5. Cole a nova URL
-6. Deploy novamente:
-   ```bash
-   vercel --prod
-   ```
+### Testar:
+```
+https://fastproxyoriginal.vercel.app/api/subscription/test-telegram
+```
 
 ---
 
-## 🔐 Segurança
+## 🔐 Variáveis de Ambiente
 
-### Implementado
+| Variável | Obrigatório | Descrição |
+|---|---|---|
+| `DATABASE_URL` | ✅ | Connection string Neon PostgreSQL |
+| `APP_URL` | ✅ | URL do site (ex: https://fastproxyoriginal.vercel.app) |
+| `STRIPE_SECRET_KEY` | ✅ | Chave secreta Stripe |
+| `JWT_SECRET` | ✅ | Secret para JWT |
+| `JWT_EXPIRE` | ❌ | Expiração JWT (default: 7d) |
+| `STRIPE_PUBLISHABLE_KEY` | ❌ | Chave pública Stripe |
+| `STRIPE_TEST_MODE` | ❌ | `true` = teste |
+| `STRIPE_WEBHOOK_SECRET` | ❌ | Webhook prod |
+| `STRIPE_WEBHOOK_SECRET_TEST` | ❌ | Webhook teste |
+| `RESEND_API_KEY` | ❌ | Emails (Resend) |
+| `PROXYSELLER_API_KEY` | ❌* | API ProxySeller |
+| `PROXY_IP` | ❌ | IP base estoque IPv6 |
+| `PROXY_PORT_START`/`END` | ❌ | Range de portas |
+| `TELEGRAM_BOT_TOKEN` | ❌ | Notificações |
+| `TELEGRAM_CHAT_ID` | ❌ | Chat ID Telegram |
 
-1. **Senhas hasheadas** - bcrypt com salt de 10 rounds
-2. **JWT Tokens** - expiração de 7 dias
-3. **Validação de inputs** - verificação de email, senha mínima
-4. **CORS** - configurado para produção
-5. **SQL Injection** - queries parametrizadas (Neon)
+---
 
-### Vulnerabilidades Testadas
+## 📦 Estrutura de Arquivos
 
-| Teste | Status | Observação |
-|-------|--------|-----------|
-| SQL Injection | ✅ Protegido | Queries com template literals |
-| XSS | ✅ Protegido | HTML escaping nos outputs |
-| Brute Force | ⚠️ Implementar | Rate limiting recomendado |
-| CSRF | ✅ Protegido | Tokens JWT |
-| Password Strength | ✅ Implementado | Mínimo 6 caracteres |
-
-### Recomendações Futuras
-
-1. **Rate Limiting** - limitar requests por IP
-2. **2FA** - autenticação em dois fatores
-3. **Email verification** - confirmar email
-4. **Password reset** - recuperação de senha
-5. **Logging** - registrar tentativas de login
+```
+├── server.js                 # Entry point — registra rotas + static files
+├── vercel.json               # Config Vercel
+├── package.json              # Dependências
+├── lib/
+│   ├── database.js           # Conexão Neon + init tables
+│   ├── email.js              # Resend — welcome, reset, cancel, swap
+│   ├── proxyseller.js        # Wrapper API ProxySeller
+│   ├── stripe.js             # Stripe client + pricing + checkout
+│   └── notifier.js           # Telegram notifications
+├── routes/
+│   ├── subscription.js       # Auth, login, register, proxy CRUD, admin
+│   ├── stripe.js             # Checkout, process-payment, swap
+│   ├── checkout.js           # Alternative checkout + webhook
+│   ├── coupons.js            # Cupons (validate, apply, admin)
+│   ├── rewards.js            # Pontos de fidelidade
+│   ├── accesslogs.js         # Logs de uso de proxy
+│   ├── test.js               # Debug endpoints
+│   └── test-prices.js        # Teste de preços
+├── middleware/
+│   └── auth.js               # JWT middleware (legacy)
+├── models/                   # Mongoose models (NÃO usados — DB é Postgres)
+└── public/
+    ├── index.html            # Landing page com checkout
+    ├── portal.html           # Dashboard do cliente
+    ├── admin.html            # Painel admin
+    ├── success.html          # Pós-pagamento
+    ├── cancel.html           # Pagamento cancelado
+    ├── planos.html           # Página de planos
+    └── blog.html / tutoriais.html / etc
+```
 
 ---
 
 ## 🔧 Manutenção
 
-### Logs do Servidor
-
-```javascript
-// Vercel não mostra logs em tempo real
-// Ver logs no dashboard: Vercel Dashboard > Deployments > Logs
-```
-
-### Resetar Banco Localmente
-
-```bash
-# Limpar tabelas via psql ou API
-POST /api/test/test-cleanup
-```
-
-### Reiniciar Deploy
-
-```bash
-vercel --prod
-```
-
-### Verificar Status
-
-```
-https://fastproxyv3.vercel.app/test
-```
-
-Resposta esperada:
+### Criar cupom rápido:
+Admin → POST `/api/coupons/admin/quick-create`:
 ```json
 {
-  "message": "FastProxy API running",
-  "stripeMode": "TEST", // ou PRODUCTION
-  "database": "Neon Postgres ✅"
+  "discount_amount": 24.90,
+  "proxy_type": "ipv6",
+  "max_uses": 10,
+  "valid_days": 30
 }
 ```
+→ Gera código automático tipo `FASTIPV6R5ABC123`
 
-### Criar Admin Inicial
+### Criar cupom manualmente:
+Rodar script `migrate-coupon.js` ou direto no DB.
 
-Se não tiver acesso ao admin, use a API:
+### Verificar status de proxy orders:
+GET `/api/subscription/debug/orders` (autenticado)
 
+### Forçar fetch de proxies ProxySeller:
+POST `/api/subscription/fetch-proxies` (autenticado)
+
+### Ver credenciais de teste
+- **Admin:** ericktorresadm@hotmail.com / @Fastproxy10
+- **Usuário verificado no momento** → ver DB para credenciais atuais
+
+### Deploy:
 ```bash
-curl -X POST https://fastproxyv3.vercel.app/api/subscription/admin/create \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@seusite.com","password":"sua_senha","name":"Admin"}'
+git add <arquivos>
+git commit -m "descrição"
+git push  # Vercel auto-deploy
 ```
 
 ---
 
-## 📊 Limites e Custos
-
-### Neon Postgres (Free Tier)
-- **Projetos:** 1 gratuito
-- **Branches:** 1 gratuito
-- **Armazenamento:** 3 GB
-- **Usuários simultâneos:** 1
-- **Request Units:** 100/hora (para Neon Serverless)
-
-### Vercel (Hobby)
-- **Banda de rede:** 100GB/mês
-- **Funções serverless:** 100 horas/mês
-- **Build time:** 6.000 minutos/mês
-- **Domínios customizados:** 1
-
-### Stripe
-- **Test Mode:** Gratuito
-- **Live Mode:** 2.99% + R$ 0,80 por transação
-
----
-
-## 📧 Envio de Emails
-
-### Recomendação: Resend
-
-**Resend** é o SMTP gratuito mais fácil de usar:
-- **Gratuito:** 100 emails/dia
-- **Fácil configuração:** Sem necessidade de servidor SMTP
-- **API moderna:** Basta chamar a API
-
-### Configuração Resend
-
-1. Acesse https://resend.com
-2. Crie uma conta gratuita
-3. Crie uma API Key
-4. Adicione no Vercel:
-   ```bash
-   vercel env add RESEND_API_KEY production
-   # Cole sua API key
-   ```
-
-5. Crie um domínio verificado (opcional para testes)
-
-### Alternativas Gratuitas
-
-| Serviço | Limite | Melhor Para |
-|---------|--------|------------|
-| **Resend** | 100/dia | Transacionais simples |
-| **Mailgun** | 100/mês | desenvolvimento |
-| **SendGrid** | 100/dia | Alto volume |
-| **Postmark** | 25/teste | Confiabilidade |
-
----
-
-## 🔌 Integração Proxy-Seller (Futuro)
-
-### API Base
-```
-https://proxy-seller.com/personal/api/v1/{API_KEY}/
-```
-
-### Endpoints Principais
-
-#### 1. Listar Proxies Ativos
-```
-GET /proxy/list/ipv6
-```
-Resposta:
-```json
-{
-  "status": "success",
-  "data": {
-    "ipv6": [
-      {
-        "id": "12345",
-        "ip": "2a04:xxxx:xxxx::1",
-        "port": 80,
-        "login": "user1",
-        "password": "pass1",
-        "orderNumber": "3388485_57471911"
-      }
-    ]
-  }
-}
-```
-
-#### 2. Listar Autorizações (Usuários)
-```
-GET /auth/list
-```
-Retorna todos os usuário/senha criados para cada proxy.
-
-#### 3. Criar Autorização (usuário para cliente)
-```
-POST /auth/add
-Body: { "orderNumber": "3388485_57471911" }
-```
-Resposta:
-```json
-{
-  "status": "success",
-  "data": {
-    "id": "66decee1e4b0c423139280d9",
-    "active": true,
-    "login": "cliente_abc",
-    "password": "senha_cliente",
-    "orderNumber": "3388485_57471911"
-  }
-}
-```
-
-#### 4. BLOQUEAR Cliente Específico (INADIMPLENTE)
-```
-POST /auth/change
-Body: { "id": "66decee1e4b0c423139280d9", "active": false }
-```
-**Isso bloqueia SÓ aquele cliente, não afeta os outros!**
-
-#### 5. Desbloquear Cliente
-```
-POST /auth/change
-Body: { "id": "66decee1e4b0c423139280d9", "active": true }
-```
-
-#### 6. Trocar Senha do Cliente
-```
-POST /auth/change
-Body: { "id": "66decee1e4b0c423139280d9", "password": "nova_senha_123" }
-```
-
-#### 7. Deletar Autorização
-```
-POST /auth/delete
-Body: { "id": "66decee1e4b0c423139280d9" }
-```
-
-### Configuração (Futuro)
-
-Adicionar no Vercel:
-```bash
-vercel env add PROXYSELLER_API_KEY production
-# Cole sua API key do proxy-seller.com
-```
-
-### Fluxo de Inadimplência (A Implementar)
-
-1. Assinatura expira → sistema detecta
-2. Chama `POST /auth/change` com `active: false`
-3. Cliente perde acesso ao proxy
-4. Quando pagar, chama `POST /auth/change` com `active: true`
-5. Cliente volta a ter acesso
-
----
-
-## 🆘 Suporte
-
-Para dúvidas técnicas:
-1. Consulte esta documentação
-2. Verifique logs no Vercel Dashboard
-3. Teste APIs via Postman/curl
-4. Verifique variáveis de ambiente
-
----
-
-*Documento gerado em 10/04/2026*
-   
- 
+*Documento atualizado em: 2026-04-17*

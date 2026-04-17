@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la public/*.html)",
+      "Bash(bash -c \"grep -n ''function authenticate\\\\|async function authenticate\\\\|function isAdmin\\\\|async function isAdmin'' routes/subscription.js\")",
+      "Bash(bash -c \"grep -rn ''require.*subscription'' routes/ | grep -v node_modules\")",
+      "WebFetch(domain:proxy-seller.com)",
+      "Bash(API_KEY=\"a38df52a4a9d3d93b8305720080b00ab\")",
+      "Bash(curl -s \"https://proxy-seller.com/personal/api/v1/$API_KEY/reference/list\")",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s https://proxy-seller.com/personal/api/v1/$API_KEY/reference/list)",
+      "Bash(curl -s \"https://proxy-seller.com/personal/api/v1/$API_KEY/reference/list/ipv4\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d, indent=2\\)\\)\")",
+      "Bash(API_KEY=a38df52a4a9d3d93b8305720080b00ab)",
+      "Bash(curl -s https://proxy-seller.com/personal/api/v1/$API_KEY/reference/list/ipv4)",
+      "Bash(curl -s https://proxy-seller.com/personal/api/v1/$API_KEY/balance)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(curl -s -X POST \"https://fastproxyoriginal.vercel.app/api/subscription/login\" -H \"Content-Type: application/json\" -d '{\"\"\"\"email\"\"\"\":\"\"\"\"ericktorresadm@hotmail.com\"\"\"\",\"\"\"\"password\"\"\"\":\"\"\"\"@Fastproxy10\"\"\"\"}')",
+      "Bash(python3 -c \":*)",
+      "Bash(node create-offer-coupon.js)",
+      "Bash(node migrate-coupon.js)"
+    ]
+  }
+}
