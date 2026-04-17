@@ -594,8 +594,9 @@ async function loadUserData() {
             // User name
             document.getElementById('user-name').textContent = currentUser?.name || currentUser?.email?.split('@')[0] || 'Cliente';
             
-            // Check if user has active subscription (from API response)
-            const hasActive = currentSubscription?.hasActiveSubscription;
+            // Show proxies if they exist in currentProxies
+            const hasProxies = currentProxies && currentProxies.length > 0;
+            const hasActive = currentSubscription?.hasActiveSubscription || hasProxies;
             const activeSub = currentSubscription?.subscriptions?.find(s => s.isActive);
             const firstSub = currentSubscription?.subscriptions?.[0];
             

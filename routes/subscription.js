@@ -225,7 +225,15 @@ router.post('/login', async (req, res) => {
     if (activeSubscription) {
       proxies = await sql`
         SELECT * FROM proxies 
-        WHERE user_id = ${user.id} AND subscription_id = ${activeSubscription.id} AND is_active = true
+        WHERE user_id = ${user.id} AND is_active = true
+        ORDER BY created_at DESC
+      `;
+    } else {
+      // Also get proxies for users whose subscription_id wasn't set properly
+      proxies = await sql`
+        SELECT * FROM proxies 
+        WHERE user_id = ${user.id} AND is_active = true
+        ORDER BY created_at DESC
       `;
     }
 
@@ -311,7 +319,7 @@ router.get('/me', async (req, res) => {
         LEFT JOIN proxy_replacements pr ON p.id = pr.proxy_id AND pr.created_at = (
           SELECT MAX(created_at) FROM proxy_replacements WHERE proxy_id = p.id
         )
-        WHERE p.user_id = ${user.id} AND p.subscription_id = ${activeSubscription.id}
+        WHERE p.user_id = ${user.id} AND p.is_active = true
         ORDER BY p.created_at DESC
       `;
     }
