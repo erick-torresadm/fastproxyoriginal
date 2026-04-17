@@ -340,6 +340,7 @@ router.post('/process-payment/:sessionId', async (req, res) => {
         console.log(`✅ ProxySeller order created: orderId=${orderId}, orderNumber=${orderNumber}`);
 
         // Save proxy_order record
+        const PERIOD_DAYS_MAP = { '1w':7,'2w':14,'1m':30,'2m':60,'3m':90,'6m':180,'12m':365,'monthly':30,'annual':365 };
         const periodDays = PERIOD_DAYS_MAP[period] || 30;
         try {
           await sql`
