@@ -144,10 +144,17 @@ router.post('/process-payment/:sessionId', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Pagamento não confirmado' });
     }
     
-    const customerEmail = session.customer_email || email;
-    const proxyCount = parseInt(session.metadata?.quantity) || parseInt(req.body.proxyCount) || 1;
-    const period = session.metadata?.period || req.body.period || 'monthly';
+    const customerEmail = (session.customer_email || email || '').toLowerCase().trim();
+    // Resolve proxy count from metadata (proxy_count or quantity alias) or body fallback
+    const proxyCount = parseInt(session.metadata?.proxy_count)
+                    || parseInt(session.metadata?.quantity)
+                    || parseInt(req.body.proxyCount)
+                    || 1;
+    const period    = session.metadata?.period || req.body.period || '1m';
+    const proxyType = session.metadata?.type   || req.body.type   || 'ipv6';
     const pricePaid = session.amount_total / 100;
+
+    console.log(`proxyCount: ${proxyCount}, period: ${period}, type: ${proxyType}, email: ${customerEmail}`);
     
     // 2. Check if this session was already processed
     const { sql } = require('../lib/database');
@@ -225,12 +232,19 @@ router.post('/process-payment/:sessionId', async (req, res) => {
       isNewUser = true;
     }
     
-    // 4. Calculate end date
+    // 4. Calculate end date — supports both legacy ('monthly'/'annual') and new ('1m','6m','12m') formats
     const endDate = new Date();
-    if (period === 'monthly') {
-      endDate.setMonth(endDate.getMonth() + 1);
-    } else if (period === 'annual') {
-      endDate.setFullYear(endDate.getFullYear() + 1);
+    const PERIOD_MONTHS_MAP = {
+      'monthly': 1, 'annual': 12,          // legacy
+      '1w': 0.25, '2w': 0.5,               // weeks
+      '1m': 1, '2m': 2, '3m': 3,
+      '6m': 6, '12m': 12
+    };
+    const monthsToAdd = PERIOD_MONTHS_MAP[period] || 1;
+    if (monthsToAdd < 1) {
+      endDate.setDate(endDate.getDate() + Math.round(monthsToAdd * 30));
+    } else {
+      endDate.setMonth(endDate.getMonth() + monthsToAdd);
     }
     
     // 5. Create subscription

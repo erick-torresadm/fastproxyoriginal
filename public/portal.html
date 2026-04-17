@@ -457,10 +457,13 @@
                     currentUser = data.user;
                     currentProxies = data.proxies || [];
                     
-                    // Convert login response to expected format
-                    currentSubscription = {
-                        hasActiveSubscription: data.hasActiveSubscription,
-                        subscriptions: data.subscription ? [{
+                    console.log('Login success - proxies:', currentProxies.length);
+                    console.log('Login data:', JSON.stringify(data).substring(0, 500));
+                    
+                    // Build subscription object from login response
+                    let subs = [];
+                    if (data.subscription) {
+                        subs = [{
                             id: data.subscription.id,
                             period: data.subscription.period,
                             proxyCount: data.subscription.proxyCount,
@@ -468,7 +471,12 @@
                             startDate: data.subscription.startDate,
                             endDate: data.subscription.endDate,
                             isActive: data.hasActiveSubscription
-                        }] : []
+                        }];
+                    }
+                    
+                    currentSubscription = {
+                        hasActiveSubscription: data.hasActiveSubscription || currentProxies.length > 0,
+                        subscriptions: subs
                     };
                     
                     // Store in localStorage
@@ -477,7 +485,10 @@
                     localStorage.setItem('fastproxy_subscription', JSON.stringify(currentSubscription));
                     localStorage.setItem('fastproxy_proxies', JSON.stringify(currentProxies));
                     
+                    console.log('Login success - proxies:', currentProxies.length, '| sub:', !!currentSubscription);
+
                     showDashboard();
+                    renderDashboard();
                 } else {
                     errorDiv.textContent = data.message || 'Credenciais inválidas';
                     errorDiv.classList.remove('hidden');
@@ -530,7 +541,7 @@
                     
                     showToast('Conta criada! Assine um plano para receber seus proxies.', 'success');
                     showDashboard();
-                    renderDashboard();
+                    renderDashboard(); // defined above — renders subscription info + proxies
                 } else {
                     errorDiv.textContent = data.message || 'Erro ao criar conta';
                     errorDiv.classList.remove('hidden');
@@ -549,6 +560,107 @@
             document.getElementById('nav-email').textContent = currentUser?.email || '';
         }
 
+        // ── renderDashboard: populates all dashboard content ──────────────────
+        function renderDashboard() {
+            // ── 1. User name ──────────────────────────────────────────────────
+            const nameEl = document.getElementById('user-name');
+            if (nameEl) {
+                nameEl.textContent = currentUser?.name || currentUser?.email?.split('@')[0] || 'usuário';
+            }
+
+            // ── 2. Resolve subscription from any data-structure variant ───────
+            //   Data can come from:
+            //   a) /me response:         { subscriptions:[...], hasActiveSubscription, proxies }
+            //   b) /login response:      { subscription:{...}, hasActiveSubscription, proxies }
+            //   c) process-payment resp: { subscription:{id,period,...}, proxies }
+            let sub = null;
+            let hasActive = false;
+
+            const PERIOD_NAMES = {
+                '1m':'1 Mês','6m':'6 Meses','12m':'12 Meses',
+                '1w':'1 Semana','2w':'2 Semanas','3m':'3 Meses',
+                monthly:'Mensal', annual:'Anual'
+            };
+
+            if (currentSubscription) {
+                // Variant A – /me returns subscriptions array
+                if (currentSubscription.subscriptions && Array.isArray(currentSubscription.subscriptions)) {
+                    sub = currentSubscription.subscriptions.find(s => s.isActive || s.status === 'active')
+                       || currentSubscription.subscriptions[0]
+                       || null;
+                    hasActive = !!currentSubscription.hasActiveSubscription;
+                }
+                // Variant B – /login or localStorage from payment: { subscription:{...} }
+                else if (currentSubscription.subscription && currentSubscription.subscription.id) {
+                    sub = currentSubscription.subscription;
+                    hasActive = !!currentSubscription.hasActiveSubscription || sub.status === 'active';
+                }
+                // Variant C – direct subscription object { id, period, ... }
+                else if (currentSubscription.id && currentSubscription.period) {
+                    sub = currentSubscription;
+                    hasActive = sub.status === 'active';
+                }
+            }
+
+            const qty      = sub?.proxyCount || sub?.proxy_count || currentProxies.length || 0;
+            const period   = PERIOD_NAMES[sub?.period] || sub?.period || '—';
+            const endRaw   = sub?.endDate || sub?.end_date;
+            const startRaw = sub?.startDate || sub?.start_date;
+            const endFmt   = endRaw   ? new Date(endRaw).toLocaleDateString('pt-BR')   : '—';
+            const startFmt = startRaw ? new Date(startRaw).toLocaleDateString('pt-BR') : '—';
+
+            // ── 3. Subscription subtitle ──────────────────────────────────────
+            const subInfoEl = document.getElementById('subscription-info');
+            if (subInfoEl) {
+                if (sub) {
+                    subInfoEl.textContent = `${qty} proxy${qty !== 1 ? 's' : ''} • Plano ${period} • vence ${endFmt}`;
+                } else if (currentProxies.length > 0) {
+                    subInfoEl.textContent = `${currentProxies.length} proxy${currentProxies.length !== 1 ? 's' : ''} ativos`;
+                } else {
+                    subInfoEl.textContent = 'Nenhuma assinatura ativa no momento.';
+                }
+            }
+
+            // ── 4. Subscription detail card ───────────────────────────────────
+            const subDetailsEl = document.getElementById('subscription-details');
+            if (subDetailsEl) {
+                if (sub) {
+                    const statusHtml = sub.status === 'active'
+                        ? '<span class="text-green-400 font-semibold">✓ Ativo</span>'
+                        : `<span class="text-red-400">${sub.status || '—'}</span>`;
+                    subDetailsEl.innerHTML = `
+                        <div class="flex justify-between py-1"><span class="text-secondary">Plano</span><span>${period}</span></div>
+                        <div class="flex justify-between py-1"><span class="text-secondary">Proxies</span><span>${qty}</span></div>
+                        <div class="flex justify-between py-1"><span class="text-secondary">Início</span><span>${startFmt}</span></div>
+                        <div class="flex justify-between py-1"><span class="text-secondary">Vencimento</span><span>${endFmt}</span></div>
+                        <div class="flex justify-between py-1"><span class="text-secondary">Status</span>${statusHtml}</div>
+                        <div class="mt-4 pt-3 border-t border-white/10">
+                            <a href="/cancelar.html" class="text-xs text-red-400 hover:text-red-300 hover:underline transition-colors">
+                                Cancelar assinatura
+                            </a>
+                        </div>
+                    `;
+                } else {
+                    subDetailsEl.innerHTML = `
+                        <p class="text-secondary text-sm mb-3">Nenhuma assinatura ativa.</p>
+                        <a href="/" class="text-green-400 hover:underline text-sm">Comprar proxies →</a>
+                    `;
+                }
+            }
+
+            // ── 5. Expiration check ───────────────────────────────────────────
+            const expirationAlert = document.getElementById('expiration-alert');
+            if (expirationAlert && sub && endRaw) {
+                const daysLeft = Math.ceil((new Date(endRaw) - new Date()) / (1000 * 60 * 60 * 24));
+                if (daysLeft <= 5 && daysLeft > 0) {
+                    expirationAlert.classList.remove('hidden');
+                }
+            }
+
+            // ── 6. Render proxies ─────────────────────────────────────────────
+            renderProxies(hasActive || currentProxies.length > 0);
+        }
+
 async function loadUserData() {
             const token = localStorage.getItem('fastproxy_token');
             
@@ -562,36 +674,52 @@ async function loadUserData() {
             const storedSub = JSON.parse(localStorage.getItem('fastproxy_subscription') || 'null');
             const storedUser = JSON.parse(localStorage.getItem('fastproxy_user') || 'null');
             
-            if (storedProxies.length > 0) {
-                // Use cached data if available
-                currentUser = storedUser;
-                currentProxies = storedProxies;
-                currentSubscription = storedSub;
+            // Render cached data immediately for fast perceived load
+            if (storedUser || storedProxies.length > 0 || storedSub) {
+                currentUser         = storedUser         || currentUser;
+                currentProxies      = storedProxies.length > 0 ? storedProxies : currentProxies;
+                currentSubscription = storedSub          || currentSubscription;
                 renderDashboard();
             }
-            
-            // Then try to refresh from server
+
+            // Always refresh from server for accurate, up-to-date data
             try {
                 const res = await fetch(`${API_URL}/api/subscription/me`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                
+
                 const data = await res.json();
-                
-                if (data.success && data.proxies && data.proxies.length > 0) {
-                    // Update with fresh data from server
-                    currentUser = data.user;
-                    currentProxies = data.proxies;
-                    currentSubscription = data;
-                    
-                    localStorage.setItem('fastproxy_user', JSON.stringify(currentUser));
-                    localStorage.setItem('fastproxy_proxies', JSON.stringify(currentProxies));
-                    localStorage.setItem('fastproxy_subscription', JSON.stringify(data));
-                    
-                    renderDashboard();
+
+                if (!data.success) {
+                    // Token expired or invalid
+                    if (res.status === 401) { logout(); return; }
+                    return;
                 }
-} catch (err) {
-                console.error('Error loading history:', err);
+
+                // Always update from server response
+                currentUser         = data.user;
+                currentProxies      = data.proxies || [];
+                currentSubscription = data;
+
+                localStorage.setItem('fastproxy_user',         JSON.stringify(currentUser));
+                localStorage.setItem('fastproxy_proxies',      JSON.stringify(currentProxies));
+                localStorage.setItem('fastproxy_subscription', JSON.stringify(data));
+
+                renderDashboard();
+
+                // Check for expiring subscription discounts
+                if (data.discounts && data.discounts.length > 0) {
+                    const discountBanner  = document.getElementById('discount-banner');
+                    const discountDetails = document.getElementById('discount-details');
+                    if (discountBanner && discountDetails) {
+                        const d = data.discounts[0];
+                        discountDetails.textContent = `Desconto de ${d.discountPercent}% disponível para renovação!`;
+                        discountBanner.classList.remove('hidden');
+                    }
+                }
+
+            } catch (err) {
+                console.error('Error refreshing user data from server:', err);
             }
         }
         
