@@ -429,7 +429,7 @@ router.post('/replace-proxy', async (req, res) => {
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    const { proxyId, reason } = req.body;
+    const { proxyId, reason, usePoints } = req.body;
 
     if (!proxyId) {
       return res.status(400).json({ success: false, message: 'ID do proxy é obrigatório' });
@@ -468,6 +468,33 @@ router.post('/replace-proxy', async (req, res) => {
       price = 11.99;
     }
 
+    // Check if using points for free swap
+    let finalPrice = price;
+    if (usePoints) {
+      // Deduct 100 points from user
+      const [reward] = await sql`
+        SELECT * FROM reward_points WHERE user_id = ${decoded.id}
+      `;
+      
+      if (!reward || reward.available_points < 100) {
+        return res.status(400).json({ success: false, message: 'Pontos insuficientes. Mínimo: 100 pontos' });
+      }
+      
+      await sql`
+        UPDATE reward_points 
+        SET available_points = available_points - 100
+        WHERE user_id = ${decoded.id}
+      `;
+      
+      // Log the transaction
+      await sql`
+        INSERT INTO reward_transactions (user_id, type, points, description)
+        VALUES (${decoded.id}, 'redeem', -100, 'Troca de proxy gratuita via pontos')
+      `;
+      
+      finalPrice = 0;
+    }
+    
     // Generate new proxy credentials
     const newPort = getNextPort();
     if (!newPort) {
@@ -491,7 +518,7 @@ router.post('/replace-proxy', async (req, res) => {
     // Record replacement
     await sql`
       INSERT INTO proxy_replacements (proxy_id, old_ip, old_port, new_ip, new_port, price_charged, reason)
-      VALUES (${proxyId}, ${oldProxy.ip}, ${oldProxy.port}, ${IP_BASE}, ${newPort}, ${price}, ${reason || 'Troca solicitada pelo cliente'})
+      VALUES (${proxyId}, ${oldProxy.ip}, ${oldProxy.port}, ${IP_BASE}, ${newPort}, ${finalPrice}, ${reason || 'Troca solicitada pelo cliente'})
     `;
 
     const newProxy = updated[0];

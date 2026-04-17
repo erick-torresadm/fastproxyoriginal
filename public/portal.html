@@ -284,6 +284,17 @@
                         <div id="subscription-details" class="text-sm space-y-2">
                             <!-- Subscription info here -->
                         </div>
+                        <div id="points-info" class="mt-4 p-3 rounded-lg bg-green-900/30 border border-green-500/30 hidden">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-green-400 font-semibold">⭐ Pontos de fidelidade</p>
+                                    <p class="text-xs text-secondary"><span id="points-available">0</span> pontos disponíveis</p>
+                                </div>
+                                <button onclick="redeemPoints()" class="btn-primary px-3 py-1 rounded-lg text-xs">
+                                    Resgatar
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -304,6 +315,13 @@
             
             <div id="replace-info" class="mb-4 p-3 rounded-lg bg-secondary text-sm">
                 <!-- Price info here -->
+            </div>
+            
+            <div id="replace-points" class="mb-4 p-3 rounded-lg bg-green-900/30 border border-green-500/30 hidden">
+                <p class="text-sm">💎 Você pode usar <span id="replace-points-avail">0</span> pontos para trocar!</p>
+                <button onclick="swapWithPoints()" class="btn-primary w-full py-2 rounded-lg mt-2 text-sm">
+                    🎉 Trocar GRÁTIS com pontos
+                </button>
             </div>
 
             <div class="space-y-3">
@@ -630,6 +648,71 @@ async function loadUserData() {
             
             // Render proxies - always pass true to show proxies if they exist
             renderProxies(true);
+            
+            // Load reward points
+            loadRewardPoints();
+        }
+        
+        async function loadRewardPoints() {
+            const token = localStorage.getItem('fastproxy_token');
+            const pointsInfo = document.getElementById('points-info');
+            
+            if (!token) return;
+            
+            try {
+                const res = await fetch(`${API_URL}/api/rewards/balance`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const data = await res.json();
+                
+                if (data.success && data.points && data.points.available > 0) {
+                    pointsInfo.classList.remove('hidden');
+                    document.getElementById('points-available').textContent = data.points.available;
+                } else {
+                    pointsInfo.classList.add('hidden');
+                }
+            } catch (err) {
+                console.error('Error loading points:', err);
+                pointsInfo.classList.add('hidden');
+            }
+        }
+        
+        async function redeemPoints() {
+            const pontos = parseInt(document.getElementById('points-available').textContent);
+            
+            if (!pontos || pontos < 100) {
+                showToast('Pontos insuficientes. Mínimo: 100 pontos', 'error');
+                return;
+            }
+            
+            const usarTodos = confirm(`Usar todos os ${pontos} pontos para cupom de desconto?`);
+            
+            const token = localStorage.getItem('fastproxy_token');
+            
+            try {
+                const res = await fetch(`${API_URL}/api/rewards/redeem`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ points: usarTodos ? pontos : Math.floor(pontos / 2) * 2 })
+                });
+                
+                const data = await res.json();
+                
+                if (data.success && data.coupon) {
+                    showToast(`Cupom criado: ${data.coupon.code}`, 'success');
+                    // Copy to clipboard
+                    navigator.clipboard.writeText(data.coupon.code);
+                    loadRewardPoints();
+                } else {
+                    showToast(data.message || 'Erro ao criar cupom', 'error');
+                }
+            } catch (err) {
+                showToast('Erro de conexão', 'error');
+            }
         }
 
         function renderProxies(hasActive = true) {
@@ -683,7 +766,8 @@ async function loadUserData() {
                             <button onclick="copyProxyLine(${JSON.stringify(p).replace(/"/g, '&quot;')})" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded-lg text-sm text-white" title="Copiar">
                                 <i class="fas fa-copy"></i>
                             </button>
-                            <button onclick="openReplaceModal(${p.id})" class="btn-secondary px-3 py-1 rounded-lg text-sm">
+                            <button onclick="openReplaceModal(${p.id})" class="btn-secondary px-3 py-1 rounded-lg text-sm flex items-center gap-1" title="Trocar proxy (R$ 1,99 - 11,99)">
+                                <i class="fas fa-sync-alt text-xs"></i>
                                 Trocar
                             </button>
                         </div>
@@ -731,18 +815,71 @@ async function loadUserData() {
         function openReplaceModal(proxyId) {
             selectedProxyId = proxyId;
             
+            const replaceInfo = document.getElementById('replace-info');
+            const replacePoints = document.getElementById('replace-points');
+            
             fetch(`${API_URL}/api/subscription/replacement-price/${currentSubscription?.id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             .then(r => r.json())
             .then(data => {
-                document.getElementById('replace-info').innerHTML = `
+                replaceInfo.innerHTML = `
                     <p class="text-green-400 font-semibold">Preço para troca: R$ ${data.price?.toFixed(2).replace('.', ',') || '0,00'}</p>
                     <p class="text-secondary text-xs mt-1">Baseado em ${data.daysSinceStart || 0} dias de uso</p>
                 `;
             });
             
+            // Check reward points for free swap
+            fetch(`${API_URL}/api/rewards/balance`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.points && data.points.available >= 100) {
+                    replacePoints.classList.remove('hidden');
+                    document.getElementById('replace-points-avail').textContent = data.points.available;
+                } else {
+                    replacePoints.classList.add('hidden');
+                }
+            })
+            .catch(() => replacePoints.classList.add('hidden'));
+            
             document.getElementById('replace-modal').classList.remove('hidden');
+        }
+        
+        async function swapWithPoints() {
+            if (!selectedProxyId) return;
+            
+            const token = localStorage.getItem('fastproxy_token');
+            const reason = document.getElementById('replace-reason').value;
+            
+            try {
+                // Use 100 points for free swap
+                const res = await fetch(`${API_URL}/api/subscription/replace-proxy`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ 
+                        proxyId: selectedProxyId,
+                        reason,
+                        usePoints: true
+                    })
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    showToast('Proxy trocado com sucesso! 🎉', 'success');
+                    closeReplaceModal();
+                    loadUserData();
+                } else {
+                    showToast(data.message || 'Erro ao trocar', 'error');
+                }
+            } catch (err) {
+                showToast('Erro de conexão', 'error');
+            }
         }
 
         function closeReplaceModal() {
