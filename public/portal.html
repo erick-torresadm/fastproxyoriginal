@@ -432,17 +432,29 @@
                 if (data.success) {
                     token = data.token;
                     currentUser = data.user;
-                    currentSubscription = null;
-                    currentProxies = [];
+                    currentProxies = data.proxies || [];
                     
-                    // Always use server data, ignore localStorage cache
+                    // Convert login response to expected format
+                    currentSubscription = {
+                        hasActiveSubscription: data.hasActiveSubscription,
+                        subscriptions: data.subscription ? [{
+                            id: data.subscription.id,
+                            period: data.subscription.period,
+                            proxyCount: data.subscription.proxyCount,
+                            status: data.subscription.status,
+                            startDate: data.subscription.startDate,
+                            endDate: data.subscription.endDate,
+                            isActive: data.hasActiveSubscription
+                        }] : []
+                    };
+                    
+                    // Store in localStorage
                     localStorage.setItem('fastproxy_token', token);
                     localStorage.setItem('fastproxy_user', JSON.stringify(currentUser));
-                    localStorage.setItem('fastproxy_subscription', JSON.stringify(null));
-                    localStorage.setItem('fastproxy_proxies', JSON.stringify([]));
+                    localStorage.setItem('fastproxy_subscription', JSON.stringify(currentSubscription));
+                    localStorage.setItem('fastproxy_proxies', JSON.stringify(currentProxies));
                     
                     showDashboard();
-                    loadUserData();
                 } else {
                     errorDiv.textContent = data.message || 'Credenciais inválidas';
                     errorDiv.classList.remove('hidden');
