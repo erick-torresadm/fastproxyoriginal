@@ -995,7 +995,7 @@
 
         async function allocateThisProxy(proxyId, proxyStr) {
             try {
-                const usersData = await api('/api/auth/users');
+                const usersData = await api('/api/subscription/admin/users');
                 const users = usersData.data?.users || [];
                 
                 if (users.length === 0) {
@@ -1003,13 +1003,13 @@
                     return;
                 }
                 
-                const userList = users.map(u => `<div class="user-option flex items-center justify-between p-3 hover:bg-white/5 rounded-lg cursor-pointer transition" onclick="selectUser('${u._id}', '${u.name}', '${u.email}', '${u.whatsapp || ''}')">
+                const userList = users.map(u => `<div class="user-option flex items-center justify-between p-3 hover:bg-white/5 rounded-lg cursor-pointer transition" onclick="selectUser('${u.id}', '${u.name || ''}', '${u.email}', '${u.whatsapp || ''}')">
                     <div>
-                        <div class="font-medium text-white">${u.name}</div>
+                        <div class="font-medium text-white">${u.name || 'Sem nome'}</div>
                         <div class="text-sm text-secondary">${u.email}</div>
                         ${u.whatsapp ? `<div class="text-xs text-green-400">${u.whatsapp}</div>` : ''}
                     </div>
-                    <div class="text-xs text-white/30">${u.proxyCount || 0} proxies</div>
+                    <div class="text-xs text-white/30">${u.proxy_count || 0} proxies</div>
                 </div>`).join('');
                 
                 document.getElementById('modal').classList.remove('hidden');
@@ -1018,7 +1018,7 @@
                     <div class="space-y-4">
                         <div class="p-3 bg-green-500/10 border border-green-500/30 rounded-lg font-mono text-sm text-green-400">${proxyStr}</div>
                         <div>
-                            <input type="text" id="user-search" placeholder="Buscar por nome, email ou WhatsApp..." class="input-field w-full rounded-xl px-4 py-3 text-white" oninput="filterUsers()">
+                            <input type="text" id="user-search" placeholder="Buscar por email..." class="input-field w-full rounded-xl px-4 py-3 text-white" oninput="searchUsersByEmail(this.value)">
                         </div>
                         <div id="user-list" class="max-h-60 overflow-y-auto space-y-1">
                             ${userList}
@@ -1033,16 +1033,11 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm text-secondary mb-2">Status</label>
-                            <select id="allocate-status" class="input-field w-full rounded-xl px-4 py-3 text-white">
-                                <option value="active">Ativo</option>
-                                <option value="available">Disponível</option>
-                                <option value="expired">Expirado</option>
-                            </select>
+                            <label class="block text-sm text-secondary mb-2">Email do usuário</label>
+                            <input type="email" id="allocate-user-email" placeholder="usuario@email.com" class="input-field w-full rounded-xl px-4 py-3 text-white">
                         </div>
-                        <input type="hidden" id="allocate-user-id">
-                        <button onclick="confirmAllocate('${proxyId}')" class="btn-primary w-full py-3 rounded-xl font-semibold text-white">
-                            <i class="fas fa-link mr-2"></i>Vincular
+                        <button onclick="confirmAllocateByEmail('${proxyId}')" class="btn-primary w-full py-3 rounded-xl font-semibold text-white">
+                            <i class="fas fa-link mr-2"></i>Vincular por Email
                         </button>
                     </div>
                 `;
@@ -1056,6 +1051,28 @@
                 const text = opt.innerText.toLowerCase();
                 opt.classList.toggle('hidden', !text.includes(search));
             });
+        }
+        
+        async function searchUsersByEmail(email) {
+            if (email.length < 3) return;
+            try {
+                const data = await api(`/api/subscription/admin/users/by-email/${encodeURIComponent(email)}`);
+                const users = data.data?.users || [];
+                const userList = document.getElementById('user-list');
+                if (users.length > 0) {
+                    userList.innerHTML = users.map(u => `<div class="user-option flex items-center justify-between p-3 hover:bg-white/5 rounded-lg cursor-pointer transition" onclick="selectUser('${u.id}', '${u.name || ''}', '${u.email}', '${u.whatsapp || ''}')">
+                        <div>
+                            <div class="font-medium text-white">${u.name || 'Sem nome'}</div>
+                            <div class="text-sm text-secondary">${u.email}</div>
+                        </div>
+                        <div class="text-xs text-white/30">${u.proxy_count || 0} proxies</div>
+                    </div>`).join('');
+                } else {
+                    userList.innerHTML = '<div class="p-3 text-center text-secondary">Nenhum usuário encontrado</div>';
+                }
+            } catch (err) {
+                console.error(err);
+            }
         }
 
         function selectUser(id, name, email, whatsapp) {
@@ -1087,6 +1104,30 @@
                 });
                 if (data.success) {
                     showToast('Proxy vinculado!');
+                    closeModal();
+                    loadProxies();
+                    loadStats();
+                } else {
+                    showToast(data.message || 'Erro', 'error');
+                }
+            } catch (err) { showToast('Erro de conexão', 'error'); }
+        }
+        
+        async function confirmAllocateByEmail(proxyId) {
+            const email = document.getElementById('allocate-user-email').value.trim();
+            
+            if (!email) {
+                showToast('Digite o email do usuário', 'error');
+                return;
+            }
+            
+            try {
+                const data = await api('/api/subscription/admin/proxies/allocate', 'POST', {
+                    proxyId,
+                    email
+                });
+                if (data.success) {
+                    showToast('Proxy vinculado a ' + email + '!');
                     closeModal();
                     loadProxies();
                     loadStats();
@@ -1127,8 +1168,19 @@
             } catch (err) { console.error(err); }
         }
 
-        function viewUserProxies(userId) {
-            showToast('Funcionalidade em desenvolvimento');
+        async function viewUserProxies(userId) {
+            try {
+                const data = await api('/api/subscription/admin/users');
+                const users = data.data?.users || [];
+                const user = users.find(u => u.id == userId);
+                if (!user) {
+                    showToast('Usuário não encontrado', 'error');
+                    return;
+                }
+                showToast(`Usuário: ${user.email}\nProxies: ${user.proxy_count || 0}`);
+            } catch (err) {
+                showToast('Erro ao carregar', 'error');
+            }
         }
 
         async function cancelSubscription(userId, userEmail) {

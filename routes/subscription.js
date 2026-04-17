@@ -999,10 +999,23 @@ router.post('/admin/proxies/allocate', async (req, res) => {
       return res.status(403).json({ success: false, message: 'Acesso negado' });
     }
 
-    const { proxyId, userId } = req.body;
+    const { proxyId, userId, email } = req.body;
+
+    // If email provided, find user
+    let targetUserId = userId;
+    if (email && !targetUserId) {
+      const users = await sql`SELECT id FROM users WHERE email = ${email.toLowerCase()}`;
+      if (users.length > 0) {
+        targetUserId = users[0].id;
+      }
+    }
+    
+    if (!targetUserId) {
+      return res.status(400).json({ success: false, message: 'Usuário não encontrado' });
+    }
 
     await sql`
-      UPDATE proxies SET user_id = ${userId}, updated_at = NOW()
+      UPDATE proxies SET user_id = ${targetUserId}, updated_at = NOW()
       WHERE id = ${proxyId}
     `;
 
@@ -1109,6 +1122,39 @@ router.get('/admin/users', async (req, res) => {
   } catch (err) {
     console.error('Admin get users error:', err);
     res.status(500).json({ success: false, message: 'Erro ao buscar usuários' });
+  }
+});
+
+// Admin: Get user by email
+router.get('/admin/users/by-email/:email', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+
+    const { email } = req.params;
+    const users = await sql`
+      SELECT u.*, 
+        (SELECT COUNT(*) FROM proxies p WHERE p.user_id = u.id AND p.is_active = true) as proxy_count
+      FROM users u
+      WHERE u.email ILIKE ${'%' + email + '%'}
+      ORDER BY u.created_at DESC
+      LIMIT 10
+    `;
+
+    res.json({ success: true, data: { users } });
+
+  } catch (err) {
+    console.error('Admin get user by email error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao buscar usuário' });
   }
 });
 
