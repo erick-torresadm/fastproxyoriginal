@@ -220,21 +220,17 @@ router.post('/login', async (req, res) => {
       return endDate > new Date();
     });
 
-    // Only get proxies if user has an ACTIVE and VALID subscription
+    // Always get proxies if user has any active proxies (regardless of subscription status)
     let proxies = [];
-    if (activeSubscription) {
-      proxies = await sql`
-        SELECT * FROM proxies 
-        WHERE user_id = ${user.id} AND is_active = true
-        ORDER BY created_at DESC
-      `;
-    } else {
-      // Also get proxies for users whose subscription_id wasn't set properly
-      proxies = await sql`
-        SELECT * FROM proxies 
-        WHERE user_id = ${user.id} AND is_active = true
-        ORDER BY created_at DESC
-      `;
+    const allProxies = await sql`
+      SELECT * FROM proxies 
+      WHERE user_id = ${user.id} AND is_active = true
+      ORDER BY created_at DESC
+    `;
+    
+    // Get proxies if they exist
+    if (allProxies.length > 0) {
+      proxies = allProxies;
     }
 
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: JWT_EXPIRE });
@@ -256,8 +252,16 @@ router.post('/login', async (req, res) => {
         startDate: activeSubscription.start_date,
         endDate: activeSubscription.end_date,
         autoRenew: activeSubscription.auto_renew
+      } : subscriptions.length > 0 ? {
+        id: subscriptions[0].id,
+        period: subscriptions[0].period,
+        proxyCount: subscriptions[0].proxy_count,
+        status: subscriptions[0].status,
+        startDate: subscriptions[0].start_date,
+        endDate: subscriptions[0].end_date,
+        autoRenew: subscriptions[0].auto_renew
       } : null,
-      hasActiveSubscription: !!activeSubscription,
+      hasActiveSubscription: !!(activeSubscription || proxies.length > 0),
       proxies: proxies.map(p => ({
         id: p.id,
         ip: p.ip,
