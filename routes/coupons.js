@@ -2,40 +2,29 @@ const express = require('express');
 const router = express.Router();
 const { sql } = require('../lib/database');
 
-// Self-contained inline middleware (avoids circular require)
+// Inline middleware — avoids circular require with subscription.js
+const JWT_SECRET = process.env.JWT_SECRET || 'fastproxy_secret_key_2024';
+
 function authenticate(req, res, next) {
-  const jwt = require('jsonwebtoken');
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ success: false, message: 'Token não fornecido' });
-  }
-  const token = authHeader.split(' ')[1];
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fastproxy_secret_key_2024');
-    req.user = decoded;
+    const jwt = require('jsonwebtoken');
+    const auth = req.headers.authorization;
+    if (!auth || !auth.startsWith('Bearer ')) return res.status(401).json({ success:false, message:'Token não fornecido' });
+    req.user = jwt.verify(auth.split(' ')[1], JWT_SECRET);
     next();
-  } catch(e) {
-    return res.status(401).json({ success: false, message: 'Token inválido' });
-  }
+  } catch(e) { return res.status(401).json({ success:false, message:'Token inválido' }); }
 }
 
 function isAdmin(req, res, next) {
-  const jwt = require('jsonwebtoken');
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ success: false, message: 'Token não fornecido' });
-  }
-  const token = authHeader.split(' ')[1];
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fastproxy_secret_key_2024');
-    if (decoded.role !== 'admin') {
-      return res.status(403).json({ success: false, message: 'Acesso negado' });
-    }
-    req.user = decoded;
+    const jwt = require('jsonwebtoken');
+    const auth = req.headers.authorization;
+    if (!auth || !auth.startsWith('Bearer ')) return res.status(401).json({ success:false, message:'Token não fornecido' });
+    const d = jwt.verify(auth.split(' ')[1], JWT_SECRET);
+    if (d.role !== 'admin') return res.status(403).json({ success:false, message:'Acesso negado' });
+    req.user = d;
     next();
-  } catch(e) {
-    return res.status(401).json({ success: false, message: 'Token inválido' });
-  }
+  } catch(e) { return res.status(401).json({ success:false, message:'Token inválido' }); }
 }
 
 router.post('/validate', authenticate, async (req, res) => {
