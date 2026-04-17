@@ -564,10 +564,12 @@
             const activeSub = currentSubscription?.subscriptions?.find(s => s.isActive);
             const firstSub = currentSubscription?.subscriptions?.[0];
             
+            // Helper function for period names
+            const periodNames = { '1m': '1 Mês', '3m': '3 Meses', '6m': '6 Meses', '12m': '12 Meses', 'monthly': 'Mensal', 'annual': 'Anual' };
+            const getPeriodName = (p) => periodNames[p] || p;
+            
             // Subscription info
             if (hasActive && activeSub) {
-                const periodNames = { '1m': '1 Mês', '3m': '3 Meses', '6m': '6 Meses', '12m': '12 Meses', 'monthly': 'Mensal', 'annual': 'Anual' };
-                const getPeriodName = (p) => periodNames[p] || p;
                 
                 const sub = activeSub;
                 const endDate = new Date(sub.endDate);
@@ -605,8 +607,8 @@
                 `;
             }
             
-            // Render proxies
-            renderProxies(hasActive);
+            // Render proxies - always pass true to show proxies if they exist
+            renderProxies(true);
         }
 
         function renderProxies(hasActive = true) {
