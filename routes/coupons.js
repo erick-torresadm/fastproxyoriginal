@@ -3,8 +3,7 @@ const router = express.Router();
 const { sql } = require('../lib/database');
 
 // Inline middleware — avoids circular require with subscription.js
-if (!process.env.JWT_SECRET) console.error('⚠️ CRITICAL: JWT_SECRET não configurado! Configure JWT_SECRET nas variáveis de ambiente.');
-const JWT_SECRET = process.env.JWT_SECRET || 'fastproxy_secret_key_2024';
+const JWT_SECRET = process.env.JWT_SECRET || 'INSECURE_LOCAL_DEV_KEY_DO_NOT_USE_IN_PRODUCTION';
 
 function authenticate(req, res, next) {
   try {

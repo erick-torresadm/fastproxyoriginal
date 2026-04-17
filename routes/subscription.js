@@ -9,8 +9,12 @@ const proxyseller = require('../lib/proxyseller');
 // In-memory password reset tokens: email → { token, expires, name }
 const resetTokens = new Map();
 
-if (!process.env.JWT_SECRET) console.error('⚠️ CRITICAL: JWT_SECRET não configurado! Configure JWT_SECRET nas variáveis de ambiente.');
-const JWT_SECRET = process.env.JWT_SECRET || 'fastproxy_secret_key_2024';
+if (!process.env.JWT_SECRET) {
+  console.error('🚨 FATAL: JWT_SECRET não configurado! Servidor iniciado sem autenticação segura. Configure JWT_SECRET no Vercel.');
+  // Em produção, impede o servidor de rodar sem a chave
+  if (process.env.NODE_ENV === 'production') process.exit(1);
+}
+const JWT_SECRET = process.env.JWT_SECRET || 'INSECURE_LOCAL_DEV_KEY_DO_NOT_USE_IN_PRODUCTION';
 const JWT_EXPIRE = process.env.JWT_EXPIRE || '7d';
 
 const IP_BASE = process.env.PROXY_IP || '177.54.146.90';
