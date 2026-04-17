@@ -784,6 +784,78 @@
             border-color: rgba(34, 197, 94, 0.5) !important;
         }
 
+        /* ===== Mobile Pricing Bottom-Sheet ===== */
+        #mobile-pricing-sheet {
+            position: fixed;
+            inset: 0;
+            z-index: 9000;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            pointer-events: none;
+        }
+        #mobile-pricing-sheet.open {
+            pointer-events: all;
+        }
+        #mobile-pricing-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            transition: opacity 0.35s ease;
+        }
+        #mobile-pricing-sheet.open #mobile-pricing-backdrop {
+            opacity: 1;
+        }
+        #mobile-pricing-content {
+            position: relative;
+            border-radius: 24px 24px 0 0;
+            padding: 0 0 env(safe-area-inset-bottom, 16px);
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+            max-height: 92vh;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+        }
+        #mobile-pricing-sheet.open #mobile-pricing-content {
+            transform: translateY(0);
+        }
+        .msheet-handle {
+            width: 40px; height: 4px;
+            border-radius: 2px;
+            background: rgba(255,255,255,0.2);
+            margin: 12px auto 0;
+        }
+        .msheet-period-btn {
+            flex: 1;
+            padding: 12px 6px;
+            border-radius: 14px;
+            border: 2px solid var(--border-color);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+        }
+        .msheet-period-btn.active {
+            border-color: #22c55e;
+            background: rgba(34,197,94,0.12);
+        }
+        .msheet-qty-btn {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            border: 1.5px solid var(--border-color);
+            background: var(--bg-secondary);
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: border-color 0.2s;
+            flex-shrink: 0;
+        }
+        .msheet-qty-btn:hover { border-color: #22c55e; }
+
     </style>
 </head>
 <body>
@@ -1266,8 +1338,13 @@
                 </div>
             </div>
 
-            <!-- Purchase Panel -->
-            <div id="home-purchase-panel" class="max-w-xl mx-auto rounded-2xl p-8 reveal" style="background: var(--bg-card); border: 2px solid rgba(34, 197, 94, 0.3);">
+            <!-- Mobile hint — only visible on small screens -->
+            <p class="md:hidden text-center text-sm mb-6 mt-2" style="color:var(--text-muted);">
+                👆 Toque em um plano para ver preços e comprar
+            </p>
+
+            <!-- Purchase Panel (hidden on mobile — tap a card to open the bottom-sheet) -->
+            <div id="home-purchase-panel" class="max-w-xl mx-auto rounded-2xl p-8 reveal hidden md:block" style="background: var(--bg-card); border: 2px solid rgba(34, 197, 94, 0.3);">
                 <!-- Panel header -->
                 <div class="flex items-center gap-3 mb-6">
                     <span id="panel-type-icon" class="text-3xl">🌐</span>
@@ -1987,7 +2064,13 @@
         function selectHomeType(type) {
             currentType = type;
 
-            // Update type card highlights
+            // On mobile (< 768px): open bottom-sheet instead of scrolling to panel
+            if (window.innerWidth < 768) {
+                openMobilePricingSheet(type);
+                return;
+            }
+
+            // Desktop: update type card highlights + purchase panel
             document.querySelectorAll('.plan-type-card').forEach(card => {
                 card.classList.remove('selected-type');
                 card.style.borderColor = 'var(--border-color)';
@@ -1997,6 +2080,10 @@
             if (activeCard) activeCard.classList.add('selected-type');
 
             updatePurchasePanel();
+
+            // Smooth-scroll to the purchase panel
+            const panel = document.getElementById('home-purchase-panel');
+            if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
         function updatePurchasePanel() {
@@ -2698,6 +2785,103 @@
             openHomeTermsModal();
         }
 
+        // ===== MOBILE PRICING BOTTOM-SHEET =====
+        let msheetPeriod = '1m';
+
+        function openMobilePricingSheet(type) {
+            currentType = type;
+            // Update card highlights (same as desktop)
+            document.querySelectorAll('.plan-type-card').forEach(card => {
+                card.classList.remove('selected-type');
+                card.style.borderColor = 'var(--border-color)';
+                card.style.background  = 'var(--bg-card)';
+            });
+            const activeCard = document.getElementById(`type-card-${type}`);
+            if (activeCard) activeCard.classList.add('selected-type');
+
+            const info = HOME_PRICING[type];
+
+            // Header
+            document.getElementById('msheet-icon').textContent = info.icon;
+            document.getElementById('msheet-name').textContent = info.name;
+            document.getElementById('msheet-price-tag').textContent = `R$${info.sellPrice.toFixed(2).replace('.',',')} por proxy/mês`;
+
+            const badge = document.getElementById('msheet-delivery-badge');
+            if (!info.autoDelivery) {
+                badge.textContent = '📦 Estoque';
+                badge.className = 'text-xs px-2 py-1 rounded-full font-semibold bg-green-500/20 text-green-400';
+            } else {
+                badge.textContent = '⚡ API Auto';
+                badge.className = 'text-xs px-2 py-1 rounded-full font-semibold bg-blue-500/20 text-blue-400';
+            }
+
+            // Qty
+            const qtyEl = document.getElementById('msheet-qty');
+            qtyEl.min = info.minQty;
+            qtyEl.value = info.minQty;
+
+            // Period reset
+            msheetPeriod = '1m';
+            selectMobilePeriod('1m');
+
+            document.getElementById('mobile-pricing-sheet').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMobilePricingSheet() {
+            document.getElementById('mobile-pricing-sheet').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        function selectMobilePeriod(id) {
+            msheetPeriod = id;
+            document.querySelectorAll('.msheet-period-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.period === id);
+            });
+            updateMobileTotal();
+        }
+
+        function changeMobileQty(delta) {
+            const input  = document.getElementById('msheet-qty');
+            const minVal = parseInt(input.min) || 1;
+            input.value  = Math.max(minVal, parseInt(input.value || 1) + delta);
+            updateMobileTotal();
+        }
+
+        function updateMobileTotal() {
+            const info   = HOME_PRICING[currentType];
+            const period = HOME_PERIODS.find(p => p.id === msheetPeriod) || HOME_PERIODS[0];
+            const qty    = parseInt(document.getElementById('msheet-qty').value) || 1;
+
+            const pricePerMonth = info.sellPrice * (1 - period.discount);
+            const total         = pricePerMonth * period.months * qty;
+
+            document.getElementById('msheet-total').textContent   = `R$ ${total.toFixed(2).replace('.',',')}`;
+            document.getElementById('msheet-per-proxy').textContent = `R$ ${info.sellPrice.toFixed(2).replace('.',',')}${period.discount > 0 ? ` (−${Math.round(period.discount*100)}%)` : ''}`;
+
+            // Show/hide discount badge
+            const discBadge = document.getElementById('msheet-discount-badge');
+            if (period.discount > 0) {
+                discBadge.textContent = `−${Math.round(period.discount*100)}% OFF`;
+                discBadge.classList.remove('hidden');
+            } else {
+                discBadge.classList.add('hidden');
+            }
+        }
+
+        function startMobilePurchase() {
+            const qty = parseInt(document.getElementById('msheet-qty').value) || 1;
+            homePendingPurchase = {
+                type:     currentType,
+                period:   msheetPeriod,
+                quantity: qty,
+                months:   (HOME_PERIODS.find(p => p.id === msheetPeriod) || HOME_PERIODS[0]).months
+            };
+            // Keep sheet visible until terms modal opens
+            closeMobilePricingSheet();
+            openHomeTermsModal();
+        }
+
         // Toast notification
         function showToast(message, type = 'info') {
             const toast = document.getElementById('toast');
@@ -2711,5 +2895,81 @@
             setTimeout(() => toast.classList.add('hidden'), 3000);
         }
     </script>
+
+    <!-- ===== MOBILE PRICING BOTTOM-SHEET ===== -->
+    <div id="mobile-pricing-sheet">
+        <div id="mobile-pricing-backdrop" onclick="closeMobilePricingSheet()"></div>
+        <div id="mobile-pricing-content" style="background: var(--bg-card);">
+            <!-- Drag handle -->
+            <div class="msheet-handle"></div>
+
+            <div style="padding: 20px 20px 8px;">
+                <!-- Type header -->
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+                    <span id="msheet-icon" style="font-size:2.4rem; line-height:1;">🌐</span>
+                    <div style="flex:1; min-width:0;">
+                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <h3 id="msheet-name" style="font-size:1.3rem; font-weight:800; color:var(--text-primary); margin:0;">IPv6</h3>
+                            <span id="msheet-discount-badge" class="hidden" style="font-size:0.7rem; font-weight:700; padding:2px 8px; border-radius:20px; background:rgba(34,197,94,0.2); color:#22c55e;"></span>
+                        </div>
+                        <p id="msheet-price-tag" style="font-size:0.8rem; color:var(--text-muted); margin:2px 0 0;"></p>
+                    </div>
+                    <span id="msheet-delivery-badge" class="text-xs px-2 py-1 rounded-full font-semibold bg-green-500/20 text-green-400"></span>
+                    <button onclick="closeMobilePricingSheet()" style="background:rgba(255,255,255,0.07); border:none; border-radius:50%; width:32px; height:32px; font-size:1.1rem; cursor:pointer; color:var(--text-muted); flex-shrink:0;">✕</button>
+                </div>
+
+                <!-- Period selector -->
+                <div style="margin-bottom:18px;">
+                    <label style="display:block; font-size:0.82rem; font-weight:600; margin-bottom:10px; color:var(--text-secondary);">Período de contratação</label>
+                    <div style="display:flex; gap:8px;">
+                        <button class="msheet-period-btn active" data-period="1m" onclick="selectMobilePeriod('1m')">
+                            <div style="font-size:0.88rem; font-weight:700; color:var(--text-primary);">1 Mês</div>
+                            <div style="font-size:0.72rem; color:var(--text-muted);">sem desconto</div>
+                        </button>
+                        <button class="msheet-period-btn" data-period="6m" onclick="selectMobilePeriod('6m')">
+                            <div style="font-size:0.88rem; font-weight:700; color:var(--text-primary);">6 Meses</div>
+                            <div style="font-size:0.72rem; color:#22c55e; font-weight:600;">−25% OFF</div>
+                        </button>
+                        <button class="msheet-period-btn" data-period="12m" onclick="selectMobilePeriod('12m')">
+                            <div style="font-size:0.88rem; font-weight:700; color:var(--text-primary);">12 Meses</div>
+                            <div style="font-size:0.72rem; color:#22c55e; font-weight:600;">−35% OFF</div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quantity selector -->
+                <div style="margin-bottom:18px;">
+                    <label style="display:block; font-size:0.82rem; font-weight:600; margin-bottom:10px; color:var(--text-secondary);">Quantidade de proxies</label>
+                    <div style="display:flex; align-items:center; gap:14px;">
+                        <button class="msheet-qty-btn" onclick="changeMobileQty(-1)">−</button>
+                        <input type="number" id="msheet-qty" value="1" min="1" max="100"
+                            style="flex:1; text-align:center; padding:10px; border-radius:12px; border:1.5px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); font-size:1.3rem; font-weight:700; outline:none;"
+                            oninput="updateMobileTotal()">
+                        <button class="msheet-qty-btn" onclick="changeMobileQty(1)">+</button>
+                    </div>
+                </div>
+
+                <!-- Total box -->
+                <div style="border-radius:14px; padding:14px 16px; margin-bottom:16px; background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.25);">
+                    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px;">
+                        <span style="font-size:0.82rem; color:var(--text-secondary);">Total do período:</span>
+                        <span id="msheet-total" style="font-size:1.8rem; font-weight:800; color:#22c55e; line-height:1;">R$ 29,90</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.75rem; color:var(--text-muted);">Preço por proxy/mês:</span>
+                        <span id="msheet-per-proxy" style="font-size:0.82rem; font-weight:600; color:var(--text-zinc);"></span>
+                    </div>
+                </div>
+
+                <!-- Buy button -->
+                <button onclick="startMobilePurchase()"
+                    style="width:100%; padding:16px; border-radius:14px; font-size:1.05rem; font-weight:800; background:#22c55e; color:#000; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 20px rgba(34,197,94,0.35); letter-spacing:0.01em; margin-bottom:8px;">
+                    <i class="fas fa-shopping-cart"></i>
+                    Comprar Agora
+                </button>
+                <p style="text-align:center; font-size:0.75rem; color:var(--text-muted); padding-bottom:8px;">🔒 Pagamento seguro via Stripe</p>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
