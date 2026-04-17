@@ -218,8 +218,8 @@ Total: R$ ${finalPrice.toFixed(2)}${deliveryNote}
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.APP_URL}/portal.html?payment=success&order=${order.id}`,
-      cancel_url: `${process.env.APP_URL}/planos.html?payment=cancelled`,
+      success_url: `https://fastproxyoriginal.vercel.app/portal.html?payment=success&order=${order.id}`,
+      cancel_url: `https://fastproxyoriginal.vercel.app/planos.html?payment=cancelled`,
       metadata: {
         orderId: order.id.toString(),
         userId: req.user.id.toString(),
