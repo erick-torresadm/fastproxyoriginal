@@ -1914,6 +1914,32 @@ router.get('/test-telegram', async (req, res) => {
   }
 });
 
+// Debug: check saved proxy_orders (requires auth)
+router.get('/debug/orders', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    try {
+      const orders = await sql`
+        SELECT id, user_id, proxy_type, country, quantity, period,
+          proxyseller_order_id, proxyseller_order_number, status, payment_status
+        FROM proxy_orders
+        WHERE user_id = ${decoded.id}
+        ORDER BY created_at DESC
+      `;
+      res.json({ success: true, orders: orders.length > 0 ? orders : [ { hint: 'No orders found in proxy_orders table for this user' } ] });
+    } catch(e) {
+      res.json({ success: true, error: 'proxy_orders table may not exist or missing columns', message: e.message });
+    }
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // Public: Get all tutorials
 router.get('/tutorials', async (req, res) => {
   try {
