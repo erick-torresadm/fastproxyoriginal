@@ -94,6 +94,11 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Tipo de proxy inválido' });
     }
 
+    // Mobile 4G/5G temporarily unavailable
+    if (type === 'mobile') {
+      return res.status(400).json({ success: false, message: 'Mobile 4G/5G ainda não está disponível. Em breve!' });
+    }
+
     if (!termsAccepted) {
       return res.status(400).json({ success: false, message: 'Você precisa aceitar os termos de uso' });
     }

@@ -1317,23 +1317,29 @@
                     </ul>
                 </div>
 
-                <!-- Mobile -->
-                <div class="plan-type-card rounded-2xl p-6 cursor-pointer border relative reveal reveal-delay-4"
-                     id="type-card-mobile" onclick="selectHomeType('mobile')">
-                    <div class="absolute -top-3 right-4 bg-purple-500 text-white text-xs px-3 py-1 rounded-full font-bold">ESPECIAL</div>
+                <!-- Mobile — Em Breve -->
+                <div class="plan-type-card rounded-2xl p-6 border relative reveal reveal-delay-4 select-none"
+                     id="type-card-mobile"
+                     onclick="showMobileComingSoon()"
+                     style="cursor:default;opacity:.55;pointer-events:auto">
+                    <div class="absolute -top-3 right-4 text-white text-xs px-3 py-1 rounded-full font-bold" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">EM BREVE</div>
+                    <!-- lock overlay -->
+                    <div class="absolute inset-0 rounded-2xl flex items-end justify-center pb-5 pointer-events-none" style="background:linear-gradient(to top,rgba(0,0,0,.45) 0%,transparent 60%)">
+                        <span class="text-xs font-semibold tracking-wider" style="color:rgba(255,255,255,.6)">Em desenvolvimento</span>
+                    </div>
                     <div class="text-4xl mb-3 mt-2">📱</div>
                     <h3 class="text-lg font-bold mb-0.5" style="color: var(--text-primary)">Mobile 4G/5G</h3>
                     <div class="mb-3">
-                        <span class="text-2xl font-bold text-green-500">R$79,90</span>
+                        <span class="text-2xl font-bold" style="color:var(--text-muted)">R$79,90</span>
                         <span class="text-xs block" style="color: var(--text-muted)">por proxy / mês</span>
                     </div>
-                    <p class="text-xs mb-4 leading-relaxed" style="color: var(--text-zinc)">Rede móvel real. Máxima anonimidade para automações exigentes.</p>
-                    <ul class="text-xs space-y-1.5" style="color: var(--text-zinc)">
-                        <li><span class="text-green-500 mr-1">✓</span>IP de rede móvel real</li>
-                        <li><span class="text-green-500 mr-1">✓</span>Máxima anonimidade</li>
-                        <li><span class="text-green-500 mr-1">✓</span>Ideal para automação</li>
-                        <li><span class="text-green-500 mr-1">✓</span>Entrega automática via API</li>
-                        <li><span class="text-green-500 mr-1">✓</span>Suporte 24/7</li>
+                    <p class="text-xs mb-4 leading-relaxed" style="color: var(--text-muted)">Rede móvel real. Máxima anonimidade para automações exigentes.</p>
+                    <ul class="text-xs space-y-1.5" style="color: var(--text-muted)">
+                        <li><span class="mr-1">○</span>IP de rede móvel real</li>
+                        <li><span class="mr-1">○</span>Máxima anonimidade</li>
+                        <li><span class="mr-1">○</span>Ideal para automação</li>
+                        <li><span class="mr-1">○</span>Entrega automática via API</li>
+                        <li><span class="mr-1">○</span>Suporte 24/7</li>
                     </ul>
                 </div>
             </div>
@@ -2081,7 +2087,14 @@
 
         let panelSelectedPeriod = '1m';
 
+        function showMobileComingSoon() {
+            showToast('Mobile 4G/5G em breve! Fique ligado nas novidades.', 'info');
+        }
+
         function selectHomeType(type) {
+            // Block mobile plan — coming soon
+            if (type === 'mobile') { showMobileComingSoon(); return; }
+
             currentType = type;
 
             // On mobile (< 768px): open bottom-sheet instead of scrolling to panel
@@ -2906,6 +2919,7 @@
         let msheetPeriod = '1m';
 
         function openMobilePricingSheet(type) {
+            if (type === 'mobile') { showMobileComingSoon(); return; }
             currentType = type;
             // Update card highlights (same as desktop)
             document.querySelectorAll('.plan-type-card').forEach(card => {

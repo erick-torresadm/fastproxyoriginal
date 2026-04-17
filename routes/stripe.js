@@ -43,6 +43,11 @@ router.post('/create-checkout', express.json(), async (req, res) => {
       return res.status(400).json({ error: 'Tipo de proxy é obrigatório' });
     }
 
+    // Mobile 4G/5G temporarily unavailable
+    if (type === 'mobile') {
+      return res.status(400).json({ success: false, error: 'Mobile 4G/5G ainda não está disponível. Em breve!' });
+    }
+
     if (!period) {
       return res.status(400).json({ error: 'Período é obrigatório' });
     }
