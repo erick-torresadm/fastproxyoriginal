@@ -479,7 +479,7 @@ router.post('/create-swap-checkout', express.json(), async (req, res) => {
       price = 11.99;
     }
     
-    const appUrl = process.env.APP_URL || 'https://fastproxyv3.vercel.app';
+    const appUrl = process.env.APP_URL || 'https://fastproxyoriginal.vercel.app';
     
     // Create Stripe checkout session for swap
     const session = await Stripe.stripe.checkout.sessions.create({
