@@ -20,7 +20,8 @@
       "Bash(curl -s -X POST \"https://fastproxyoriginal.vercel.app/api/subscription/login\" -H \"Content-Type: application/json\" -d '{\"\"\"\"email\"\"\"\":\"\"\"\"ericktorresadm@hotmail.com\"\"\"\",\"\"\"\"password\"\"\"\":\"\"\"\"@Fastproxy10\"\"\"\"}')",
       "Bash(python3 -c \":*)",
       "Bash(node create-offer-coupon.js)",
-      "Bash(node migrate-coupon.js)"
+      "Bash(node migrate-coupon.js)",
+      "Bash(curl:*)"
     ]
   }
 }

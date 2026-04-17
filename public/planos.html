@@ -527,7 +527,24 @@
                             class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-secondary focus:border-accent focus:outline-none"
                             placeholder="São Paulo - SP">
                     </div>
-                    
+
+                    <!-- Coupon field -->
+                    <div>
+                        <label class="block text-sm text-secondary mb-2">Cupom de Desconto (opcional)</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="planos-coupon" placeholder="Ex: DESCONTO25"
+                                class="flex-1 px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-secondary focus:border-accent focus:outline-none uppercase tracking-widest"
+                                style="letter-spacing:0.08em"
+                                oninput="this.value=this.value.toUpperCase()"
+                                onkeydown="if(event.key==='Enter'){event.preventDefault();applyPlanosCoupon();}">
+                            <button type="button" id="planos-coupon-btn" onclick="applyPlanosCoupon()"
+                                class="px-4 py-3 rounded-xl text-sm font-semibold border border-white/20 text-secondary hover:bg-white/10 transition whitespace-nowrap">
+                                Aplicar
+                            </button>
+                        </div>
+                        <div id="planos-coupon-feedback" class="hidden mt-2 text-sm px-3 py-2 rounded-lg"></div>
+                    </div>
+
                     <div class="flex gap-4 pt-4">
                         <button type="button" onclick="backToTerms()" class="flex-1 py-3 rounded-xl border border-white/20 text-white hover:bg-white/10 transition">
                             Voltar
@@ -546,6 +563,67 @@
         let currentType = 'ipv6';
         let pendingPurchase = null;
         let buyerInfo = null;
+        let planosCouponCode = null;
+        let planosCouponDiscount = 0;
+
+        async function applyPlanosCoupon() {
+            const code = (document.getElementById('planos-coupon').value || '').trim().toUpperCase();
+            const feedback = document.getElementById('planos-coupon-feedback');
+            const btn = document.getElementById('planos-coupon-btn');
+
+            if (!code) { showPlanosCouponFeedback('Informe o código', false); return; }
+            if (planosCouponCode === code) { showPlanosCouponFeedback(`Cupom "${code}" já aplicado`, true); return; }
+
+            btn.textContent = '...';
+            btn.disabled = true;
+
+            try {
+                const r = await fetch('/api/coupons/validate-public', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, orderValue: pendingPurchase?.price || 0, email: null })
+                    // planos.html is authenticated — scope check happens server-side via user_id
+                });
+                const d = await r.json();
+                if (d.success) {
+                    planosCouponCode = d.coupon.code;
+                    planosCouponDiscount = d.coupon.discount;
+                    showPlanosCouponFeedback(`✓ ${d.message}`, true);
+                    const input = document.getElementById('planos-coupon');
+                    input.readOnly = true;
+                    input.style.borderColor = 'rgb(34,197,94)';
+                    btn.textContent = '✕';
+                    btn.disabled = false;
+                    btn.onclick = removePlanosCoupon;
+                    btn.style.color = 'rgb(239,68,68)';
+                } else {
+                    planosCouponCode = null; planosCouponDiscount = 0;
+                    showPlanosCouponFeedback(d.message, false);
+                    btn.textContent = 'Aplicar'; btn.disabled = false;
+                }
+            } catch (e) {
+                showPlanosCouponFeedback('Erro ao validar', false);
+                btn.textContent = 'Aplicar'; btn.disabled = false;
+            }
+        }
+
+        function removePlanosCoupon() {
+            planosCouponCode = null; planosCouponDiscount = 0;
+            const input = document.getElementById('planos-coupon');
+            input.value = ''; input.readOnly = false; input.style.borderColor = '';
+            const btn = document.getElementById('planos-coupon-btn');
+            btn.textContent = 'Aplicar'; btn.disabled = false;
+            btn.onclick = applyPlanosCoupon; btn.style.color = '';
+            document.getElementById('planos-coupon-feedback').classList.add('hidden');
+        }
+
+        function showPlanosCouponFeedback(msg, ok) {
+            const el = document.getElementById('planos-coupon-feedback');
+            el.classList.remove('hidden');
+            el.style.background = ok ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)';
+            el.style.color = ok ? 'rgb(34,197,94)' : 'rgb(239,68,68)';
+            el.textContent = msg;
+        }
         
         const PRICING = {
             ipv6: {
@@ -786,9 +864,9 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ 
-                        type: pendingPurchase.type, 
-                        period: pendingPurchase.period, 
+                    body: JSON.stringify({
+                        type: pendingPurchase.type,
+                        period: pendingPurchase.period,
                         quantity: pendingPurchase.quantity,
                         buyerName: name,
                         buyerDocument: document_,
@@ -796,7 +874,8 @@
                         buyerAddress: address,
                         termsAccepted: true,
                         country: pendingPurchase.country || null,
-                        countryName: pendingPurchase.countryName || null
+                        countryName: pendingPurchase.countryName || null,
+                        couponCode: planosCouponCode || null
                     })
                 });
 

@@ -34,6 +34,8 @@ app.use(cors({
   origin: function (origin, callback) {
     const allowed = [
       process.env.APP_URL,
+      'https://fastproxy.com.br',
+      'https://www.fastproxy.com.br',
       'https://fastproxyoriginal.vercel.app',
       'https://fastproxyv3.vercel.app',
       'http://localhost:3000',
@@ -42,6 +44,7 @@ app.use(cors({
     if (!normalOrigin || allowed.includes(normalOrigin)) {
       callback(null, true);
     } else {
+      console.warn('CORS blocked origin:', normalOrigin, '| Allowed:', allowed);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -54,10 +57,29 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
+  res.json({
+    status: 'ok',
     timestamp: new Date().toISOString(),
     version: '1.0.0'
+  });
+});
+
+// Status / diagnostics endpoint
+app.get('/api/status', (req, res) => {
+  const loadedRoutes = {
+    stripe: !!stripeRoutes,
+    subscription: !!subscriptionRoutes,
+    auth: !!authRoutes,
+    test: !!testRoutes,
+  };
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    appUrl: process.env.APP_URL || '(not set)',
+    nodeEnv: process.env.NODE_ENV || 'development',
+    database: process.env.DATABASE_URL ? 'configured' : 'MISSING',
+    stripe: process.env.STRIPE_SECRET_KEY ? 'configured' : 'MISSING',
+    loadedRoutes,
   });
 });
 
@@ -93,6 +115,7 @@ try {
   console.log('✅ Subscription routes registered');
 } catch (err) {
   console.error('❌ Error loading Subscription routes:', err.message);
+  console.error(err.stack);
 }
 
 try {
@@ -164,6 +187,12 @@ app.get('/debug/env', (req, res) => {
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// API 404 — catch unmatched API routes before the static wildcard
+app.all('/api/*', (req, res) => {
+  console.warn(`[404] ${req.method} ${req.path} - route not found`);
+  res.status(404).json({ success: false, message: `Rota não encontrada: ${req.method} ${req.path}` });
 });
 
 app.get('*', (req, res) => {

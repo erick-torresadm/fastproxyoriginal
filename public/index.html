@@ -1775,8 +1775,28 @@
                                 class="w-full px-4 py-3 rounded-xl border transition-all outline-none focus:border-green-500"
                                 style="background: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary)">
                         </div>
+
+                        <!-- Coupon field -->
+                        <div>
+                            <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary)">Cupom de Desconto (opcional)</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="checkout-coupon" placeholder="Ex: DESCONTO25"
+                                    class="flex-1 px-4 py-3 rounded-xl border transition-all outline-none focus:border-green-500 uppercase tracking-widest"
+                                    style="background: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary); letter-spacing: 0.08em"
+                                    oninput="this.value = this.value.toUpperCase()"
+                                    onkeydown="if(event.key==='Enter'){event.preventDefault();applyCoupon();}">
+                                <button type="button" id="coupon-btn" onclick="applyCoupon()"
+                                    class="px-4 py-3 rounded-xl font-semibold text-sm transition-all whitespace-nowrap"
+                                    style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-secondary)">
+                                    Aplicar
+                                </button>
+                            </div>
+                            <!-- Coupon feedback -->
+                            <div id="coupon-feedback" class="hidden mt-2 flex items-center gap-2 text-sm px-3 py-2 rounded-lg"></div>
+                        </div>
                     </div>
-                    
+
+                    <!-- Quantity / volume discount badge -->
                     <div id="discount-badge" class="hidden mt-4 p-3 rounded-xl text-center" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3);">
                         <span id="discount-text" class="text-sm font-semibold" style="color: var(--badge-text)"></span>
                     </div>
@@ -2493,35 +2513,131 @@
         function closeCheckoutModal() {
             const modal = document.getElementById('checkout-modal');
             const content = modal.querySelector('.checkout-modal-content');
-            
+
             content.classList.add('scale-95', 'opacity-0');
             content.classList.remove('scale-100', 'opacity-100');
-            
+
             setTimeout(() => {
                 modal.classList.add('hidden');
                 document.body.style.overflow = '';
+                // Reset coupon state on close
+                removeCoupon();
             }, 300);
+        }
+
+        // Coupon state
+        let appliedCouponCode = null;
+        let appliedCouponDiscount = 0; // absolute R$ value
+
+        function getRawTotal() {
+            const quantity = parseInt(document.getElementById('proxy-count').value) || 1;
+            const discount = getDiscount(quantity);
+            const discountedPrice = basePrice * (1 - discount);
+            return quantity * discountedPrice;
         }
 
         function updateTotal() {
             const quantity = parseInt(document.getElementById('proxy-count').value) || 1;
-            const discount = getDiscount(quantity);
-            const discountedPrice = basePrice * (1 - discount);
-            const total = quantity * discountedPrice;
-            
+            const rawTotal = getRawTotal();
+            const finalTotal = Math.max(0, rawTotal - appliedCouponDiscount);
+
             document.getElementById('modal-quantity').textContent = `${quantity} proxy${quantity > 1 ? 's' : ''}`;
-            document.getElementById('modal-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-            
+
+            if (appliedCouponDiscount > 0) {
+                document.getElementById('modal-total').innerHTML =
+                    `<span style="text-decoration:line-through;opacity:.45;font-size:.9em;margin-right:6px">R$ ${rawTotal.toFixed(2).replace('.', ',')}</span>` +
+                    `<span style="color:var(--badge-text)">R$ ${finalTotal.toFixed(2).replace('.', ',')}</span>`;
+            } else {
+                document.getElementById('modal-total').textContent = `R$ ${rawTotal.toFixed(2).replace('.', ',')}`;
+            }
+
             const discountBadge = document.getElementById('discount-badge');
             const discountText = document.getElementById('discount-text');
-            
-            if (discount > 0) {
-                discountBadge.classList.remove('hidden');
-                discountText.textContent = getDiscountText(quantity);
-            } else {
-                discountBadge.classList.remove('hidden');
-                discountText.textContent = getDiscountText(quantity);
+            discountBadge.classList.remove('hidden');
+            discountText.textContent = getDiscountText(quantity);
+        }
+
+        async function applyCoupon() {
+            const code = (document.getElementById('checkout-coupon').value || '').trim().toUpperCase();
+            const feedback = document.getElementById('coupon-feedback');
+            const btn = document.getElementById('coupon-btn');
+
+            if (!code) {
+                showCouponFeedback('Informe o código do cupom', false);
+                return;
             }
+
+            // Reset if same code re-applied
+            if (appliedCouponCode && appliedCouponCode === code) {
+                showCouponFeedback(`Cupom "${code}" já está aplicado`, true);
+                return;
+            }
+
+            btn.textContent = '...';
+            btn.disabled = true;
+
+            try {
+                const orderValue = getRawTotal();
+                const emailVal = (document.getElementById('checkout-email')?.value || '').trim();
+                const res = await fetch('/api/coupons/validate-public', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, orderValue, email: emailVal || null })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    appliedCouponCode = data.coupon.code;
+                    appliedCouponDiscount = data.coupon.discount;
+                    showCouponFeedback(`✓ ${data.message}`, true);
+                    // Style the input as applied
+                    const input = document.getElementById('checkout-coupon');
+                    input.style.borderColor = 'rgb(34,197,94)';
+                    input.readOnly = true;
+                    btn.textContent = '✕';
+                    btn.onclick = removeCoupon;
+                    btn.style.borderColor = 'rgba(239,68,68,.5)';
+                    btn.style.color = 'rgb(239,68,68)';
+                } else {
+                    appliedCouponCode = null;
+                    appliedCouponDiscount = 0;
+                    showCouponFeedback(data.message, false);
+                    btn.textContent = 'Aplicar';
+                    btn.disabled = false;
+                }
+            } catch (e) {
+                showCouponFeedback('Erro ao validar cupom', false);
+                btn.textContent = 'Aplicar';
+                btn.disabled = false;
+            }
+
+            updateTotal();
+        }
+
+        function removeCoupon() {
+            appliedCouponCode = null;
+            appliedCouponDiscount = 0;
+            const input = document.getElementById('checkout-coupon');
+            input.value = '';
+            input.readOnly = false;
+            input.style.borderColor = '';
+            const btn = document.getElementById('coupon-btn');
+            btn.textContent = 'Aplicar';
+            btn.disabled = false;
+            btn.onclick = applyCoupon;
+            btn.style.borderColor = '';
+            btn.style.color = '';
+            document.getElementById('coupon-feedback').classList.add('hidden');
+            updateTotal();
+        }
+
+        function showCouponFeedback(msg, success) {
+            const el = document.getElementById('coupon-feedback');
+            el.classList.remove('hidden');
+            el.style.background = success ? 'rgba(34,197,94,.1)' : 'rgba(239,68,68,.1)';
+            el.style.color = success ? 'rgb(34,197,94)' : 'rgb(239,68,68)';
+            el.style.border = `1px solid ${success ? 'rgba(34,197,94,.3)' : 'rgba(239,68,68,.3)'}`;
+            el.textContent = msg;
         }
 
         async function handleCheckout(event) {
@@ -2538,7 +2654,7 @@
             const email = document.getElementById('checkout-email').value;
             const whatsapp = document.getElementById('checkout-whatsapp').value;
             const proxyCount = parseInt(document.getElementById('proxy-count').value);
-            
+
             try {
                 const response = await fetch('/api/stripe/create-checkout', {
                     method: 'POST',
@@ -2548,7 +2664,8 @@
                         whatsapp,
                         proxyCount,
                         period: currentPeriod,
-                        type: currentType
+                        type: currentType,
+                        couponCode: appliedCouponCode || null
                     })
                 });
                 

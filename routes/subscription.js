@@ -1936,16 +1936,20 @@ router.post('/admin/coupons/create', async (req, res) => {
     if (decoded.role !== 'admin') {
       return res.status(403).json({ success: false, message: 'Acesso negado' });
     }
-    const { code, discount_percent, discount_amount, min_order_value, max_uses, max_uses_per_user, valid_days, proxy_types } = req.body;
+    const { code, discount_percent, discount_amount, min_order_value, max_uses, max_uses_per_user, valid_days, proxy_types, scope } = req.body;
     if (!code) return res.status(400).json({ success: false, message: 'Código é obrigatório' });
     if (!discount_percent && !discount_amount) return res.status(400).json({ success: false, message: 'Informe desconto (%) ou valor (R$)' });
+
+    // scope validation
+    const validScopes = ['all', 'first_only'];
+    const couponScope = validScopes.includes(scope) ? scope : 'all';
 
     let valid_until = null;
     if (valid_days) { valid_until = new Date(); valid_until.setDate(valid_until.getDate() + valid_days); }
 
     const [coupon] = await sql`
-      INSERT INTO coupons (code, discount_percent, discount_amount, min_order_value, max_uses, max_uses_per_user, valid_until, proxy_types, is_active, created_by)
-      VALUES (${code.toUpperCase()}, ${discount_percent || null}, ${discount_amount || null}, ${min_order_value || 0}, ${max_uses || null}, ${max_uses_per_user || null}, ${valid_until}, ${proxy_types || null}, true, ${decoded.id})
+      INSERT INTO coupons (code, discount_percent, discount_amount, min_order_value, max_uses, max_uses_per_user, valid_until, proxy_types, scope, is_active, created_by)
+      VALUES (${code.toUpperCase()}, ${discount_percent || null}, ${discount_amount || null}, ${min_order_value || 0}, ${max_uses || null}, ${max_uses_per_user || null}, ${valid_until}, ${proxy_types || null}, ${couponScope}, true, ${decoded.id})
       RETURNING *
     `;
     res.json({ success: true, coupon, message: `Cupom ${coupon.code} criado!` });

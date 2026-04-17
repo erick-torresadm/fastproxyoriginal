@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { sql } = require('../lib/database');
 
 console.log('=== LOADING STRIPE ROUTES ===');
 
@@ -24,32 +25,67 @@ router.post('/create-checkout', express.json(), async (req, res) => {
       });
     }
     
-    const { email, whatsapp, period, type, proxyCount, couponDiscount } = req.body;
+    const { email, whatsapp, period, type, proxyCount, couponCode } = req.body;
     const quantity = proxyCount || 1;
-    
+
     console.log('email:', email);
     console.log('whatsapp:', whatsapp);
     console.log('type:', type);
     console.log('period:', period);
     console.log('quantity:', quantity);
-    
+    console.log('couponCode:', couponCode || '(none)');
+
     if (!email) {
       return res.status(400).json({ error: 'Email é obrigatório' });
     }
-    
+
     if (!type) {
       return res.status(400).json({ error: 'Tipo de proxy é obrigatório' });
     }
-    
+
     if (!period) {
       return res.status(400).json({ error: 'Período é obrigatório' });
     }
-    
+
     if (!quantity || quantity < 1 || quantity > 100) {
       return res.status(400).json({ error: 'Quantidade de proxies inválida (1-100)' });
     }
-    
-    const priceCalculation = Stripe.calculatePrice(type, period, quantity, couponDiscount || 0);
+
+    // Server-side coupon validation (never trust client-sent discount amounts)
+    let couponDiscount = 0;
+    let appliedCoupon = null;
+    if (couponCode) {
+      const rawPrice = Stripe.calculatePrice(type, period, quantity, 0);
+      const orderValue = rawPrice ? rawPrice.total / 100 : 0;
+      let couponRoutes;
+      try { couponRoutes = require('./coupons'); } catch(e) {}
+      const validateFn = couponRoutes && couponRoutes.validateCouponLogic;
+      if (validateFn) {
+        const result = await validateFn({ code: couponCode, orderValue, userEmail: email });
+        if (result.success) {
+          couponDiscount = result.coupon.discount;
+          appliedCoupon = { code: result.coupon.code };
+          console.log(`Cupom "${result.coupon.code}" aplicado: -R$ ${couponDiscount.toFixed(2)}`);
+        } else {
+          console.warn(`Cupom rejeitado (${couponCode}): ${result.message}`);
+        }
+      } else {
+        // fallback: basic validation without scope check
+        const [coupon] = await sql`
+          SELECT * FROM coupons
+          WHERE UPPER(code) = UPPER(${couponCode}) AND is_active = true
+        `;
+        if (coupon && !(coupon.valid_until && new Date(coupon.valid_until) < new Date())
+                   && !(coupon.max_uses && coupon.used_count >= coupon.max_uses)) {
+          couponDiscount = coupon.discount_percent
+            ? orderValue * (parseFloat(coupon.discount_percent) / 100)
+            : Math.min(parseFloat(coupon.discount_amount || 0), orderValue);
+          appliedCoupon = coupon;
+        }
+      }
+    }
+
+    const priceCalculation = Stripe.calculatePrice(type, period, quantity, couponDiscount);
     
     if (!priceCalculation) {
       return res.status(400).json({ error: 'Tipo ou período inválido' });
@@ -62,21 +98,22 @@ router.post('/create-checkout', express.json(), async (req, res) => {
     console.log('  - Unit price:', priceCalculation.unitAmount / 100);
     console.log('  - Total:', priceCalculation.total / 100);
     
-    const appUrl = process.env.APP_URL || 'https://fastproxyoriginal.vercel.app';
+    const appUrl = process.env.APP_URL || 'https://fastproxy.com.br';
     
     const session = await Stripe.createCheckoutSession({
       email: email,
       type: type,
       period: period,
       quantity: quantity,
-      couponDiscount: couponDiscount || 0,
+      couponDiscount: couponDiscount,
+      couponCode: appliedCoupon ? appliedCoupon.code : null,
       successUrl: `${appUrl}/login.html`,
       cancelUrl: `${appUrl}/planos.html?payment=cancelled`
     });
-    
+
     console.log('Checkout session created:', session.id);
     console.log('Checkout URL:', session.url);
-    
+
     res.json({
       success: true,
       checkoutUrl: session.url,
@@ -87,6 +124,8 @@ router.post('/create-checkout', express.json(), async (req, res) => {
       period: period,
       type: type,
       pricePerUnit: priceCalculation.unitAmount / 100,
+      couponApplied: appliedCoupon ? appliedCoupon.code : null,
+      couponDiscount: couponDiscount,
       message: 'Checkout Stripe criado com sucesso'
     });
   } catch (err) {
@@ -590,7 +629,7 @@ router.post('/create-swap-checkout', express.json(), async (req, res) => {
       price = 11.99;
     }
     
-    const appUrl = process.env.APP_URL || 'https://fastproxyoriginal.vercel.app';
+    const appUrl = process.env.APP_URL || 'https://fastproxy.com.br';
     
     // Create Stripe checkout session for swap
     const session = await Stripe.stripe.checkout.sessions.create({

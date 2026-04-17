@@ -103,19 +103,32 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
     
     let couponDiscount = 0;
     let appliedCoupon = null;
-    
+
     if (couponCode) {
-      const [coupon] = await sql`
-        SELECT * FROM coupons 
-        WHERE UPPER(code) = UPPER(${couponCode}) AND is_active = true
-      `;
-      
-      if (coupon && (!coupon.valid_until || new Date(coupon.valid_until) > new Date())) {
-        appliedCoupon = coupon;
-        if (coupon.discount_percent) {
-          couponDiscount = pricing.total * (coupon.discount_percent / 100);
-        } else if (coupon.discount_amount) {
-          couponDiscount = Math.min(coupon.discount_amount, pricing.total);
+      let validateFn;
+      try { validateFn = require('./coupons').validateCouponLogic; } catch(e) {}
+
+      if (validateFn) {
+        const result = await validateFn({ code: couponCode, orderValue: pricing.total, userId: req.user.id });
+        if (result.success) {
+          couponDiscount = result.coupon.discount;
+          // fetch full coupon for usage tracking
+          const [coupon] = await sql`SELECT * FROM coupons WHERE UPPER(code) = UPPER(${couponCode}) LIMIT 1`;
+          appliedCoupon = coupon || { code: result.coupon.code };
+        }
+      } else {
+        // fallback
+        const [coupon] = await sql`
+          SELECT * FROM coupons
+          WHERE UPPER(code) = UPPER(${couponCode}) AND is_active = true
+        `;
+        if (coupon && (!coupon.valid_until || new Date(coupon.valid_until) > new Date())) {
+          appliedCoupon = coupon;
+          if (coupon.discount_percent) {
+            couponDiscount = pricing.total * (parseFloat(coupon.discount_percent) / 100);
+          } else if (coupon.discount_amount) {
+            couponDiscount = Math.min(parseFloat(coupon.discount_amount), pricing.total);
+          }
         }
       }
     }

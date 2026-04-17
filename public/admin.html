@@ -272,6 +272,28 @@
                                     <label class="block text-sm text-secondary mb-2">Código do Cupom</label>
                                     <input type="text" id="coupon-code" placeholder="DESCONTO10" class="input-field w-full rounded-xl px-4 py-3 text-white uppercase" required>
                                 </div>
+
+                                <!-- Scope selector -->
+                                <div>
+                                    <label class="block text-sm text-secondary mb-2">Abrangência do Desconto</label>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <label id="scope-all-label" onclick="selectScope('all')" class="scope-option cursor-pointer flex items-start gap-3 p-3 rounded-xl border-2 border-green-500/60 bg-green-500/10 transition-all">
+                                            <input type="radio" name="coupon-scope" id="scope-all" value="all" checked class="mt-1 accent-green-500">
+                                            <div>
+                                                <div class="font-semibold text-sm text-white">Todas as compras</div>
+                                                <div class="text-xs text-secondary mt-0.5">Clientes novos e recorrentes</div>
+                                            </div>
+                                        </label>
+                                        <label id="scope-first-label" onclick="selectScope('first_only')" class="scope-option cursor-pointer flex items-start gap-3 p-3 rounded-xl border-2 border-white/10 bg-white/5 transition-all">
+                                            <input type="radio" name="coupon-scope" id="scope-first" value="first_only" class="mt-1 accent-green-500">
+                                            <div>
+                                                <div class="font-semibold text-sm text-white">Primeira compra</div>
+                                                <div class="text-xs text-secondary mt-0.5">Apenas novos clientes</div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm text-secondary mb-2">Desconto (%)</label>
@@ -713,26 +735,45 @@
         }
 
         // Coupons Functions
+        function selectScope(val) {
+            const allLabel   = document.getElementById('scope-all-label');
+            const firstLabel = document.getElementById('scope-first-label');
+            const active   = 'border-green-500/60 bg-green-500/10';
+            const inactive = 'border-white/10 bg-white/5';
+            if (val === 'all') {
+                document.getElementById('scope-all').checked = true;
+                allLabel.className   = allLabel.className.replace(inactive, active);
+                firstLabel.className = firstLabel.className.replace(active, inactive);
+            } else {
+                document.getElementById('scope-first').checked = true;
+                firstLabel.className = firstLabel.className.replace(inactive, active);
+                allLabel.className   = allLabel.className.replace(active, inactive);
+            }
+        }
+
         document.getElementById('coupon-form')?.addEventListener('submit', async function(e) {
             e.preventDefault();
-            const code = document.getElementById('coupon-code').value.trim();
+            const code    = document.getElementById('coupon-code').value.trim();
             const percent = document.getElementById('coupon-percent').value;
-            const amount = document.getElementById('coupon-amount').value;
-            const days = document.getElementById('coupon-days').value;
-            const max = document.getElementById('coupon-max').value;
-            
+            const amount  = document.getElementById('coupon-amount').value;
+            const days    = document.getElementById('coupon-days').value;
+            const max     = document.getElementById('coupon-max').value;
+            const scope   = document.querySelector('input[name="coupon-scope"]:checked')?.value || 'all';
+
             try {
                 const result = await api('/api/subscription/admin/coupons/create', 'POST', {
                     code,
                     discount_percent: percent || null,
                     discount_amount: amount || null,
                     valid_days: days || null,
-                    max_uses: max || null
+                    max_uses: max || null,
+                    scope
                 });
-                
+
                 if (result.success) {
                     showToast('Cupom criado!', 'success');
                     this.reset();
+                    selectScope('all'); // reset scope UI
                     loadCoupons();
                 } else {
                     showToast(result.message, 'error');
@@ -749,17 +790,26 @@
                 const list = document.getElementById('coupons-list');
                 
                 if (coupons.length > 0) {
-                    list.innerHTML = coupons.map(c => `<div class="flex justify-between items-center p-3 bg-white/5 rounded-lg">
-                        <div>
-                            <div class="font-bold">${c.code}</div>
-                            <div class="text-xs text-secondary">
-                                ${c.discount_percent ? c.discount_percent + '%' : 'R$ ' + c.discount_amount}
-                                | Usado: ${c.used_count}${c.max_uses ? '/' + c.max_uses : ''}
-                                | ${c.is_active ? '✅ Ativo' : '❌ Inativo'}
+                    list.innerHTML = coupons.map(c => {
+                        const scopeTag = c.scope === 'first_only'
+                            ? `<span style="background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3)" class="px-2 py-0.5 rounded-full text-xs">1ª compra</span>`
+                            : `<span style="background:rgba(34,197,94,.1);color:#4ade80;border:1px solid rgba(34,197,94,.2)" class="px-2 py-0.5 rounded-full text-xs">Todas</span>`;
+                        const expiry = c.valid_until ? ` | Expira: ${new Date(c.valid_until).toLocaleDateString('pt-BR')}` : '';
+                        return `<div class="flex justify-between items-center p-3 bg-white/5 rounded-lg gap-2">
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="font-bold font-mono">${c.code}</span>
+                                    ${scopeTag}
+                                    ${c.is_active ? '' : '<span class="text-xs text-red-400">Inativo</span>'}
+                                </div>
+                                <div class="text-xs text-secondary mt-1">
+                                    ${c.discount_percent ? c.discount_percent + '% off' : 'R$ ' + parseFloat(c.discount_amount).toFixed(2) + ' off'}
+                                    &nbsp;·&nbsp; Usado: ${c.used_count}${c.max_uses ? '/'+c.max_uses : ''}${expiry}
+                                </div>
                             </div>
-                        </div>
-                        <button onclick="deleteCoupon(${c.id})" class="text-red-400 hover:text-red-300"><i class="fas fa-trash"></i></button>
-                    </div>`).join('');
+                            <button onclick="deleteCoupon(${c.id})" class="text-red-400 hover:text-red-300 flex-shrink-0"><i class="fas fa-trash"></i></button>
+                        </div>`;
+                    }).join('');
                 } else {
                     list.innerHTML = '<p class="text-secondary text-center py-4">Nenhum cupom</p>';
                 }

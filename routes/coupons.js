@@ -30,63 +30,8 @@ function isAdmin(req, res, next) {
 router.post('/validate', authenticate, async (req, res) => {
   try {
     const { code, orderValue } = req.body;
-
-    const [coupon] = await sql`
-      SELECT * FROM coupons 
-      WHERE UPPER(code) = UPPER(${code}) AND is_active = true
-    `;
-
-    if (!coupon) {
-      return res.json({ success: false, message: 'Cupom inválido' });
-    }
-
-    if (coupon.valid_until && new Date(coupon.valid_until) < new Date()) {
-      return res.json({ success: false, message: 'Cupom expirado' });
-    }
-
-    if (coupon.valid_from && new Date(coupon.valid_from) > new Date()) {
-      return res.json({ success: false, message: 'Cupom ainda não disponível' });
-    }
-
-    if (coupon.max_uses && coupon.used_count >= coupon.max_uses) {
-      return res.json({ success: false, message: 'Cupom esgotado' });
-    }
-
-    // Check if already used by this user (max_uses_per_user = 1 by default)
-    if (coupon.max_uses_per_user) {
-      const userUses = await sql`
-        SELECT COUNT(*) as cnt FROM coupon_usage
-        WHERE coupon_id = ${coupon.id} AND user_id = ${req.user.id}
-      `;
-      if (userUses[0].cnt >= coupon.max_uses_per_user) {
-        return res.json({ success: false, message: 'Limite de uso deste cupom atingido' });
-      }
-    }
-
-    if (orderValue && coupon.min_order_value && orderValue < coupon.min_order_value) {
-      return res.json({ 
-        success: false, 
-        message: `Valor mínimo do pedido: R$ ${coupon.min_order_value.toFixed(2)}` 
-      });
-    }
-
-    let discount = 0;
-    if (coupon.discount_percent) {
-      discount = orderValue * (coupon.discount_percent / 100);
-    } else if (coupon.discount_amount) {
-      discount = Math.min(coupon.discount_amount, orderValue);
-    }
-
-    res.json({
-      success: true,
-      coupon: {
-        code: coupon.code,
-        discount_percent: coupon.discount_percent,
-        discount_amount: coupon.discount_amount,
-        discount
-      },
-      message: `Desconto de R$ ${discount.toFixed(2)} aplicado!`
-    });
+    const result = await validateCouponLogic({ code, orderValue, userId: req.user.id });
+    res.json(result);
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -274,6 +219,105 @@ router.get('/admin/usage', isAdmin, async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
+
+// ── Shared coupon validator (pure function) ───────────────────────────────────
+async function validateCouponLogic({ code, orderValue, userEmail, userId }) {
+  if (!code) return { success: false, message: 'Informe o código do cupom' };
+
+  const [coupon] = await sql`
+    SELECT * FROM coupons
+    WHERE UPPER(code) = UPPER(${code}) AND is_active = true
+  `;
+
+  if (!coupon) return { success: false, message: 'Cupom inválido ou inexistente' };
+
+  if (coupon.valid_until && new Date(coupon.valid_until) < new Date())
+    return { success: false, message: 'Cupom expirado' };
+
+  if (coupon.valid_from && new Date(coupon.valid_from) > new Date())
+    return { success: false, message: 'Cupom ainda não disponível' };
+
+  if (coupon.max_uses && coupon.used_count >= coupon.max_uses)
+    return { success: false, message: 'Cupom esgotado' };
+
+  const value = parseFloat(orderValue) || 0;
+
+  if (value > 0 && coupon.min_order_value && value < parseFloat(coupon.min_order_value))
+    return { success: false, message: `Valor mínimo para este cupom: R$ ${parseFloat(coupon.min_order_value).toFixed(2)}` };
+
+  // ── Scope: first_only — só para quem nunca comprou ───────────────────────
+  const scope = coupon.scope || 'all';
+  if (scope === 'first_only') {
+    let hasPriorOrder = false;
+    if (userId) {
+      const [row] = await sql`
+        SELECT 1 FROM proxy_orders
+        WHERE user_id = ${userId} AND payment_status = 'paid'
+        LIMIT 1
+      `;
+      hasPriorOrder = !!row;
+    } else if (userEmail) {
+      const [row] = await sql`
+        SELECT 1 FROM proxy_orders po
+        JOIN users u ON u.id = po.user_id
+        WHERE LOWER(u.email) = LOWER(${userEmail}) AND po.payment_status = 'paid'
+        LIMIT 1
+      `;
+      hasPriorOrder = !!row;
+    }
+    if (hasPriorOrder) {
+      return { success: false, message: 'Este cupom é válido apenas para novos clientes' };
+    }
+  }
+
+  // Per-user usage limit
+  if (coupon.max_uses_per_user && userId) {
+    const [usage] = await sql`
+      SELECT COUNT(*) as cnt FROM coupon_usage
+      WHERE coupon_id = ${coupon.id} AND user_id = ${userId}
+    `;
+    if (parseInt(usage.cnt) >= coupon.max_uses_per_user) {
+      return { success: false, message: 'Você já utilizou este cupom o número máximo de vezes' };
+    }
+  }
+
+  let discount = 0;
+  if (coupon.discount_percent) {
+    discount = value * (parseFloat(coupon.discount_percent) / 100);
+  } else if (coupon.discount_amount) {
+    discount = Math.min(parseFloat(coupon.discount_amount), value || 9999);
+  }
+
+  const scopeLabel = scope === 'first_only' ? ' (primeira compra)' : '';
+
+  return {
+    success: true,
+    coupon: {
+      code: coupon.code,
+      scope,
+      discount_percent: coupon.discount_percent ? parseFloat(coupon.discount_percent) : null,
+      discount_amount: coupon.discount_amount ? parseFloat(coupon.discount_amount) : null,
+      discount: parseFloat(discount.toFixed(2))
+    },
+    message: coupon.discount_percent
+      ? `${parseFloat(coupon.discount_percent)}% de desconto aplicado${scopeLabel}!`
+      : `R$ ${parseFloat(discount).toFixed(2)} de desconto aplicado${scopeLabel}!`
+  };
+}
+
+// ── Public coupon validation (no auth required — called before checkout) ─────
+router.post('/validate-public', async (req, res) => {
+  try {
+    const { code, orderValue, email } = req.body;
+    const result = await validateCouponLogic({ code, orderValue, userEmail: email });
+    res.json(result);
+  } catch (err) {
+    console.error('validate-public error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao validar cupom' });
+  }
+});
+
+module.exports.validateCouponLogic = validateCouponLogic;
 
 // ── Quick coupon creator for simple offers ──────────────────────────────────
 router.post('/admin/quick-create', isAdmin, async (req, res) => {
