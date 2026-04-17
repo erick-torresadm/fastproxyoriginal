@@ -28,6 +28,17 @@ router.post('/validate', authenticate, async (req, res) => {
       return res.json({ success: false, message: 'Cupom esgotado' });
     }
 
+    // Check if already used by this user (max_uses_per_user = 1 by default)
+    if (coupon.max_uses_per_user) {
+      const userUses = await sql`
+        SELECT COUNT(*) as cnt FROM coupon_usage
+        WHERE coupon_id = ${coupon.id} AND user_id = ${req.user.id}
+      `;
+      if (userUses[0].cnt >= coupon.max_uses_per_user) {
+        return res.json({ success: false, message: 'Limite de uso deste cupom atingido' });
+      }
+    }
+
     if (orderValue && coupon.min_order_value && orderValue < coupon.min_order_value) {
       return res.json({ 
         success: false, 
@@ -131,12 +142,13 @@ router.get('/admin/list', isAdmin, async (req, res) => {
 
 router.post('/admin/create', isAdmin, async (req, res) => {
   try {
-    const { 
-      code, 
-      discount_percent, 
-      discount_amount, 
+    const {
+      code,
+      discount_percent,
+      discount_amount,
       min_order_value = 0,
       max_uses,
+      max_uses_per_user = 1,
       valid_days,
       proxy_types
     } = req.body;
@@ -158,13 +170,14 @@ router.post('/admin/create', isAdmin, async (req, res) => {
     const [coupon] = await sql`
       INSERT INTO coupons (
         code, discount_percent, discount_amount, min_order_value,
-        max_uses, valid_until, proxy_types, created_by
+        max_uses, max_uses_per_user, valid_until, proxy_types, created_by
       ) VALUES (
-        ${code.toUpperCase()}, 
-        ${discount_percent || null}, 
-        ${discount_amount || null}, 
+        ${code.toUpperCase()},
+        ${discount_percent || null},
+        ${discount_amount || null},
         ${min_order_value},
-        ${max_uses || null}, 
+        ${max_uses || null},
+        ${max_uses_per_user || null},
         ${valid_until},
         ${proxy_types || null},
         ${req.user.id}
@@ -238,4 +251,55 @@ router.get('/admin/usage', isAdmin, async (req, res) => {
   }
 });
 
-module.exports = router;
+// ── Quick coupon creator for simple offers ──────────────────────────────────
+router.post('/admin/quick-create', isAdmin, async (req, res) => {
+  try {
+    const {
+      discount_amount,
+      discount_percent,
+      proxy_type,
+      max_uses,
+      max_uses_per_user = 1,
+      valid_days
+    } = req.body;
+
+    if (!discount_amount && !discount_percent) {
+      return res.status(400).json({ success: false, message: 'Informe desconto (%) ou valor (R$)' });
+    }
+
+    const suffix = (proxy_type || 'ipv6').toUpperCase().substring(0,4);
+    const code = `FAST${suffix}${Date.now().toString(36).toUpperCase()}`;
+
+    let valid_until = null;
+    if (valid_days) {
+      valid_until = new Date();
+      valid_until.setDate(valid_until.getDate() + valid_days);
+    }
+
+    const [coupon] = await sql`
+      INSERT INTO coupons (
+        code, discount_percent, discount_amount, min_order_value,
+        max_uses, max_uses_per_user, valid_until, proxy_types, is_active, created_by
+      ) VALUES (
+        ${code},
+        ${discount_percent || null},
+        ${discount_amount || null},
+        ${0},
+        ${max_uses || null},
+        ${max_uses_per_user || null},
+        ${valid_until},
+        ${proxy_type || null},
+        true,
+        ${req.user.id}
+      )
+      RETURNING *
+    `;
+
+    res.json({ success: true, coupon, message: `Cupom ${code} criado!` });
+  } catch (err) {
+    if (err.message && (err.message.includes('duplicate') || err.message.includes('unique'))) {
+      return res.status(400).json({ success: false, message: 'Código já existe' });
+    }
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
