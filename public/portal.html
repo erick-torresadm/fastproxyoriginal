@@ -545,15 +545,18 @@
             
             // Subscription info
             if (hasActive && activeSub) {
+                const periodNames = { '1m': '1 Mês', '3m': '3 Meses', '6m': '6 Meses', '12m': '12 Meses', 'monthly': 'Mensal', 'annual': 'Anual' };
+                const getPeriodName = (p) => periodNames[p] || p;
+                
                 const sub = activeSub;
                 const endDate = new Date(sub.endDate);
                 const daysLeft = Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24));
                 
                 document.getElementById('subscription-info').textContent = 
-                    `${sub.proxyCount} proxies • ${sub.period === 'monthly' ? 'Mensal' : 'Anual'} • ${daysLeft > 0 ? `${daysLeft} dias restantes` : 'Expirado'}`;
+                    `${sub.proxyCount} proxies • ${getPeriodName(sub.period)} • ${daysLeft > 0 ? `${daysLeft} dias restantes` : 'Expirado'}`;
                 
                 document.getElementById('subscription-details').innerHTML = `
-                    <p><span class="text-muted">Plano:</span> ${sub.period === 'monthly' ? 'Mensal' : 'Anual'}</p>
+                    <p><span class="text-muted">Plano:</span> ${getPeriodName(sub.period)}</p>
                     <p><span class="text-muted">Proxies:</span> ${sub.proxyCount}</p>
                     <p><span class="text-muted">Vencimento:</span> ${endDate.toLocaleDateString('pt-BR')}</p>
                     <p><span class="text-muted">Status:</span> <span class="text-green-400">Ativo</span></p>
@@ -567,7 +570,7 @@
                     `${firstSub.proxyCount} proxies • Expirado`;
                 
                 document.getElementById('subscription-details').innerHTML = `
-                    <p><span class="text-muted">Plano:</span> ${firstSub.period === 'monthly' ? 'Mensal' : 'Anual'}</p>
+                    <p><span class="text-muted">Plano:</span> ${getPeriodName(firstSub.period)}</p>
                     <p><span class="text-muted">Proxies:</span> ${firstSub.proxyCount}</p>
                     <p><span class="text-muted">Vencimento:</span> ${endDate.toLocaleDateString('pt-BR')}</p>
                     <p><span class="text-muted">Status:</span> <span class="text-red-400">Expirado</span></p>

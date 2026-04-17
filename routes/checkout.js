@@ -426,24 +426,27 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
               console.error('Error in auto-delivery:', err);
             }
           } else {
-            // IPv6 - manual delivery notification
-            console.log('IPv6 order - manual delivery required');
-            
-            // Create attribution log for manual delivery
+            // IPv6 - manual delivery needed
+            console.log('IPv6 order - manual delivery for order', orderId);
+          }
+          
+          // Create proxy records in local proxies table
+          for (let i = 0; i < order.quantity; i++) {
+            const port = 11331 + i; // Sequential ports
             await sql`
-              INSERT INTO attribution_logs (
-                user_id, proxy_order_id,
-                user_name, user_email, user_document, user_whatsapp,
-                action, action_reason, expires_at,
-                purchased_at, delivered_at
+              INSERT INTO proxies (
+                user_id, subscription_id, proxy_type, ip, port,
+                username, password, is_active, created_at
               ) VALUES (
-                ${order.user_id}, ${orderId},
-                ${order.buyer_name || ''}, ${order.buyer_email || ''}, ${order.buyer_document || ''}, ${order.buyer_whatsapp || ''},
-                'PENDING_MANUAL_DELIVERY', 'IPv6 - entrega manual necessária', ${order.expira_em},
-                ${order.created_at}, NOW()
+                ${order.user_id}, 
+                (SELECT id FROM subscriptions WHERE proxy_order_id = ${orderId} ORDER BY created_at DESC LIMIT 1),
+                ${order.proxy_type}, '177.54.146.90', ${port},
+                'fastproxy123', 'fast123', true, NOW()
               )
             `;
           }
+          
+          console.log('Created', order.quantity, 'proxies for user', order.user_id);
         }
       } catch (err) {
         console.error('Error processing payment:', err);
