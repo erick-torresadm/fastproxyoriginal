@@ -815,29 +815,28 @@ async function loadUserData() {
                 </div>
             ` + currentProxies.map(p => {
                 const createdDate = p.createdAt ? new Date(p.createdAt).toLocaleDateString('pt-BR') : 'N/A';
-                return `
-                <div class="proxy-card p-4">
-                    <div class="flex items-center justify-between">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="w-2 h-2 rounded-full bg-green-400"></span>
-                                <span class="text-sm text-secondary">${p.ip}:${p.port}</span>
-                                <span class="text-xs text-gray-500">📅 ${createdDate}</span>
-                            </div>
-                            <code class="text-sm text-green-400 break-all">${p.line || `${p.username}:${p.password}@${p.ip}:${p.port}`}</code>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="copyProxyLine('${p.username}:${p.password}@${p.ip}:${p.port}')" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded-lg text-sm text-white" title="Copiar">
-                                <i class="fas fa-copy"></i>
-                            </button>
-                            <button onclick="openReplaceModal(${p.id})" class="btn-secondary px-3 py-1 rounded-lg text-sm flex items-center gap-1" title="Trocar proxy (R$ 1,99 - 11,99)">
-                                <i class="fas fa-sync-alt text-xs"></i>
-                                Trocar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
+                const proxyLine = p.line || (p.username + ':' + p.password + '@' + p.ip + ':' + p.port);
+                return '<div class="proxy-card p-4">' +
+                    '<div class="flex items-center justify-between">' +
+                        '<div class="flex-1">' +
+                            '<div class="flex items-center gap-2 mb-2">' +
+                                '<span class="w-2 h-2 rounded-full bg-green-400"></span>' +
+                                '<span class="text-sm text-secondary">' + p.ip + ':' + p.port + '</span>' +
+                                '<span class="text-xs text-gray-500">📅 ' + createdDate + '</span>' +
+                            '</div>' +
+                            '<code class="text-sm text-green-400 break-all">' + proxyLine + '</code>' +
+                        '</div>' +
+                        '<div class="flex gap-2">' +
+                            '<button onclick="copyProxyLine(\'' + proxyLine + '\')" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded-lg text-sm text-white" title="Copiar">' +
+                                '<i class="fas fa-copy"></i>' +
+                            '</button>' +
+                            '<button onclick="openReplaceModal(' + p.id + ')" class="btn-secondary px-3 py-1 rounded-lg text-sm flex items-center gap-1" title="Trocar proxy (R$ 1,99 - 11,99)">' +
+                                '<i class="fas fa-sync-alt text-xs"></i> Trocar' +
+                            '</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
         }
 
         function refreshProxies() {
