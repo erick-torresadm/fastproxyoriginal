@@ -295,6 +295,11 @@
                                 </button>
                             </div>
                         </div>
+                        <div id="history-section" class="mt-4 pt-4 border-t border-white/10">
+                            <button onclick="loadHistory()" class="text-green-400 hover:underline text-sm flex items-center gap-2">
+                                <i class="fas fa-history"></i> Ver histórico de transações
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -709,6 +714,41 @@ async function loadUserData() {
                 }
             } catch (err) {
                 showToast('Erro de conexão', 'error');
+            }
+        }
+        
+        async function loadHistory() {
+            const token = localStorage.getItem('fastproxy_token');
+            const historySection = document.getElementById('history-section');
+            
+            try {
+                // Load rewards history
+                const res = await fetch(`${API_URL}/api/rewards/history`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                
+                let historyHtml = '<div class="mt-3 space-y-2 max-h-48 overflow-y-auto">';
+                historyHtml += '<h4 class="text-sm font-semibold text-white mb-2">📜 Histórico</h4>';
+                
+                if (data.success && data.transactions && data.transactions.length > 0) {
+                    data.transactions.forEach(t => {
+                        const isEarn = t.points > 0;
+                        historyHtml += `
+                            <div class="p-2 rounded bg-white/5 text-xs flex justify-between">
+                                <span>${t.description || (isEarn ? 'Ganhou pontos' : 'Resgatou pontos')}</span>
+                                <span class="${isEarn ? 'text-green-400' : 'text-red-400'}">${isEarn ? '+' : ''}${t.points}</span>
+                            </div>
+                        `;
+                    });
+                } else {
+                    historyHtml += '<p class="text-xs text-secondary">Nenhuma transação ainda</p>';
+                }
+                
+                historyHtml += '</div>';
+                historySection.innerHTML = historyHtml;
+            } catch (err) {
+                console.error('Error loading history:', err);
             }
         }
 
