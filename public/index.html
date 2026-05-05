@@ -984,6 +984,68 @@
         }
         .msheet-qty-btn:hover { border-color: #22c55e; }
 
+        /* Pricing Toggle */
+        .pricing-toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .pricing-toggle {
+            position: relative;
+            width: 56px;
+            height: 28px;
+            background: var(--border-color);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .pricing-toggle::after {
+            content: '';
+            position: absolute;
+            left: 4px;
+            top: 4px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .pricing-toggle.active {
+            background: #22c55e;
+        }
+
+        .pricing-toggle.active::after {
+            transform: translateX(28px);
+        }
+
+        .toggle-label {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .toggle-label.active {
+            color: var(--text-primary);
+        }
+
+        .save-badge {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-left: 8px;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
     </style>
 </head>
 <body>
@@ -1375,12 +1437,19 @@
         <div class="absolute inset-0 bg-gradient-to-b from-green-950/20 via-transparent to-transparent"></div>
 
         <div class="max-w-6xl mx-auto px-6 relative z-10">
-            <div class="text-center mb-14 reveal">
+            <div class="text-center mb-10 reveal">
                 <span class="text-sm font-semibold uppercase tracking-widest primary-text">ESCOLHA SEU PLANO</span>
                 <h2 class="font-bold text-4xl md:text-5xl mt-4" style="color: var(--text-primary)">Proxy para cada necessidade</h2>
                 <p class="mt-4 text-base max-w-xl mx-auto" style="color: var(--text-secondary)">
-                    Compare os tipos abaixo — cada um tem uma finalidade diferente. Todos com IP do Brasil 🇧🇷 e suporte 24/7.
+                    Compare os tipos abaixo. Todos com IP do Brasil 🇧🇷 e suporte 24/7.
                 </p>
+            </div>
+
+            <!-- Pricing Toggle -->
+            <div class="pricing-toggle-container reveal">
+                <span class="toggle-label active" id="label-monthly" onclick="setBilling('monthly')">Mensal</span>
+                <div class="pricing-toggle" id="billing-toggle" onclick="toggleBilling()"></div>
+                <span class="toggle-label" id="label-yearly" onclick="setBilling('yearly')">Anual <span class="save-badge">ECONOMIZE 35%</span></span>
             </div>
 
             <!-- Type comparison cards — click to select -->
@@ -1393,17 +1462,10 @@
                     <div class="text-4xl mb-3 mt-2">🌐</div>
                     <h3 class="text-lg font-bold mb-0.5" style="color: var(--text-primary)">IPv6</h3>
                     <div class="mb-3">
-                        <span class="text-2xl font-bold text-green-500">R$29,90</span>
+                        <span class="text-2xl font-bold text-green-500" data-monthly="R$29,90" data-yearly="R$19,40" id="price-ipv6">R$29,90</span>
                         <span class="text-xs block" style="color: var(--text-muted)">por proxy / mês</span>
                     </div>
-                    <p class="text-xs mb-4 leading-relaxed" style="color: var(--text-zinc)">Entrada no mercado. Entrega do estoque, sem esperar API.</p>
-                    <ul class="text-xs space-y-1.5" style="color: var(--text-zinc)">
-                        <li><span class="text-green-500 mr-1">✓</span>Entrega imediata do estoque</li>
-                        <li><span class="text-green-500 mr-1">✓</span>Compre quantos precisar</li>
-                        <li><span class="text-green-500 mr-1">✓</span>IP do Brasil 🇧🇷</li>
-                        <li><span class="text-green-500 mr-1">✓</span>Reposição garantida</li>
-                        <li><span class="text-green-500 mr-1">✓</span>Suporte 24/7</li>
-                    </ul>
+                    <p class="text-xs mb-4 leading-relaxed" style="color: var(--text-zinc)">Entrada no mercado. Entrega do estoque imediato.</p>
                 </div>
 
                 <!-- IPv4 -->
@@ -1412,17 +1474,23 @@
                     <div class="text-4xl mb-3">🖥️</div>
                     <h3 class="text-lg font-bold mb-0.5" style="color: var(--text-primary)">IPv4</h3>
                     <div class="mb-3">
-                        <span class="text-2xl font-bold text-green-500">R$39,90</span>
+                        <span class="text-2xl font-bold text-green-500" data-monthly="R$39,90" data-yearly="R$25,90" id="price-ipv4">R$39,90</span>
                         <span class="text-xs block" style="color: var(--text-muted)">por proxy / mês</span>
                     </div>
-                    <p class="text-xs mb-4 leading-relaxed" style="color: var(--text-zinc)">IP dedicado exclusivo. Alta compatibilidade com todas as plataformas.</p>
-                    <ul class="text-xs space-y-1.5" style="color: var(--text-zinc)">
-                        <li><span class="text-green-500 mr-1">✓</span>IP dedicado e exclusivo</li>
-                        <li><span class="text-green-500 mr-1">✓</span>Pode comprar +1 proxy</li>
-                        <li><span class="text-green-500 mr-1">✓</span>Entrega automática via API</li>
-                        <li><span class="text-green-500 mr-1">✓</span>Alta compatibilidade</li>
-                        <li><span class="text-green-500 mr-1">✓</span>Suporte 24/7</li>
-                    </ul>
+                    <p class="text-xs mb-4 leading-relaxed" style="color: var(--text-zinc)">IP dedicado exclusivo. Alta compatibilidade.</p>
+                </div>
+
+                <!-- Facebook Ads Kit -->
+                <div class="plan-type-card rounded-2xl p-6 cursor-pointer border relative reveal reveal-delay-3"
+                     id="type-card-ipv6_fb" onclick="selectHomeType('ipv6_fb')">
+                    <div class="absolute -top-3 right-4 bg-green-500 text-black text-xs px-3 py-1 rounded-full font-bold">RECOMENDADO</div>
+                    <div class="text-4xl mb-3 mt-2">🎯</div>
+                    <h3 class="text-lg font-bold mb-0.5" style="color: var(--text-primary)">Kit Anunciante FB</h3>
+                    <div class="mb-3">
+                        <span class="text-2xl font-bold text-green-500" data-monthly="R$79,90" data-yearly="R$51,90" id="price-ipv6_fb">R$79,90</span>
+                        <span class="text-xs block" style="color: var(--text-muted)">por kit / mês</span>
+                    </div>
+                    <p class="text-xs mb-4 leading-relaxed" style="color: var(--text-zinc)">1 Proxy IPv6 com 10 rotações inclusas/mês.</p>
                 </div>
 
                 <!-- ISP -->
@@ -1432,17 +1500,10 @@
                     <div class="text-4xl mb-3 mt-2">🏢</div>
                     <h3 class="text-lg font-bold mb-0.5" style="color: var(--text-primary)">ISP</h3>
                     <div class="mb-3">
-                        <span class="text-2xl font-bold text-green-500">R$49,90</span>
+                        <span class="text-2xl font-bold text-green-500" data-monthly="R$49,90" data-yearly="R$32,40" id="price-isp">R$49,90</span>
                         <span class="text-xs block" style="color: var(--text-muted)">por proxy / mês</span>
                     </div>
-                    <p class="text-xs mb-4 leading-relaxed" style="color: var(--text-zinc)">IP de provedor residencial. Bypassa detecções mais exigentes.</p>
-                    <ul class="text-xs space-y-1.5" style="color: var(--text-zinc)">
-                        <li><span class="text-green-500 mr-1">✓</span>IP residencial real</li>
-                        <li><span class="text-green-500 mr-1">✓</span>Máximo bypass de bot</li>
-                        <li><span class="text-green-500 mr-1">✓</span>Ideal para Facebook Ads</li>
-                        <li><span class="text-green-500 mr-1">✓</span>Entrega automática via API</li>
-                        <li><span class="text-green-500 mr-1">✓</span>Suporte 24/7</li>
-                    </ul>
+                    <p class="text-xs mb-4 leading-relaxed" style="color: var(--text-zinc)">IP de provedor residencial. Máximo bypass.</p>
                 </div>
 
                 <!-- Mobile — Em Breve -->
@@ -1910,6 +1971,19 @@
                                 style="background: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary)">
                         </div>
 
+                        <!-- VIP Support Upsell -->
+                        <div class="p-3 rounded-xl border-2 border-dashed transition-all" 
+                             style="border-color: rgba(34, 197, 94, 0.4); background: rgba(34, 197, 94, 0.05)"
+                             id="vip-upsell-container">
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" id="upsell-vip" class="w-5 h-5 accent-green-500" onchange="updateTotal()">
+                                <div>
+                                    <div class="text-sm font-bold" style="color: var(--text-primary)">🚀 Suporte VIP 24h Prioritário</div>
+                                    <div class="text-xs" style="color: var(--text-muted)">Receba atendimento em até 15 min por apenas <span class="text-green-500 font-bold">R$ 9,90/mês</span></div>
+                                </div>
+                            </label>
+                        </div>
+
                         <!-- Coupon field -->
                         <div>
                             <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary)">Cupom de Desconto (opcional)</label>
@@ -2204,8 +2278,42 @@
             ipv6:   { name: 'IPv6',        icon: '🌐', minQty: 1, sellPrice: 29.90, autoDelivery: false },
             ipv4:   { name: 'IPv4',        icon: '🖥️', minQty: 1, sellPrice: 39.90, autoDelivery: true  },
             isp:    { name: 'ISP',         icon: '🏢', minQty: 1, sellPrice: 49.90, autoDelivery: true  },
-            mobile: { name: 'Mobile 4G/5G',icon: '📱', minQty: 1, sellPrice: 79.90, autoDelivery: true  }
+            mobile: { name: 'Mobile 4G/5G',icon: '📱', minQty: 1, sellPrice: 79.90, autoDelivery: true  },
+            ipv6_fb: { name: 'Kit FB Ads',  icon: '🎯', minQty: 1, sellPrice: 79.90, autoDelivery: false }
         };
+
+        let currentBilling = 'monthly';
+
+        function toggleBilling() {
+            setBilling(currentBilling === 'monthly' ? 'yearly' : 'monthly');
+        }
+
+        function setBilling(mode) {
+            currentBilling = mode;
+            const toggle = document.getElementById('billing-toggle');
+            const labelMonthly = document.getElementById('label-monthly');
+            const labelYearly = document.getElementById('label-yearly');
+
+            if (mode === 'yearly') {
+                toggle.classList.add('active');
+                labelYearly.classList.add('active');
+                labelMonthly.classList.remove('active');
+                selectPanelPeriod('12m');
+            } else {
+                toggle.classList.remove('active');
+                labelYearly.classList.remove('active');
+                labelMonthly.classList.add('active');
+                selectPanelPeriod('1m');
+            }
+
+            // Update card prices
+            ['ipv6', 'ipv4', 'isp', 'ipv6_fb'].forEach(type => {
+                const el = document.getElementById(`price-${type}`);
+                if (el) {
+                    el.textContent = el.dataset[mode];
+                }
+            });
+        }
 
         const HOME_PERIODS = [
             { id: '1m',  name: '1 Mês',    months: 1,  discount: 0    },
@@ -2442,7 +2550,8 @@
             ipv6:   { name: 'IPv6',         icon: '🌐', price: 29.90, minQty: 1 },
             ipv4:   { name: 'IPv4',         icon: '🖥️', price: 39.90, minQty: 1 },
             isp:    { name: 'ISP',          icon: '🏢', price: 49.90, minQty: 1 },
-            mobile: { name: 'Mobile 4G/5G', icon: '📱', price: 79.90, minQty: 1 }
+            mobile: { name: 'Mobile 4G/5G', icon: '📱', price: 79.90, minQty: 1 },
+            ipv6_fb: { name: 'Kit FB Ads',  icon: '🎯', price: 79.90, minQty: 1 }
         };
 
         const PERIODS = [
@@ -2680,11 +2789,16 @@
         function updateTotal() {
             const quantity = parseInt(document.getElementById('proxy-count').value) || 1;
             const rawTotal = getRawTotal();
-            const finalTotal = Math.max(0, rawTotal - appliedCouponDiscount);
+            
+            // VIP Support Logic
+            const vipEnabled = document.getElementById('upsell-vip')?.checked;
+            const vipPrice = vipEnabled ? 9.90 : 0;
+            
+            const finalTotal = Math.max(0, rawTotal + vipPrice - appliedCouponDiscount);
 
-            document.getElementById('modal-quantity').textContent = `${quantity} proxy${quantity > 1 ? 's' : ''}`;
+            document.getElementById('modal-quantity').textContent = `${quantity} proxy${quantity > 1 ? 's' : ''}${vipEnabled ? ' + Suporte VIP' : ''}`;
 
-            if (appliedCouponDiscount > 0) {
+            if (appliedCouponDiscount > 0 || vipEnabled) {
                 document.getElementById('modal-total').innerHTML =
                     `<span style="text-decoration:line-through;opacity:.45;font-size:.9em;margin-right:6px">R$ ${rawTotal.toFixed(2).replace('.', ',')}</span>` +
                     `<span style="color:var(--badge-text)">R$ ${finalTotal.toFixed(2).replace('.', ',')}</span>`;
@@ -2797,7 +2911,16 @@
 
         async function handleCheckout(event) {
             event.preventDefault();
+            const email = document.getElementById('checkout-email').value.trim();
+            const whatsapp = document.getElementById('checkout-whatsapp').value.trim();
+            const proxyCount = parseInt(document.getElementById('proxy-count').value) || 1;
+            const vipEnabled = document.getElementById('upsell-vip')?.checked;
             
+            if (!email) {
+                showToast('Informe seu e-mail', 'error');
+                return;
+            }
+
             const btn = document.getElementById('checkout-btn');
             const btnText = document.getElementById('checkout-btn-text');
             const spinner = document.getElementById('checkout-spinner');

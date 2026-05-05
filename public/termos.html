@@ -1,167 +1,156 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Termos de Uso - FastProxy</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#0d1117',
-                        secondary: '#8b949e',
-                        accent: '#22c55e'
-                    }
-                }
-            }
-        }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        body { background: #0d1117; color: #fff; font-family: system-ui, -apple-system, sans-serif; }
-        .terms-content { max-height: 400px; overflow-y: auto; }
-        .terms-content::-webkit-scrollbar { width: 8px; }
-        .terms-content::-webkit-scrollbar-track { background: #1f2937; }
-        .terms-content::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+        :root {
+            --bg-dark: #050505;
+            --bg-card: rgba(15, 15, 18, 0.8);
+            --accent: #22c55e;
+            --text-zinc: #a1a1aa;
+        }
+        body {
+            background: var(--bg-dark);
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+        }
+        .glow-mesh {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(34, 197, 94, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(34, 197, 94, 0.05) 0%, transparent 50%);
+            z-index: -1;
+        }
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #fff 0%, var(--text-zinc) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .prose h2 {
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .prose h2::before {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 24px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+        .prose p {
+            color: var(--text-zinc);
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+        .prose ul {
+            list-style: none;
+            padding-left: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .prose li {
+            position: relative;
+            padding-left: 1.5rem;
+            color: var(--text-zinc);
+            margin-bottom: 0.5rem;
+        }
+        .prose li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: bold;
+        }
+        .sticky-nav {
+            background: rgba(5, 5, 5, 0.8);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
     </style>
 </head>
-<body class="min-h-screen">
-    <header class="border-b border-white/10">
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="/" class="text-2xl font-bold text-accent"><i class="fas fa-globe mr-2"></i>FastProxy</a>
-        </div>
-    </header>
+<body>
+    <div class="glow-mesh"></div>
 
-    <main class="container mx-auto px-4 py-8 max-w-4xl">
-        <h1 class="text-3xl font-bold mb-2">Termos de Uso</h1>
-        <p class="text-secondary mb-6">Última atualização: 10 de Abril de 2026</p>
-
-        <div class="card rounded-2xl p-6 mb-6">
-            <div class="terms-content text-sm text-secondary leading-relaxed">
-                
-                <h2 class="text-xl font-bold text-white mb-4">1. Objeto</h2>
-                <p class="mb-4">
-                    O presente Termo estabelece as condições gerais para a utilização do serviço de proxy 
-                    fornecido pela FastProxy, doravante denominado "Prestador", ao usuário, doravante 
-                    denominado "Contratante".
-                </p>
-
-                <h2 class="text-xl font-bold text-white mb-4">2. Do Serviço</h2>
-                <p class="mb-2">
-                    2.1. O Prestador oferece serviços de proxy de internet, permitindo ao Contratante 
-                    rotear seu tráfego de internet através de servidores proxy.
-                </p>
-                <p class="mb-4">
-                    2.2. O serviço é fornecido no estado em que se encontra, sem garantias de 
-                    disponibilidade contínua ou adequação a propósitos específicos.
-                </p>
-
-                <h2 class="text-xl font-bold text-white mb-4">3. Obrigações do Contratante</h2>
-                <p class="mb-2">
-                    3.1. O Contratante se compromete a utilizar o serviço exclusivamente para fins 
-                    lícitos, em conformidade com a legislação brasileira vigente.
-                </p>
-                <p class="mb-2">
-                    3.2. É EXPRESSAMENTE PROIBIDO utilizar o serviço para:
-                </p>
-                <ul class="list-disc list-inside mb-4 ml-4">
-                    <li>Ataques cibernéticos de qualquer natureza</li>
-                    <li>Atividades ilegais ou fraudulentas</li>
-                    <li>Violação de direitos de terceiros</li>
-                    <li>Spam ou envio de mensagens não solicitadas</li>
-                    <li>Clonagem de cartões de crédito ou débito</li>
-                    <li>Qualquer atividade criminosa prevista no Código Penal Brasileiro</li>
-                </ul>
-
-                <h2 class="text-xl font-bold text-white mb-4">4. Responsabilidade</h2>
-                <p class="mb-2">
-                    4.1. O Contratante é o único responsável pelo conteúdo de suas atividades 
-                    realizadas através do serviço de proxy.
-                </p>
-                <p class="mb-2">
-                    4.2. O Prestador NÃO é responsável por quaisquer atos praticados pelo Contratante, 
-                    incluindo, mas não limitado a:
-                </p>
-                <ul class="list-disc list-inside mb-4 ml-4">
-                    <li>Conteúdo transmitido ou acessado</li>
-                    <li>Violação de direitos de propriedade intelectual</li>
-                    <li>Danos causados a terceiros</li>
-                    <li>Atividades ilegais ou fraudulentas</li>
-                </ul>
-
-                <h2 class="text-xl font-bold text-white mb-4">5. Registro de Dados - Marco Civil da Internet</h2>
-                <p class="mb-2">
-                    5.1. Em conformidade com o Marco Civil da Internet (Lei nº 12.965/2014), o 
-                    Prestador mantém registros de acesso aos serviços pelo período mínimo de 6 (seis) meses.
-                </p>
-                <p class="mb-2">
-                    5.2. São registrados os seguintes dados:
-                </p>
-                <ul class="list-disc list-inside mb-4 ml-4">
-                    <li>Data e hora da contratação</li>
-                    <li>Dados pessoais do Contratante (nome, email, documento)</li>
-                    <li>Endereço IP utilizado para acesso ao painel</li>
-                    <li>Lista de proxies entregues ao Contratante</li>
-                    <li>Período de utilização de cada proxy</li>
-                </ul>
-                <p class="mb-4">
-                    5.3. Em caso de ordem judicial válida, o Prestador poderá fornecer os registros 
-                    necessários às autoridades competentes.
-                </p>
-
-                <h2 class="text-xl font-bold text-white mb-4">6. Cancelamento e Reembolso</h2>
-                <p class="mb-2">
-                    6.1. O Contratante pode solicitar cancelamento a qualquer momento, sem direito 
-                    a reembolso proporcional.
-                </p>
-                <p class="mb-4">
-                    6.2. O Prestador reserva-se o direito de cancelar o serviço imediatamente, 
-                    sem reembolso, em caso de violação destes Termos.
-                </p>
-
-                <h2 class="text-xl font-bold text-white mb-4">7. Privacidade e LGPD</h2>
-                <p class="mb-2">
-                    7.1. Os dados pessoais coletados são tratados conforme a Lei Geral de Proteção 
-                    de Dados (Lei nº 13.709/2018 - LGPD).
-                </p>
-                <p class="mb-4">
-                    7.2. O Contratante autoriza o tratamento de seus dados pessoais para fins de 
-                    prestação do serviço e cumprimento de obrigações legais.
-                </p>
-
-                <h2 class="text-xl font-bold text-white mb-4">8. Disposições Gerais</h2>
-                <p class="mb-2">
-                    8.1. Ao aceitar estes Termos, o Contratante declara ter lido, compreendido e 
-                    concordado com todas as condições aqui estabelecidas.
-                </p>
-                <p class="mb-2">
-                    8.2. Estes Termos podem ser alterados a qualquer momento, sendo necessário novo 
-                    aceite do Contratante.
-                </p>
-                <p class="mb-4">
-                    8.3. Para questões jurisdictionais, fica eleito o foro da Comarca de São Paulo, SP.
-                </p>
-
-                <h2 class="text-xl font-bold text-white mb-4">9. Contato</h2>
-                <p>
-                    Para dúvidas sobre estes Termos, entre em contato pelo email: contato@fastproxy.com.br
-                </p>
-
-            </div>
-        </div>
-
-        <div class="text-center">
-            <a href="/" class="inline-block px-8 py-3 rounded-xl border border-white/20 hover:bg-white/10 transition">
-                <i class="fas fa-arrow-left mr-2"></i>Voltar ao Início
+    <nav class="sticky-nav fixed top-0 w-full z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="/" class="flex items-center gap-3 group">
+                <img src="https://i.ibb.co/SwQ6ksRy/LOGO-FAST-PROXY.png" alt="FastProxy" class="h-10 group-hover:scale-105 transition-transform">
             </a>
+            <a href="/" class="text-sm font-semibold hover:text-green-400 transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>Voltar
+            </a>
+        </div>
+    </nav>
+
+    <main class="pt-32 pb-24 px-6">
+        <div class="max-w-4xl mx-auto">
+            <header class="mb-12">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold uppercase tracking-widest mb-4">
+                    Documentação Legal
+                </div>
+                <h1 class="text-5xl font-black mb-4 tracking-tight">Termos de <span class="text-green-500">Uso</span></h1>
+                <p class="text-zinc-500 font-medium">Última atualização: 04 de Maio de 2026</p>
+            </header>
+
+            <div class="glass-card rounded-3xl p-8 md:p-12 prose max-w-none">
+                <h2>1. Objeto e Aceitação</h2>
+                <p>O presente Termo estabelece as condições gerais para a utilização do serviço de proxy fornecido pela FastProxy. Ao contratar nossos serviços, você declara ter lido, compreendido e aceitado todos os termos aqui descritos.</p>
+
+                <h2>2. Utilização Responsável</h2>
+                <p>A FastProxy fornece ferramentas de anonimato e roteamento de tráfego. O contratante é o <strong>único e exclusivo responsável</strong> pelas atividades realizadas através dos proxies fornecidos.</p>
+                <p>É expressamente proibido o uso dos nossos serviços para:</p>
+                <ul>
+                    <li>Práticas de crimes cibernéticos (Invasão de dispositivos, DDoS, etc);</li>
+                    <li>Fraudes financeiras, clonagem de cartões ou phishing;</li>
+                    <li>Disseminação de spam ou conteúdo ilegal;</li>
+                    <li>Ataques a infraestruturas governamentais ou privadas;</li>
+                    <li>Qualquer atividade que viole as leis vigentes no território brasileiro.</li>
+                </ul>
+
+                <h2>3. Compliance Legal (Marco Civil)</h2>
+                <p>Em total conformidade com a <strong>Lei nº 12.965/2014 (Marco Civil da Internet)</strong>, informamos que mantemos registros de logs de conexão pelo período de 1 (um) ano. Estes logs permitem identificar o usuário originário em caso de requisição judicial.</p>
+                <p>Dados registrados incluem: IP de origem, data/hora da conexão, volume de tráfego e destino (host).</p>
+
+                <h2>4. Responsabilidade Limitada</h2>
+                <p>A FastProxy atua apenas como provedora de infraestrutura de rede. Não monitoramos o conteúdo do tráfego dos usuários, exceto em casos de suspeita de abuso que comprometa a integridade da nossa rede.</p>
+                <p>Não nos responsabilizamos por perdas financeiras, bloqueios de contas em plataformas de terceiros (como Facebook, Google, etc) ou qualquer dano indireto decorrente do uso dos proxies.</p>
+
+                <h2>5. Política de Pagamentos e Reembolsos</h2>
+                <p>Nossos serviços são prestados na modalidade de <strong>assinatura recorrente</strong>. O cancelamento pode ser feito a qualquer momento através do painel do cliente ou suporte.</p>
+                <p>Devido à natureza digital e de consumo imediato da largura de banda, não oferecemos reembolsos após a ativação e uso do serviço, exceto em casos de falha técnica comprovada de nossa parte.</p>
+
+                <h2>6. Foro</h2>
+                <p>Fica eleito o foro da Comarca de São Paulo/SP para dirimir quaisquer dúvidas oriundas deste termo.</p>
+            </div>
+
+            <div class="mt-12 text-center">
+                <p class="text-zinc-500 text-sm">Dúvidas sobre os termos? Entre em contato: <a href="mailto:contato@fastproxy.com.br" class="text-green-500 font-bold hover:underline">contato@fastproxy.com.br</a></p>
+            </div>
         </div>
     </main>
 
-    <footer class="border-t border-white/10 py-8 mt-16">
-        <div class="container mx-auto px-4 text-center text-secondary">
-            <p>&copy; 2026 FastProxy. CNPJ: XX.XXX.XXX/0001-XX | contato@fastproxy.com.br</p>
+    <footer class="py-12 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <p class="text-zinc-600 text-sm">&copy; 2026 FastProxy - Todos os direitos reservados.</p>
         </div>
     </footer>
 </body>

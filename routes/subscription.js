@@ -420,7 +420,9 @@ router.get('/replacement-price/:subscriptionId', async (req, res) => {
     const daysSinceStart = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
 
     let price;
-    if (daysSinceStart <= 3) {
+    if (subscription.swaps_included > 0 && subscription.swaps_used < subscription.swaps_included) {
+      price = 0;
+    } else if (daysSinceStart <= 3) {
       price = 1.99;
     } else if (daysSinceStart <= 7) {
       price = 5.99;
@@ -460,7 +462,8 @@ router.post('/replace-proxy', async (req, res) => {
 
     // Get current proxy with user info AND verify subscription is active
     const proxies = await sql`
-      SELECT p.*, s.start_date, s.end_date, s.status as sub_status, s.id as sub_id, u.email as user_email, u.name as user_name
+      SELECT p.*, s.start_date, s.end_date, s.status as sub_status, s.id as sub_id, 
+             s.swaps_included, s.swaps_used, u.email as user_email, u.name as user_name
       FROM proxies p
       JOIN subscriptions s ON p.subscription_id = s.id
       JOIN users u ON p.user_id = u.id
@@ -491,9 +494,14 @@ router.post('/replace-proxy', async (req, res) => {
       price = 11.99;
     }
 
-    // Check if using points for free swap
+    // Check if using points for free swap OR if plan has free rotations
     let finalPrice = price;
-    if (usePoints) {
+    let isFreeRotation = false;
+
+    if (oldProxy.swaps_included > 0 && oldProxy.swaps_used < oldProxy.swaps_included) {
+      finalPrice = 0;
+      isFreeRotation = true;
+    } else if (usePoints) {
       // Deduct 100 points from user
       const [reward] = await sql`
         SELECT * FROM reward_points WHERE user_id = ${decoded.id}
@@ -541,8 +549,15 @@ router.post('/replace-proxy', async (req, res) => {
     // Record replacement
     await sql`
       INSERT INTO proxy_replacements (proxy_id, old_ip, old_port, new_ip, new_port, price_charged, reason)
-      VALUES (${proxyId}, ${oldProxy.ip}, ${oldProxy.port}, ${IP_BASE}, ${newPort}, ${finalPrice}, ${reason || 'Troca solicitada pelo cliente'})
+      VALUES (${proxyId}, ${oldProxy.ip}, ${oldProxy.port}, ${IP_BASE}, ${newPort}, ${finalPrice}, ${reason || (isFreeRotation ? 'Rotação gratuita (Plano Anunciante)' : 'Troca solicitada pelo cliente')})
     `;
+
+    // Increment swaps_used if it was a free rotation
+    if (isFreeRotation) {
+      await sql`
+        UPDATE subscriptions SET swaps_used = swaps_used + 1 WHERE id = ${oldProxy.sub_id}
+      `;
+    }
 
     const newProxy = updated[0];
 

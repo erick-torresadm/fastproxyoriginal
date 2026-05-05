@@ -1,8 +1,30 @@
 const express = require('express');
 const router = express.Router();
 const { sql } = require('../lib/database');
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'INSECURE_LOCAL_DEV_KEY_DO_NOT_USE_IN_PRODUCTION';
 
 console.log('=== LOADING STRIPE ROUTES ===');
+
+function authenticate(req, res, next) {
+  try {
+    const auth = req.headers.authorization;
+    if (!auth || !auth.startsWith('Bearer ')) return res.status(401).json({ success:false, message:'Token não fornecido' });
+    req.user = jwt.verify(auth.split(' ')[1], JWT_SECRET);
+    next();
+  } catch(e) { return res.status(401).json({ success:false, message:'Token inválido' }); }
+}
+
+function isAdmin(req, res, next) {
+  try {
+    const auth = req.headers.authorization;
+    if (!auth || !auth.startsWith('Bearer ')) return res.status(401).json({ success:false, message:'Token não fornecido' });
+    const d = jwt.verify(auth.split(' ')[1], JWT_SECRET);
+    if (d.role !== 'admin') return res.status(403).json({ success:false, message:'Acesso negado' });
+    req.user = d;
+    next();
+  } catch(e) { return res.status(401).json({ success:false, message:'Token inválido' }); }
+}
 
 let Stripe;
 try {
@@ -103,14 +125,22 @@ router.post('/create-checkout', express.json(), async (req, res) => {
     
     const appUrl = process.env.APP_URL || 'https://fastproxy.com.br';
     
+    // Special Coupon Logic: 'perfis' adds +3 free rotations
+    let bonusSwaps = 0;
+    if (couponCode && couponCode.toLowerCase() === 'perfis') {
+      bonusSwaps = 3;
+      console.log('🎁 Coupon "perfis" detected! Adding +3 bonus swaps.');
+    }
+
     const session = await Stripe.createCheckoutSession({
       email: email,
       type: type,
       period: period,
       quantity: quantity,
       couponDiscount: couponDiscount,
-      couponCode: appliedCoupon ? appliedCoupon.code : null,
-      successUrl: `${appUrl}/login.html`,
+      couponCode: couponCode || null,
+      bonusSwaps: bonusSwaps,
+      successUrl: `${appUrl}/success.html?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${appUrl}/planos.html?payment=cancelled`
     });
 
@@ -289,9 +319,22 @@ router.post('/process-payment/:sessionId', async (req, res) => {
     }
     
     // 5. Create subscription
+    const baseSwaps = parseInt(session.metadata?.swaps_included) || 0;
+    const bonusSwaps = parseInt(session.metadata?.bonus_swaps) || 0;
+    const swapsIncluded = baseSwaps + bonusSwaps;
+    const planType = session.metadata?.plan_type || 'standard';
+
     const subscriptions = await sql`
-      INSERT INTO subscriptions (user_id, stripe_session_id, stripe_customer_id, period, proxy_count, price_paid, status, start_date, end_date, auto_renew)
-      VALUES (${user.id}, ${sessionId}, ${session.customer_id || null}, ${period}, ${proxyCount}, ${pricePaid}, 'active', NOW(), ${endDate}, true)
+      INSERT INTO subscriptions (
+        user_id, stripe_session_id, stripe_customer_id, stripe_subscription_id,
+        period, proxy_count, price_paid, status, start_date, end_date, 
+        auto_renew, swaps_included, swaps_used, plan_type
+      )
+      VALUES (
+        ${user.id}, ${sessionId}, ${session.customer_id || null}, ${session.subscription || null},
+        ${period}, ${proxyCount}, ${pricePaid}, 'active', NOW(), ${endDate}, 
+        true, ${swapsIncluded}, 0, ${planType}
+      )
       RETURNING *
     `;
     const subscription = subscriptions[0];
@@ -543,9 +586,66 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
     
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
+      
+      // Handle Rotation Top-up
+      if (session.metadata?.type === 'rotation_topup') {
+        const subId = session.metadata.subscription_id;
+        console.log(`Fulfilling rotation top-up for subscription: ${subId}`);
+        await sql`
+          UPDATE subscriptions SET 
+            swaps_included = swaps_included + 10,
+            updated_at = NOW()
+          WHERE id = ${subId}
+        `;
+      }
+      
       console.log('Payment completed for:', session.customer_email);
       console.log('Amount:', session.amount_total / 100);
       console.log('Metadata:', session.metadata);
+    } else if (event.type === 'invoice.paid') {
+      const invoice = event.data.object;
+      const stripeSubscriptionId = invoice.subscription;
+      
+      if (stripeSubscriptionId) {
+        console.log('Invoice paid for subscription:', stripeSubscriptionId);
+        
+        // Find subscription in DB
+        const subs = await sql`SELECT * FROM subscriptions WHERE stripe_subscription_id = ${stripeSubscriptionId}`;
+        if (subs.length > 0) {
+          const sub = subs[0];
+          
+          // Calculate new end date based on period
+          const endDate = new Date(sub.end_date || new Date());
+          const PERIOD_MONTHS_MAP = {
+            '1w': 0.25, '2w': 0.5, '1m': 1, '2m': 2, '3m': 3, '6m': 6, '12m': 12
+          };
+          const monthsToAdd = PERIOD_MONTHS_MAP[sub.period] || 1;
+          
+          if (monthsToAdd < 1) {
+            endDate.setDate(endDate.getDate() + Math.round(monthsToAdd * 30));
+          } else {
+            endDate.setMonth(endDate.getMonth() + monthsToAdd);
+          }
+          
+          // Update DB - Extend end_date and RESET swaps_used
+          await sql`
+            UPDATE subscriptions SET 
+              end_date = ${endDate}, 
+              swaps_used = 0,
+              status = 'active',
+              updated_at = NOW() 
+            WHERE id = ${sub.id}
+          `;
+          console.log(`Subscription ${sub.id} extended to ${endDate} and swaps reset.`);
+        }
+      }
+    } else if (event.type === 'customer.subscription.deleted') {
+      const subscription = event.data.object;
+      await sql`
+        UPDATE subscriptions SET status = 'expired', auto_renew = false, updated_at = NOW()
+        WHERE stripe_subscription_id = ${subscription.id}
+      `;
+      console.log('Subscription cancelled:', subscription.id);
     }
     
     res.json({ received: true });
@@ -621,7 +721,23 @@ router.post('/create-swap-checkout', express.json(), async (req, res) => {
     const now = new Date();
     const daysSinceStart = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
     
-    // Calculate price based on days
+    // Check for free rotations (Facebook Ads plan)
+    if (proxy.swaps_included > 0 && proxy.swaps_used < proxy.swaps_included) {
+      console.log(`Using free rotation for proxy ${proxyId}. Swaps used: ${proxy.swaps_used + 1}/${proxy.swaps_included}`);
+      
+      // Perform immediate swap (logic borrowed from what usually happens after payment)
+      // Note: This assumes we have an internal function or we just return a "free_success"
+      // To keep it simple for now, I'll return a special status so the frontend can call a "confirm-free-swap"
+      return res.json({
+        success: true,
+        isFree: true,
+        swapsUsed: proxy.swaps_used,
+        swapsIncluded: proxy.swaps_included,
+        message: 'Você possui rotações gratuitas disponíveis!'
+      });
+    }
+
+    // Calculate price based on days (Paid Flow)
     let price;
     if (daysSinceStart <= 3) {
       price = 1.99;
@@ -634,13 +750,27 @@ router.post('/create-swap-checkout', express.json(), async (req, res) => {
     const appUrl = process.env.APP_URL || 'https://fastproxy.com.br';
     
     // Create Stripe checkout session for swap
-    const session = await Stripe.stripe.checkout.sessions.create({
+    const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
       customer_email: email || decoded.email,
       line_items: [
         {
           price_data: {
+            currency: 'brl',
+            product_data: {
+              name: 'Troca de Proxy',
+              description: `Substituição do proxy #${subscriptionId}`
+            },
+            unit_amount: Math.round(price * 100),
+          },
+          quantity: 1,
+        }
+      ],
+    const session = await Stripe.stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      customer_email: email || decoded.email,
             currency: 'brl',
             product_data: {
               name: 'Troca de Proxy',
@@ -671,6 +801,96 @@ router.post('/create-swap-checkout', express.json(), async (req, res) => {
   } catch (err) {
     console.error('Swap checkout error:', err);
     res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ── Rotation Top-up ──────────────────────────────────────────────────────────
+router.post('/create-rotation-topup', express.json(), async (req, res) => {
+  try {
+    const { subscriptionId, email } = req.body;
+    
+    if (!subscriptionId) {
+      return res.status(400).json({ success: false, message: 'Subscription ID is required' });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      customer_email: email || null,
+      line_items: [
+        {
+          price_data: {
+            currency: 'brl',
+            product_data: {
+              name: 'Pacote Extra de 10 Rotações',
+              description: 'Adicione 10 trocas de IP extras ao seu plano atual.'
+            },
+            unit_amount: 1990, // R$ 19,90
+          },
+          quantity: 1,
+        }
+      ],
+      mode: 'payment',
+      success_url: `${process.env.APP_URL || 'https://fastproxyoriginal.vercel.app'}/portal.html?topup=success`,
+      cancel_url: `${process.env.APP_URL || 'https://fastproxyoriginal.vercel.app'}/portal.html?topup=cancelled`,
+      metadata: {
+        type: 'rotation_topup',
+        subscription_id: subscriptionId
+      }
+    });
+
+    res.json({ success: true, url: session.url });
+  } catch (err) {
+    console.error('Top-up error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao criar checkout de recarga' });
+  }
+});
+
+// ── Admin Stats ─────────────────────────────────────────────────────────────
+router.get('/admin/stats', isAdmin, async (req, res) => {
+  try {
+    // Fetch all active subscriptions
+    const subscriptions = await stripe.subscriptions.list({
+      status: 'active',
+      expand: ['data.plan.product']
+    });
+
+    let mrr = 0;
+    let totalRevenue = 0;
+    let customerCount = new Set();
+
+    subscriptions.data.forEach(sub => {
+      const amount = sub.plan.amount / 100;
+      const interval = sub.plan.interval;
+      
+      // Calculate MRR contribution
+      if (interval === 'month') {
+        mrr += amount;
+      } else if (interval === 'year') {
+        mrr += amount / 12;
+      } else if (interval === 'week') {
+        mrr += amount * 4;
+      }
+
+      totalRevenue += (sub.plan.amount * sub.quantity) / 100;
+      customerCount.add(sub.customer);
+    });
+
+    // Fetch total balance/profit (rough estimate from all-time charges)
+    // Note: In a real app, you'd use Stripe's balance transactions or a proper accounting tool.
+    const charges = await stripe.charges.list({ limit: 100 });
+    const netProfit = charges.data.reduce((acc, charge) => acc + (charge.amount - (charge.amount_refunded || 0)) / 100, 0);
+
+    res.json({
+      success: true,
+      mrr: parseFloat(mrr.toFixed(2)),
+      activeSubscriptions: subscriptions.data.length,
+      totalCustomers: customerCount.size,
+      estimatedProfit: parseFloat(netProfit.toFixed(2)),
+      currency: 'BRL'
+    });
+  } catch (err) {
+    console.error('Admin stats error:', err);
+    res.status(500).json({ success: false, message: 'Erro ao buscar estatísticas do Stripe' });
   }
 });
 

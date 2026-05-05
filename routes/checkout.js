@@ -231,11 +231,15 @@ Total: R$ ${finalPrice.toFixed(2)}${deliveryNote}
               description: productDescription,
             },
             unit_amount: Math.round(finalPrice * 100),
+            recurring: {
+              interval: 'month',
+              interval_count: pricing.months || 1
+            }
           },
           quantity: 1,
         },
       ],
-      mode: 'payment',
+      mode: 'subscription',
       success_url: `https://fastproxyoriginal.vercel.app/login.html`,
       cancel_url: `https://fastproxyoriginal.vercel.app/planos.html?payment=cancelled`,
       metadata: {
@@ -335,7 +339,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
               period, start_date, end_date, auto_renew, created_at
             ) VALUES (
               ${order.user_id}, ${orderId}, 'active', ${order.proxy_type}, ${order.quantity},
-              ${order.period}, ${startDate}, ${endDateStr}, false, NOW()
+              ${order.period}, ${startDate}, ${endDateStr}, true, NOW()
             )
           `;
 

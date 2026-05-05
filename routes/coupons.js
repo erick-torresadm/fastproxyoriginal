@@ -224,6 +224,21 @@ router.get('/admin/usage', isAdmin, async (req, res) => {
 async function validateCouponLogic({ code, orderValue, userEmail, userId }) {
   if (!code) return { success: false, message: 'Informe o código do cupom' };
 
+  // Special Virtual Coupon: PERFIS
+  if (code.toUpperCase() === 'PERFIS') {
+    return {
+      success: true,
+      coupon: {
+        code: 'PERFIS',
+        scope: 'first_only',
+        discount_percent: 0,
+        discount_amount: 0,
+        discount: 0
+      },
+      message: 'Cupom PERFIS aplicado! +3 rotações de proxy grátis liberadas.'
+    };
+  }
+
   const [coupon] = await sql`
     SELECT * FROM coupons
     WHERE UPPER(code) = UPPER(${code}) AND is_active = true
